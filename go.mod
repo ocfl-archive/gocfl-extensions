@@ -13,10 +13,10 @@ require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/google/uuid v1.6.0
 	github.com/gosimple/slug v1.15.0
-	github.com/je4/filesystem/v3 v3.0.49
+	github.com/je4/filesystem/v3 v3.0.52
 	github.com/je4/utils/v2 v2.0.68
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
-	github.com/ocfl-archive/gocfl/v3 v3.0.0-20260423075800-110e1c3006c8
+	github.com/ocfl-archive/gocfl/v3 v3.0.0-20260427155243-ad12235b6212
 	github.com/ocfl-archive/indexer/v3 v3.0.42
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
 	go.yaml.in/yaml/v3 v3.0.4
@@ -45,7 +45,7 @@ require (
 	github.com/klauspost/compress v1.18.5 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
-	github.com/mattn/go-isatty v0.0.21 // indirect
+	github.com/mattn/go-isatty v0.0.22 // indirect
 	github.com/ocfl-archive/error v1.0.5 // indirect
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -66,7 +66,7 @@ require (
 	go.opentelemetry.io/otel v1.43.0 // indirect
 	go.opentelemetry.io/otel/metric v1.43.0 // indirect
 	go.opentelemetry.io/otel/trace v1.43.0 // indirect
-	go.step.sm/crypto v0.77.2 // indirect
+	go.step.sm/crypto v0.77.7 // indirect
 	go.ub.unibas.ch/cloud/certloader/v2 v2.0.24 // indirect
 	go.ub.unibas.ch/cloud/minivaultclient v1.0.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
