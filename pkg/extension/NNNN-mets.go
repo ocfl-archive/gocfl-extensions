@@ -120,11 +120,7 @@ func (me *Mets) Terminate() error {
 	return nil
 }
 
-func (me *Mets) Load(fsys fs.FS) error {
-	data, err := fs.ReadFile(fsys, "config.json")
-	if err != nil {
-		return errors.Wrap(err, "cannot read config.json")
-	}
+func (me *Mets) Load(data json.RawMessage) error {
 	if err := json.Unmarshal(data, me.MetsConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal MetsConfig '%s'", string(data))
 	}

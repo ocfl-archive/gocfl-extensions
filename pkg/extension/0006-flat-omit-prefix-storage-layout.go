@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"io"
-	"io/fs"
 	"strings"
 
 	"emperror.dev/errors"
@@ -38,11 +37,7 @@ func (sl *FlatOmitPrefixStorageLayout) WithLogger(logger ocfllogger.OCFLLogger) 
 	return sl
 }
 
-func (sl *FlatOmitPrefixStorageLayout) Load(fsys fs.FS) error {
-	data, err := fs.ReadFile(fsys, "config.json")
-	if err != nil {
-		return errors.Wrap(err, "cannot read config.json")
-	}
+func (sl *FlatOmitPrefixStorageLayout) Load(data json.RawMessage) error {
 	if err := json.Unmarshal(data, sl.FlatOmitPrefixStorageLayoutConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal FlatOmitPrefixStorageLayoutConfig '%s'", string(data))
 	}

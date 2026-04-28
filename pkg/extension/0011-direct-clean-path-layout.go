@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"hash"
-	"io/fs"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -108,11 +107,7 @@ func (sl *DirectClean) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.E
 	return sl
 }
 
-func (sl *DirectClean) Load(fsys fs.FS) error {
-	data, err := fs.ReadFile(fsys, "config.json")
-	if err != nil {
-		return errors.Wrap(err, "cannot read config.json")
-	}
+func (sl *DirectClean) Load(data json.RawMessage) error {
 	if err := json.Unmarshal(data, sl.DirectCleanConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal DirectCleanConfig '%s'", string(data))
 	}
@@ -125,6 +120,7 @@ func (sl *DirectClean) Load(fsys fs.FS) error {
 		sl.NumberOfFallbackTuples = sl.FallbackSubFolders
 		sl.FallbackSubFolders = 0
 	}
+	var err error
 	// defaults
 	if sl.MaxPathnameLen == 0 {
 		sl.MaxPathnameLen = 32000

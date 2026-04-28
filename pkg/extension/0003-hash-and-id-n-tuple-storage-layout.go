@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"hash"
-	"io/fs"
 	"strings"
 
 	"emperror.dev/errors"
@@ -44,11 +43,7 @@ func (sl *StorageLayoutHashAndIdNTuple) WithLogger(logger ocfllogger.OCFLLogger)
 	return sl
 }
 
-func (sl *StorageLayoutHashAndIdNTuple) Load(fsys fs.FS) error {
-	data, err := fs.ReadFile(fsys, "config.json")
-	if err != nil {
-		return errors.Wrap(err, "cannot read config.json")
-	}
+func (sl *StorageLayoutHashAndIdNTuple) Load(data json.RawMessage) error {
 	if err := json.Unmarshal(data, sl.StorageLayoutHashAndIdNTupleConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal StorageLayoutHashAndIdNTupleConfig '%s'", string(data))
 	}

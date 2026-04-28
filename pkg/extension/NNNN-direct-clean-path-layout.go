@@ -44,14 +44,11 @@ func (sl *LegacyDirectClean) WithLogger(logger ocfllogger.OCFLLogger) extension.
 	return sl
 }
 
-func (sl *LegacyDirectClean) Load(fsys fs.FS) error {
-	data, err := fs.ReadFile(fsys, "config.json")
-	if err != nil {
-		return errors.Wrap(err, "cannot read config.json")
-	}
+func (sl *LegacyDirectClean) Load(data json.RawMessage) error {
 	if err := json.Unmarshal(data, sl.DirectCleanConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal LegacyDirectCleanConfig '%s'", string(data))
 	}
+	var err error
 	// compatibility with old config
 	if sl.MaxFilenameLen > 0 && sl.MaxPathnameLen == 0 {
 		sl.MaxPathnameLen = sl.MaxFilenameLen

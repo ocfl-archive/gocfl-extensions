@@ -59,11 +59,7 @@ func (sl *Timestamp) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.Ext
 	return sl
 }
 
-func (sl *Timestamp) Load(fsys fs.FS) error {
-	data, err := fs.ReadFile(fsys, "config.json")
-	if err != nil {
-		return errors.Wrap(err, "cannot read config.json")
-	}
+func (sl *Timestamp) Load(data json.RawMessage) error {
 	if err := json.Unmarshal(data, sl.TimestampConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal TimestampConfig '%s'", string(data))
 	}

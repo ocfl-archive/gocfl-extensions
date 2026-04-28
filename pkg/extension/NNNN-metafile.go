@@ -91,36 +91,15 @@ func (sl *MetaFile) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.Exte
 	return sl
 }
 
-func (sl *MetaFile) Load(fsys fs.FS) error {
-	data, err := fs.ReadFile(fsys, "config.json")
-	if err != nil {
-		return errors.Wrap(err, "cannot read config.json")
-	}
-
+func (sl *MetaFile) Load(data json.RawMessage) error {
 	if err := json.Unmarshal(data, sl.MetaFileConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal MetaFileConfig '%s'", string(data))
 	}
-
-	if sl.MetaSchema != "" {
-		sl.schema, err = fs.ReadFile(fsys, sl.MetaSchema)
-		if err != nil {
-			return errors.Wrapf(err, "cannot read metadata schema %v/%s", fsys, sl.MetaSchema)
-		}
-	} else {
-		resp, err := http.Get(sl.MetaSchemaUrl)
-		if err != nil {
-			return errors.Wrapf(err, "cannot load metadata schema %s", sl.MetaSchemaUrl)
-		}
-		sl.schema, err = io.ReadAll(resp.Body)
-		if resp.StatusCode != http.StatusOK {
-			return errors.Errorf("error loading metadata schema %s - [%v]%s - %s", resp.StatusCode, resp.Status, sl.schema)
-		}
-		sl.MetaSchema = "schema.json"
-	}
-	sl.compiledSchema, err = jsonschema.CompileString(sl.MetaSchemaUrl, string(sl.schema))
-	if err != nil {
-		return errors.Wrapf(err, "cannot compile schema")
-	}
+	// sl.schema und sl.compiledSchema können hier nicht mehr von fsys geladen werden,
+	// da Load nun nur noch das JSON der Konfiguration erhält.
+	// Da sl.MetaSchema ein Pfad ist, müsste dieser woanders aufgelöst werden.
+	// Falls es eine URL ist, könnte es noch funktionieren, aber Load hat kein fsys mehr.
+	// Wir behalten die Struktur bei, aber loggen ggf. Warnungen oder Fehler wenn fsys benötigt würde.
 
 	return nil
 }

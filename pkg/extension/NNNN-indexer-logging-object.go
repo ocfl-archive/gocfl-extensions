@@ -1,8 +1,8 @@
 package extension
 
 import (
+	"encoding/json"
 	"io"
-	"io/fs"
 	"net/url"
 
 	"github.com/ocfl-archive/gocfl/v3/pkg/appendfs"
@@ -27,7 +27,7 @@ func (li *LoggingIndexer) WithLogger(logger ocfllogger.OCFLLogger) extensiontype
 	return li
 }
 
-func (sl *LoggingIndexer) Load(fsys fs.FS) error {
+func (sl *LoggingIndexer) Load(data json.RawMessage) error {
 	// no config file currently defined; placeholder to satisfy interface
 	return nil
 }

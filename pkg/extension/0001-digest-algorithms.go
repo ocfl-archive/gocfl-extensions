@@ -3,8 +3,6 @@ package extension
 import (
 	"encoding/json"
 
-	"io/fs"
-
 	"emperror.dev/errors"
 	"github.com/je4/filesystem/v3/pkg/writefs"
 	"github.com/je4/utils/v2/pkg/checksum"
@@ -57,12 +55,7 @@ func (sl *DigestAlgorithms0001) WithLogger(logger ocfllogger.OCFLLogger) extensi
 	return sl
 }
 
-func (sl *DigestAlgorithms0001) Load(fsys fs.FS) error {
-	data, err := fs.ReadFile(fsys, "config.json")
-	if err != nil {
-		return errors.Wrap(err, "cannot read config.json")
-	}
-
+func (sl *DigestAlgorithms0001) Load(data json.RawMessage) error {
 	if err := json.Unmarshal(data, sl.DigestAlgorithmsConfig0001); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal DigestAlgorithmsConfig0001 '%s'", string(data))
 	}

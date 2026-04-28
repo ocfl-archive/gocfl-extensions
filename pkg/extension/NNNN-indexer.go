@@ -114,11 +114,7 @@ func (sl *Indexer) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.Exten
 	return sl
 }
 
-func (sl *Indexer) Load(fsys fs.FS) error {
-	data, err := fs.ReadFile(fsys, "config.json")
-	if err != nil {
-		return errors.Wrap(err, "cannot read config.json")
-	}
+func (sl *Indexer) Load(data json.RawMessage) error {
 	if err := json.Unmarshal(data, sl.IndexerConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal IndexerConfig '%s'", string(data))
 	}

@@ -68,11 +68,7 @@ func (sl *ContentSubPath) WithLogger(logger ocfllogger.OCFLLogger) extensiontype
 	return sl
 }
 
-func (sl *ContentSubPath) Load(fsys fs.FS) error {
-	data, err := fs.ReadFile(fsys, "config.json")
-	if err != nil {
-		return errors.Wrap(err, "cannot read config.json")
-	}
+func (sl *ContentSubPath) Load(data json.RawMessage) error {
 	if err := json.Unmarshal(data, sl.ContentSubPathConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal ContentSubPathConfig '%s'", string(data))
 	}

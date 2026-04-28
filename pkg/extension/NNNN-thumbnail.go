@@ -125,11 +125,7 @@ func (thumb *Thumbnail) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.
 	return thumb
 }
 
-func (thumb *Thumbnail) Load(fsys fs.FS) error {
-	data, err := fs.ReadFile(fsys, "config.json")
-	if err != nil {
-		return errors.Wrap(err, "cannot read config.json")
-	}
+func (thumb *Thumbnail) Load(data json.RawMessage) error {
 	if err := json.Unmarshal(data, thumb.ThumbnailConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal ThumbnailConfig '%s'", string(data))
 	}

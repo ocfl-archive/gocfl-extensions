@@ -85,11 +85,7 @@ func (fi *Filesystem) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.Ex
 	return fi
 }
 
-func (fi *Filesystem) Load(fsys fs.FS) error {
-	data, err := fs.ReadFile(fsys, "config.json")
-	if err != nil {
-		return errors.Wrap(err, "cannot read config.json")
-	}
+func (fi *Filesystem) Load(data json.RawMessage) error {
 	if err := json.Unmarshal(data, fi.FilesystemConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal FilesystemConfig '%s'", string(data))
 	}

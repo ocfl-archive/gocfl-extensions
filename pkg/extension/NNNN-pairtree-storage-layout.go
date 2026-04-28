@@ -49,14 +49,11 @@ func (sl *StorageLayoutPairTree) WithLogger(logger ocfllogger.OCFLLogger) extens
 	return sl
 }
 
-func (sl *StorageLayoutPairTree) Load(fsys fs.FS) error {
-	data, err := fs.ReadFile(fsys, "config.json")
-	if err != nil {
-		return errors.Wrap(err, "cannot read config.json")
-	}
+func (sl *StorageLayoutPairTree) Load(data json.RawMessage) error {
 	if err := json.Unmarshal(data, sl.StorageLayoutPairTreeConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal StorageLayoutPairTreeConfig '%s'", string(data))
 	}
+	var err error
 	if sl.hash, err = checksum.GetHash(checksum.DigestAlgorithm(sl.DigestAlgorithm)); err != nil {
 		return errors.Wrapf(err, "hash'%s'not found", sl.DigestAlgorithm)
 	}
