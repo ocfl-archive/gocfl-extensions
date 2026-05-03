@@ -1,6 +1,7 @@
 package ext_0003_hash_and_id_n_tuple_storage_layout
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 
@@ -18,6 +19,9 @@ import (
 
 const StorageLayoutHashAndIdNTupleName = "0003-hash-and-id-n-tuple-storage-layout"
 const StorageLayoutHashAndIdNTupleDescription = "Hashed Truncated N-tuple Trees with Object ID Encapsulating Directory for OCFL Storage Hierarchies"
+
+//go:embed 0003-hash-and-id-n-tuple-storage-layout.md
+var StorageLayoutHashAndIdNTupleDoc string
 
 func init() {
 	extension.RegisterExtension(StorageLayoutHashAndIdNTupleName, NewStorageLayoutHashAndIdNTuple, nil)
@@ -92,6 +96,13 @@ func (sl *StorageLayoutHashAndIdNTuple) IsRegistered() bool {
 
 func (sl *StorageLayoutHashAndIdNTuple) GetName() string {
 	return StorageLayoutHashAndIdNTupleName
+}
+
+func (sl *StorageLayoutHashAndIdNTuple) GetDescription() string {
+	return StorageLayoutHashAndIdNTupleDescription
+}
+func (sl *StorageLayoutHashAndIdNTuple) GetDocumentation() string {
+	return StorageLayoutHashAndIdNTupleDoc
 }
 
 func (sl *StorageLayoutHashAndIdNTuple) SetParams(params map[string]string) error {

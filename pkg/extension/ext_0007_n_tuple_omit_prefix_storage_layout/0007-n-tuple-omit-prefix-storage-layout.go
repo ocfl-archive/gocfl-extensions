@@ -1,6 +1,7 @@
 package ext_0007_n_tuple_omit_prefix_storage_layout
 
 import (
+	_ "embed"
 	"encoding/json"
 
 	"io"
@@ -18,6 +19,9 @@ import (
 
 const NTupleOmitPrefixStorageLayoutName = "0007-n-tuple-omit-prefix-storage-layout"
 const NTupleOmitPrefixStorageLayoutDescription = "pairtree-like root directory structure derived from prefix-omitted object identifiers"
+
+//go:embed 0007-n-tuple-omit-prefix-storage-layout.md
+var NTupleOmitPrefixStorageLayoutDoc string
 
 func init() {
 	extension.RegisterExtension(NTupleOmitPrefixStorageLayoutName, NewNTupleOmitPrefixStorageLayout, nil)
@@ -111,6 +115,13 @@ func (sl *NTupleOmitPrefixStorageLayout) SetParams(params map[string]string) err
 }
 
 func (sl *NTupleOmitPrefixStorageLayout) GetName() string { return NTupleOmitPrefixStorageLayoutName }
+
+func (sl *NTupleOmitPrefixStorageLayout) GetDescription() string {
+	return NTupleOmitPrefixStorageLayoutDescription
+}
+func (sl *NTupleOmitPrefixStorageLayout) GetDocumentation() string {
+	return NTupleOmitPrefixStorageLayoutDoc
+}
 func (sl *NTupleOmitPrefixStorageLayout) WriteConfig(fsys appendfs.FS) error {
 	configWriter, err := writefs.Create(fsys, "config.json")
 	if err != nil {

@@ -1,6 +1,7 @@
 package ext_0006_flat_omit_prefix_storage_layout
 
 import (
+	_ "embed"
 	"encoding/json"
 
 	"io"
@@ -18,6 +19,9 @@ import (
 
 const FlatOmitPrefixStorageLayoutName = "0006-flat-omit-prefix-storage-layout"
 const FlatOmitPrefixStorageLayoutDescription = "removes prefix after last occurrence of delimiter"
+
+//go:embed 0006-flat-omit-prefix-storage-layout.md
+var FlatOmitPrefixStorageLayoutDoc string
 
 func init() {
 	extension.RegisterExtension(FlatOmitPrefixStorageLayoutName, NewFlatOmitPrefixStorageLayout, nil)
@@ -77,6 +81,13 @@ func (sl *FlatOmitPrefixStorageLayout) SetParams(params map[string]string) error
 }
 
 func (sl *FlatOmitPrefixStorageLayout) GetName() string { return FlatOmitPrefixStorageLayoutName }
+
+func (sl *FlatOmitPrefixStorageLayout) GetDescription() string {
+	return FlatOmitPrefixStorageLayoutDescription
+}
+func (sl *FlatOmitPrefixStorageLayout) GetDocumentation() string {
+	return FlatOmitPrefixStorageLayoutDoc
+}
 func (sl *FlatOmitPrefixStorageLayout) WriteConfig(fsys appendfs.FS) error {
 	configWriter, err := writefs.Create(fsys, "config.json")
 	if err != nil {

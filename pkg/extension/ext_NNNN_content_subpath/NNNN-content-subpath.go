@@ -1,6 +1,7 @@
 package ext_NNNN_content_subpath
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 
@@ -20,6 +21,9 @@ import (
 
 const ContentSubPathName = "NNNN-content-subpath"
 const ContentSubPathDescription = "prepend a path inside the version content"
+
+//go:embed NNNN-content-subpath.md
+var ContentSubPathDoc string
 
 func init() {
 	extension.RegisterExtension(ContentSubPathName, NewContentSubPath, GetContentSubPathParams)
@@ -104,6 +108,9 @@ func (sl *ContentSubPath) SetParams(params map[string]string) error {
 }
 
 func (sl *ContentSubPath) GetName() string { return ContentSubPathName }
+
+func (sl *ContentSubPath) GetDescription() string   { return ContentSubPathDescription }
+func (sl *ContentSubPath) GetDocumentation() string { return ContentSubPathDoc }
 
 func (sl *ContentSubPath) WriteConfig(fsys appendfs.FS) error {
 	configWriter, err := writefs.Create(fsys, "config.json")

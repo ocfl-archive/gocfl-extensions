@@ -1,19 +1,19 @@
 package ext_0009_digest_algorithms
 
 import (
-	"encoding/json"
+	_ "embed"
 
-	"emperror.dev/errors"
-	"github.com/je4/filesystem/v3/pkg/writefs"
 	"github.com/je4/utils/v2/pkg/checksum"
-	"github.com/ocfl-archive/gocfl/v3/pkg/appendfs"
+	"github.com/ocfl-archive/gocfl-extensions/pkg/extension/ext_0001_digest_algorithms"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/object"
-	"github.com/ocfl-archive/gocfl/v3/pkg/ocfllogger"
 )
 
 const DigestAlgorithmsName = "0009-digest-algorithms"
 const DigestAlgorithmsDescription = "controlled vocabulary of digest algorithm names that may be used to indicate the given algorithm in fixity blocks of OCFL Objects"
+
+//go:embed 0009-digest-algorithms.md
+var DigestAlgorithmsDoc string
 
 func init() {
 	extension.RegisterExtension(DigestAlgorithmsName, NewDigestAlgorithms, nil)
@@ -32,44 +32,23 @@ var algorithms = []checksum.DigestAlgorithm{
 }
 
 func NewDigestAlgorithms() (extension.Extension, error) {
-	var config = &DigestAlgorithmsConfig{
+	var config = &ext_0001_digest_algorithms.DigestAlgorithmsConfig{
 		ExtensionConfig: &extension.ExtensionConfig{
 			ExtensionName: DigestAlgorithmsName,
 		},
 	}
 	sl := &DigestAlgorithms{
-		DigestAlgorithmsConfig: config,
+		&ext_0001_digest_algorithms.DigestAlgorithms{DigestAlgorithmsConfig: config},
 	}
 	return sl, nil
 }
 
-type DigestAlgorithmsConfig struct {
-	*extension.ExtensionConfig
-}
 type DigestAlgorithms struct {
-	*DigestAlgorithmsConfig
-	logger ocfllogger.OCFLLogger
+	*ext_0001_digest_algorithms.DigestAlgorithms
 }
 
-func (sl *DigestAlgorithms) WithLogger(logger ocfllogger.OCFLLogger) extension.Extension {
-	sl.logger = logger.With("extension", DigestAlgorithmsName)
-	return sl
-}
-
-func (sl *DigestAlgorithms) Load(data json.RawMessage) error {
-	if err := json.Unmarshal(data, sl.DigestAlgorithmsConfig); err != nil {
-		return errors.Wrapf(err, "cannot unmarshal DigestAlgorithmsConfig '%s'", string(data))
-	}
-	return nil
-}
-
-func (sl *DigestAlgorithms) Terminate() error {
-	return nil
-}
-
-func (sl *DigestAlgorithms) GetConfig() any {
-	return sl.DigestAlgorithmsConfig
-}
+func (sl *DigestAlgorithms) GetDocumentation() string { return DigestAlgorithmsDoc }
+func (sl *DigestAlgorithms) GetDescription() string   { return DigestAlgorithmsDescription }
 
 func (sl *DigestAlgorithms) IsRegistered() bool {
 	return true
@@ -80,24 +59,6 @@ func (sl *DigestAlgorithms) GetFixityDigests() []checksum.DigestAlgorithm {
 }
 
 func (sl *DigestAlgorithms) GetName() string { return DigestAlgorithmsName }
-
-func (sl *DigestAlgorithms) SetParams(params map[string]string) error {
-	return nil
-}
-
-func (sl *DigestAlgorithms) WriteConfig(fsys appendfs.FS) error {
-	configWriter, err := writefs.Create(fsys, "config.json")
-	if err != nil {
-		return errors.Wrap(err, "cannot open config.json")
-	}
-	defer configWriter.Close()
-	jenc := json.NewEncoder(configWriter)
-	jenc.SetIndent("", "   ")
-	if err := jenc.Encode(sl.ExtensionConfig); err != nil {
-		return errors.Wrapf(err, "cannot encode config to file")
-	}
-	return nil
-}
 
 // check interface satisfaction
 var (

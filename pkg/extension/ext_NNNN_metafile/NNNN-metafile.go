@@ -2,6 +2,7 @@ package ext_NNNN_metafile
 
 import (
 	"bytes"
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -31,6 +32,9 @@ import (
 
 const MetaFileName = "NNNN-metafile"
 const MetaFileDescription = "adds a file in extension folder"
+
+//go:embed NNNN-metafile.md
+var MetaFileDoc string
 
 func init() {
 	extension.RegisterExtension(MetaFileName, NewMetaFile, GetMetaFileParams)
@@ -150,6 +154,9 @@ func (sl *MetaFile) SetParams(params map[string]string) error {
 }
 
 func (sl *MetaFile) GetName() string { return MetaFileName }
+
+func (sl *MetaFile) GetDescription() string   { return MetaFileDescription }
+func (sl *MetaFile) GetDocumentation() string { return MetaFileDoc }
 
 func (sl *MetaFile) WriteConfig(fsys appendfs.FS) error {
 	if sl.metadataSource == nil {

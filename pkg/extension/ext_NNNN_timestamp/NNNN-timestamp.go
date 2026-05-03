@@ -3,6 +3,7 @@ package ext_NNNN_timestamp
 import (
 	"bytes"
 	"crypto"
+	_ "embed"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -24,6 +25,9 @@ import (
 
 const TimestampName = "NNNN-timestamp"
 const TimestampDescription = "signs ocfl versions"
+
+//go:embed NNNN-timestamp.md
+var TimestampDoc string
 
 func init() {
 	extension.RegisterExtension(TimestampName, NewTimestamp, GetTimestampParams)
@@ -193,6 +197,9 @@ func (sl *Timestamp) SetParams(params map[string]string) error {
 }
 
 func (sl *Timestamp) GetName() string { return TimestampName }
+
+func (sl *Timestamp) GetDescription() string   { return TimestampDescription }
+func (sl *Timestamp) GetDocumentation() string { return TimestampDoc }
 
 func (sl *Timestamp) WriteConfig(fsys appendfs.FS) error {
 	configWriter, err := writefs.Create(fsys, "config.json")

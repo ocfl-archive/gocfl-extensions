@@ -3,6 +3,7 @@ package ext_NNNN_mets
 import (
 	"bytes"
 	"crypto/sha512"
+	_ "embed"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
@@ -38,6 +39,9 @@ import (
 
 const METSName = "NNNN-mets"
 const METSDescription = "METS/EAD3/PREMIS metadata"
+
+//go:embed NNNN-mets.md
+var METSDoc string
 
 func init() {
 	extension.RegisterExtension(METSName, NewMets, GetMetsParams)
@@ -161,6 +165,9 @@ func (me *Mets) GetFS() fs.FS {
 }
 
 func (me *Mets) GetName() string { return METSName }
+
+func (me *Mets) GetDescription() string   { return METSDescription }
+func (me *Mets) GetDocumentation() string { return METSDoc }
 
 func (me *Mets) WriteConfig(fsys appendfs.FS) error {
 	configWriter, err := writefs.Create(fsys, "config.json")

@@ -3,6 +3,7 @@ package ext_NNNN_thumbnail
 import (
 	"bufio"
 	"bytes"
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"image"
@@ -40,6 +41,9 @@ import (
 
 const ThumbnailName = "NNNN-thumbnail"
 const ThumbnailDescription = "preservation management - file thumbnail"
+
+//go:embed NNNN-thumbnail.md
+var ThumbnailDoc string
 
 func init() {
 	extension.RegisterExtension(ThumbnailName, func() (extensiontypes.Extension, error) {
@@ -156,6 +160,9 @@ func (thumb *Thumbnail) GetConfig() any {
 func (thumb *Thumbnail) IsRegistered() bool { return false }
 
 func (thumb *Thumbnail) GetName() string { return ThumbnailName }
+
+func (thumb *Thumbnail) GetDescription() string   { return ThumbnailDescription }
+func (thumb *Thumbnail) GetDocumentation() string { return ThumbnailDoc }
 
 func (thumb *Thumbnail) SetParams(map[string]string) error {
 	return nil

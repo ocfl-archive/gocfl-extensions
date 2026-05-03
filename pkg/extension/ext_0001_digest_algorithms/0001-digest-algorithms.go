@@ -1,6 +1,7 @@
 package ext_0001_digest_algorithms
 
 import (
+	_ "embed"
 	"encoding/json"
 
 	"emperror.dev/errors"
@@ -12,14 +13,17 @@ import (
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfllogger"
 )
 
-const DigestAlgorithmsName0001 = "0001-digest-algorithms"
-const DigestAlgorithmsDescription0001 = "controlled vocabulary of digest algorithm names that may be used to indicate the given algorithm in fixity blocks of OCFL Objects"
+const DigestAlgorithmsName = "0001-digest-algorithms"
+const DigestAlgorithmsDescription = "controlled vocabulary of digest algorithm names that may be used to indicate the given algorithm in fixity blocks of OCFL Objects"
+
+//go:embed 0001-digest-algorithms.md
+var DigestAlgorithmsDoc string
 
 func init() {
-	extension.RegisterExtension(DigestAlgorithmsName0001, NewDigestAlgorithms0001, nil)
+	extension.RegisterExtension(DigestAlgorithmsName, NewDigestAlgorithms, nil)
 }
 
-var algorithms0001 = []checksum.DigestAlgorithm{
+var algorithms = []checksum.DigestAlgorithm{
 	checksum.DigestBlake2b160,
 	checksum.DigestBlake2b256,
 	checksum.DigestBlake2b384,
@@ -30,61 +34,64 @@ var algorithms0001 = []checksum.DigestAlgorithm{
 	checksum.DigestSHA1,
 }
 
-func NewDigestAlgorithms0001() (extension.Extension, error) {
-	var config = &DigestAlgorithmsConfig0001{
+func NewDigestAlgorithms() (extension.Extension, error) {
+	var config = &DigestAlgorithmsConfig{
 		ExtensionConfig: &extension.ExtensionConfig{
-			ExtensionName: DigestAlgorithmsName0001,
+			ExtensionName: DigestAlgorithmsName,
 		},
 	}
-	sl := &DigestAlgorithms0001{
-		DigestAlgorithmsConfig0001: config,
+	sl := &DigestAlgorithms{
+		DigestAlgorithmsConfig: config,
 	}
 	return sl, nil
 }
 
-type DigestAlgorithmsConfig0001 struct {
+type DigestAlgorithmsConfig struct {
 	*extension.ExtensionConfig
 }
-type DigestAlgorithms0001 struct {
-	*DigestAlgorithmsConfig0001
+type DigestAlgorithms struct {
+	*DigestAlgorithmsConfig
 	logger ocfllogger.OCFLLogger
 }
 
-func (sl *DigestAlgorithms0001) WithLogger(logger ocfllogger.OCFLLogger) extension.Extension {
-	sl.logger = logger.With("extension", DigestAlgorithmsName0001)
+func (sl *DigestAlgorithms) WithLogger(logger ocfllogger.OCFLLogger) extension.Extension {
+	sl.logger = logger.With("extension", DigestAlgorithmsName)
 	return sl
 }
 
-func (sl *DigestAlgorithms0001) Load(data json.RawMessage) error {
-	if err := json.Unmarshal(data, sl.DigestAlgorithmsConfig0001); err != nil {
+func (sl *DigestAlgorithms) Load(data json.RawMessage) error {
+	if err := json.Unmarshal(data, sl.DigestAlgorithmsConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal DigestAlgorithmsConfig0001 '%s'", string(data))
 	}
 	return nil
 }
 
-func (sl *DigestAlgorithms0001) Terminate() error {
+func (sl *DigestAlgorithms) Terminate() error {
 	return nil
 }
 
-func (sl *DigestAlgorithms0001) GetConfig() any {
-	return sl.DigestAlgorithmsConfig0001
+func (sl *DigestAlgorithms) GetConfig() any {
+	return sl.DigestAlgorithmsConfig
 }
 
-func (sl *DigestAlgorithms0001) IsRegistered() bool {
+func (sl *DigestAlgorithms) IsRegistered() bool {
 	return true
 }
 
-func (sl *DigestAlgorithms0001) GetFixityDigests() []checksum.DigestAlgorithm {
-	return algorithms0001
+func (sl *DigestAlgorithms) GetFixityDigests() []checksum.DigestAlgorithm {
+	return algorithms
 }
 
-func (sl *DigestAlgorithms0001) GetName() string { return DigestAlgorithmsName0001 }
+func (sl *DigestAlgorithms) GetName() string { return DigestAlgorithmsName }
 
-func (sl *DigestAlgorithms0001) SetParams(params map[string]string) error {
+func (sl *DigestAlgorithms) GetDescription() string   { return DigestAlgorithmsDescription }
+func (sl *DigestAlgorithms) GetDocumentation() string { return DigestAlgorithmsDoc }
+
+func (sl *DigestAlgorithms) SetParams(params map[string]string) error {
 	return nil
 }
 
-func (sl *DigestAlgorithms0001) WriteConfig(fsys appendfs.FS) error {
+func (sl *DigestAlgorithms) WriteConfig(fsys appendfs.FS) error {
 	configWriter, err := writefs.Create(fsys, "config.json")
 	if err != nil {
 		return errors.Wrap(err, "cannot open config.json")
@@ -100,6 +107,6 @@ func (sl *DigestAlgorithms0001) WriteConfig(fsys appendfs.FS) error {
 
 // check interface satisfaction
 var (
-	_ extension.Extension          = &DigestAlgorithms0001{}
-	_ object.ExtensionFixityDigest = &DigestAlgorithms0001{}
+	_ extension.Extension          = &DigestAlgorithms{}
+	_ object.ExtensionFixityDigest = &DigestAlgorithms{}
 )

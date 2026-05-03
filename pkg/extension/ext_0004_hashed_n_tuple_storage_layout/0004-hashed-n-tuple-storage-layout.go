@@ -1,6 +1,7 @@
 package ext_0004_hashed_n_tuple_storage_layout
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"hash"
@@ -18,6 +19,9 @@ import (
 
 const StorageLayoutHashedNTupleName = "0004-hashed-n-tuple-storage-layout"
 const StorageLayoutHashedNTupleDescription = "Hashed N-tuple Storage Layout"
+
+//go:embed 0004-hashed-n-tuple-storage-layout.md
+var StorageLayoutHashedNTupleDoc string
 
 func init() {
 	extension.RegisterExtension(StorageLayoutHashedNTupleName, NewStorageLayoutHashedNTuple, nil)
@@ -93,6 +97,13 @@ func (sl *StorageLayoutHashedNTuple) IsRegistered() bool {
 }
 
 func (sl *StorageLayoutHashedNTuple) GetName() string { return StorageLayoutHashedNTupleName }
+
+func (sl *StorageLayoutHashedNTuple) GetDescription() string {
+	return StorageLayoutHashedNTupleDescription
+}
+func (sl *StorageLayoutHashedNTuple) GetDocumentation() string {
+	return StorageLayoutHashedNTupleDoc
+}
 
 func (sl *StorageLayoutHashedNTuple) SetParams(params map[string]string) error {
 	return nil

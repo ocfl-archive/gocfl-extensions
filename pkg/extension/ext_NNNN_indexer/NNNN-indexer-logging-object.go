@@ -13,7 +13,7 @@ import (
 const LoggingIndexerName = "NNNN-indexer-logging-object"
 
 type LoggingIndexerConfig struct {
-	*Config
+	*extensiontypes.ExtensionConfig
 }
 
 type LoggingIndexer struct {
@@ -56,7 +56,7 @@ func (li *LoggingIndexer) WriteConfig(appendfs.FS) error {
 }
 
 func NewLoggingIndexer() (*LoggingIndexer, error) {
-	config := &LoggingIndexerConfig{Config: &Config{ExtensionName: LoggingIndexerName}}
+	config := &LoggingIndexerConfig{ExtensionConfig: &extensiontypes.ExtensionConfig{ExtensionName: LoggingIndexerName}}
 	li := &LoggingIndexer{LoggingIndexerConfig: config, metadata: map[string]any{}}
 	return li, nil
 }
@@ -64,6 +64,8 @@ func NewLoggingIndexer() (*LoggingIndexer, error) {
 func (li *LoggingIndexer) GetName() string {
 	return LoggingIndexerName
 }
+
+func (li *LoggingIndexer) GetDescription() string { return "Logging Indexer" }
 func (li *LoggingIndexer) Start() error {
 	li.metadata = map[string]any{}
 	return nil

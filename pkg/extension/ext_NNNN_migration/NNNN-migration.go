@@ -3,6 +3,7 @@ package ext_NNNN_migration
 import (
 	"bufio"
 	"bytes"
+	_ "embed"
 	"encoding/json"
 	"io"
 	"io/fs"
@@ -29,6 +30,9 @@ import (
 
 const MigrationName = "NNNN-migration"
 const MigrationDescription = "preservation management - file migration"
+
+//go:embed NNNN-migration.md
+var MigrationDoc string
 
 func init() {
 	extension.RegisterExtension(MigrationName, func() (extensiontypes.Extension, error) {
@@ -138,6 +142,9 @@ func (mi *Migration) GetConfig() any {
 func (mi *Migration) IsRegistered() bool { return false }
 
 func (mi *Migration) GetName() string { return MigrationName }
+
+func (mi *Migration) GetDescription() string   { return MigrationDescription }
+func (mi *Migration) GetDocumentation() string { return MigrationDoc }
 
 func (mi *Migration) SetParams(map[string]string) error {
 	return nil

@@ -1,6 +1,7 @@
 package ext_0002_flat_direct_storage_layout
 
 import (
+	_ "embed"
 	"encoding/json"
 	"io"
 
@@ -15,6 +16,9 @@ import (
 
 const StorageLayoutFlatDirectName = "0002-flat-direct-storage-layout"
 const StorageLayoutFlatDirectDescription = "one to one mapping without changes"
+
+//go:embed 0002-flat-direct-storage-layout.md
+var StorageLayoutFlatDirectDoc string
 
 func init() {
 	extension.RegisterExtension(StorageLayoutFlatDirectName, NewStorageLayoutFlatDirect, nil)
@@ -73,6 +77,9 @@ func (sl *StorageLayoutFlatDirect) SetParams(params map[string]string) error {
 }
 
 func (sl *StorageLayoutFlatDirect) GetName() string { return StorageLayoutFlatDirectName }
+
+func (sl *StorageLayoutFlatDirect) GetDescription() string   { return StorageLayoutFlatDirectDescription }
+func (sl *StorageLayoutFlatDirect) GetDocumentation() string { return StorageLayoutFlatDirectDoc }
 func (sl *StorageLayoutFlatDirect) WriteConfig(fsys appendfs.FS) error {
 	configWriter, err := writefs.Create(fsys, "config.json")
 	if err != nil {

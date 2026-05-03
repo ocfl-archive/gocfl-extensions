@@ -3,6 +3,7 @@ package ext_NNNN_filesystem
 import (
 	"bufio"
 	"bytes"
+	_ "embed"
 	"encoding/json"
 	"io"
 	"io/fs"
@@ -26,6 +27,9 @@ import (
 
 const FilesystemName = "NNNN-filesystem"
 const FilesystemDescription = "preserves filesytem metadata"
+
+//go:embed NNNN-filesystem.md
+var FilesystemDoc string
 
 func init() {
 	extension.RegisterExtension(FilesystemName, NewFilesystem, nil)
@@ -360,6 +364,9 @@ func (fi *Filesystem) IsRegistered() bool {
 func (fi *Filesystem) GetName() string {
 	return FilesystemName
 }
+
+func (fi *Filesystem) GetDescription() string   { return FilesystemDescription }
+func (fi *Filesystem) GetDocumentation() string { return FilesystemDoc }
 
 var (
 	_ extensiontypes.Extension      = &Filesystem{}

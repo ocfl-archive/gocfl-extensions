@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"crypto/tls"
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -30,6 +31,9 @@ import (
 
 const IndexerName = "NNNN-indexer"
 const IndexerDescription = "technical metadata for all files"
+
+//go:embed NNNN-indexer.md
+var IndexerDoc string
 
 func init() {
 	extension.RegisterExtension(IndexerName, func() (extensiontypes.Extension, error) {
@@ -155,6 +159,9 @@ func (sl *Indexer) GetConfig() any {
 func (sl *Indexer) IsRegistered() bool { return false }
 
 func (sl *Indexer) GetName() string { return IndexerName }
+
+func (sl *Indexer) GetDescription() string   { return IndexerDescription }
+func (sl *Indexer) GetDocumentation() string { return IndexerDoc }
 
 func (sl *Indexer) SetFS(fsys fs.FS, create bool) {
 	if sfs, ok := fsys.(appendfs.FS); ok {

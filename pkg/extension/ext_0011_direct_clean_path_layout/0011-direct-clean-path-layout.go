@@ -1,6 +1,7 @@
 package ext_0011_direct_clean_path_layout
 
 import (
+	_ "embed"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -29,6 +30,9 @@ func init() {
 }
 
 const DirectCleanDescription = "Maps OCFL object identifiers to storage paths or as an object extension that maps logical paths to content paths. This is done by replacing or removing \"dangerous characters\" from names"
+
+//go:embed 0011-direct-clean-path-layout.md
+var DirectCleanDoc string
 
 var directCleanRuleAll = regexp.MustCompile("[\u0000-\u001f\u007f\u0020\u0085\u00a0\u1680\u2000-\u200f\u2028\u2029\u202f\u205f\u3000\n\t*?:\\[\\]\"<>|(){}&'!\\;#@]")
 var directCleanRuleWhitespace = regexp.MustCompile("[\u0009\u000a-\u000d\u0020\u0085\u00a0\u1680\u2000-\u200f\u2028\u2029\u202f\u205f\u3000]")
@@ -156,6 +160,9 @@ func (sl *DirectClean) IsRegistered() bool {
 }
 
 func (sl *DirectClean) GetName() string { return DirectCleanName }
+
+func (sl *DirectClean) GetDescription() string   { return DirectCleanDescription }
+func (sl *DirectClean) GetDocumentation() string { return DirectCleanDoc }
 
 func (sl *DirectClean) SetParams(params map[string]string) error {
 	return nil
