@@ -107,8 +107,8 @@ github.com/ocfl-archive/error v1.0.5 h1:nPidx9HBSiViSDZHfVY8nIabBeOSO5vLFOcUMgt7
 github.com/ocfl-archive/error v1.0.5/go.mod h1:vOwIAdG34QlD9ExXUXu8QSywUKIIMN31ykQ2U0LvOMs=
 github.com/ocfl-archive/gocfl/v3 v3.0.0-20260503121431-aa27eb934c8b h1:aljDaCDL9HhEx+5SWFgzsxHADO/0PcrdTX5zORikLYw=
 github.com/ocfl-archive/gocfl/v3 v3.0.0-20260503121431-aa27eb934c8b/go.mod h1:iIOZDC4/Gq84zNNPUCz5pr1DmLZJX+oSteN33onDFGc=
-github.com/ocfl-archive/indexer/v3 v3.0.42 h1:866UmMlUq9a+nNI5BD7WCbWJCSvZbtuZYTiYLWYp84E=
-github.com/ocfl-archive/indexer/v3 v3.0.42/go.mod h1:gLVOsu6ZPeEyHCrbRF64hGYjrov0dBCg5oKiwYUxKUA=
+github.com/ocfl-archive/indexer/v3 v3.0.44 h1:JrSkHQ5xLnV7gq/0PKtDAXzyZaq1fMHzqlQ9yJ7UXVM=
+github.com/ocfl-archive/indexer/v3 v3.0.44/go.mod h1:gLVOsu6ZPeEyHCrbRF64hGYjrov0dBCg5oKiwYUxKUA=
 github.com/op/go-logging v0.0.0-20160315200505-970db520ece7 h1:lDH9UUVJtmYCjyT0CI4q8xvlXPxeZ0gYCVvWbmPlp88=
 github.com/op/go-logging v0.0.0-20160315200505-970db520ece7/go.mod h1:HzydrMdWErDVzsI23lYNej1Htcns9BCg93Dk0bBINWk=
 github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58 h1:onHthvaw9LFnH4t2DcNVpwGmV9E1BkGknEliJkfwQj0=
