@@ -48,7 +48,7 @@ var ThumbnailDoc string
 func init() {
 	extension.RegisterExtension(ThumbnailName, func() (extensiontypes.Extension, error) {
 		return NewThumbnail(nil), nil
-	}, nil)
+	}, nil, &ThumbnailDoc)
 }
 
 func NewThumbnail(thumb *thumbnail.Thumbnail) *Thumbnail {
@@ -160,9 +160,6 @@ func (thumb *Thumbnail) GetConfig() any {
 func (thumb *Thumbnail) IsRegistered() bool { return false }
 
 func (thumb *Thumbnail) GetName() string { return ThumbnailName }
-
-func (thumb *Thumbnail) GetDescription() string   { return ThumbnailDescription }
-func (thumb *Thumbnail) GetDocumentation() string { return ThumbnailDoc }
 
 func (thumb *Thumbnail) SetParams(map[string]string) error {
 	return nil

@@ -16,7 +16,7 @@ const DigestAlgorithmsDescription = "controlled vocabulary of digest algorithm n
 var DigestAlgorithmsDoc string
 
 func init() {
-	extension.RegisterExtension(DigestAlgorithmsName, NewDigestAlgorithms, nil)
+	extension.RegisterExtension(DigestAlgorithmsName, NewDigestAlgorithms, nil, &DigestAlgorithmsDoc)
 }
 
 var algorithms = []checksum.DigestAlgorithm{
@@ -46,9 +46,6 @@ func NewDigestAlgorithms() (extension.Extension, error) {
 type DigestAlgorithms struct {
 	*ext_0001_digest_algorithms.DigestAlgorithms
 }
-
-func (sl *DigestAlgorithms) GetDocumentation() string { return DigestAlgorithmsDoc }
-func (sl *DigestAlgorithms) GetDescription() string   { return DigestAlgorithmsDescription }
 
 func (sl *DigestAlgorithms) IsRegistered() bool {
 	return true

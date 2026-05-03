@@ -26,7 +26,7 @@ import (
 const DirectCleanName = "0011-direct-clean-path-layout"
 
 func init() {
-	extension.RegisterExtension(DirectCleanName, NewDirectClean, nil)
+	extension.RegisterExtension(DirectCleanName, NewDirectClean, nil, &DirectCleanDoc)
 }
 
 const DirectCleanDescription = "Maps OCFL object identifiers to storage paths or as an object extension that maps logical paths to content paths. This is done by replacing or removing \"dangerous characters\" from names"
@@ -160,9 +160,6 @@ func (sl *DirectClean) IsRegistered() bool {
 }
 
 func (sl *DirectClean) GetName() string { return DirectCleanName }
-
-func (sl *DirectClean) GetDescription() string   { return DirectCleanDescription }
-func (sl *DirectClean) GetDocumentation() string { return DirectCleanDoc }
 
 func (sl *DirectClean) SetParams(params map[string]string) error {
 	return nil

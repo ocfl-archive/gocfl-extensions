@@ -11,7 +11,7 @@ const LegacyDirectCleanName = "NNNN-direct-clean-path-layout"
 const LegacyDirectCleanDescription = "Maps OCFL object identifiers to storage paths or as an object extension that maps logical paths to content paths. This is done by replacing or removing \"dangerous characters\" from names"
 
 func init() {
-	extension.RegisterExtension(LegacyDirectCleanName, NewLegacyDirectClean, nil)
+	extension.RegisterExtension(LegacyDirectCleanName, NewLegacyDirectClean, nil, &DirectCleanDoc)
 }
 
 func NewLegacyDirectClean() (extension.Extension, error) {

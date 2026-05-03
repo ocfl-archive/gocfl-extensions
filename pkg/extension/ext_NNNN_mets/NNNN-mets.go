@@ -44,7 +44,7 @@ const METSDescription = "METS/EAD3/PREMIS metadata"
 var METSDoc string
 
 func init() {
-	extension.RegisterExtension(METSName, NewMets, GetMetsParams)
+	extension.RegisterExtension(METSName, NewMets, GetMetsParams, &METSDoc)
 }
 
 type metsInternalFiledata struct {
@@ -165,9 +165,6 @@ func (me *Mets) GetFS() fs.FS {
 }
 
 func (me *Mets) GetName() string { return METSName }
-
-func (me *Mets) GetDescription() string   { return METSDescription }
-func (me *Mets) GetDocumentation() string { return METSDoc }
 
 func (me *Mets) WriteConfig(fsys appendfs.FS) error {
 	configWriter, err := writefs.Create(fsys, "config.json")

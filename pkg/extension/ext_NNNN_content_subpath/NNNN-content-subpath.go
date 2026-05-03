@@ -26,7 +26,7 @@ const ContentSubPathDescription = "prepend a path inside the version content"
 var ContentSubPathDoc string
 
 func init() {
-	extension.RegisterExtension(ContentSubPathName, NewContentSubPath, GetContentSubPathParams)
+	extension.RegisterExtension(ContentSubPathName, NewContentSubPath, GetContentSubPathParams, &ContentSubPathDoc)
 }
 
 func GetContentSubPathParams() ([]*extension.ExternalParam, error) {
@@ -108,9 +108,6 @@ func (sl *ContentSubPath) SetParams(params map[string]string) error {
 }
 
 func (sl *ContentSubPath) GetName() string { return ContentSubPathName }
-
-func (sl *ContentSubPath) GetDescription() string   { return ContentSubPathDescription }
-func (sl *ContentSubPath) GetDocumentation() string { return ContentSubPathDoc }
 
 func (sl *ContentSubPath) WriteConfig(fsys appendfs.FS) error {
 	configWriter, err := writefs.Create(fsys, "config.json")

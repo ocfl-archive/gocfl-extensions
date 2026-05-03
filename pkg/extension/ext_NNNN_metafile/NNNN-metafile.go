@@ -37,7 +37,7 @@ const MetaFileDescription = "adds a file in extension folder"
 var MetaFileDoc string
 
 func init() {
-	extension.RegisterExtension(MetaFileName, NewMetaFile, GetMetaFileParams)
+	extension.RegisterExtension(MetaFileName, NewMetaFile, GetMetaFileParams, &MetaFileDoc)
 }
 
 func GetMetaFileParams() ([]*extension.ExternalParam, error) {
@@ -154,9 +154,6 @@ func (sl *MetaFile) SetParams(params map[string]string) error {
 }
 
 func (sl *MetaFile) GetName() string { return MetaFileName }
-
-func (sl *MetaFile) GetDescription() string   { return MetaFileDescription }
-func (sl *MetaFile) GetDocumentation() string { return MetaFileDoc }
 
 func (sl *MetaFile) WriteConfig(fsys appendfs.FS) error {
 	if sl.metadataSource == nil {

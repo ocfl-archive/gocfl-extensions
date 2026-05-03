@@ -24,7 +24,7 @@ const NTupleOmitPrefixStorageLayoutDescription = "pairtree-like root directory s
 var NTupleOmitPrefixStorageLayoutDoc string
 
 func init() {
-	extension.RegisterExtension(NTupleOmitPrefixStorageLayoutName, NewNTupleOmitPrefixStorageLayout, nil)
+	extension.RegisterExtension(NTupleOmitPrefixStorageLayoutName, NewNTupleOmitPrefixStorageLayout, nil, &NTupleOmitPrefixStorageLayoutDoc)
 }
 
 // function, which takes a string as
@@ -116,12 +116,6 @@ func (sl *NTupleOmitPrefixStorageLayout) SetParams(params map[string]string) err
 
 func (sl *NTupleOmitPrefixStorageLayout) GetName() string { return NTupleOmitPrefixStorageLayoutName }
 
-func (sl *NTupleOmitPrefixStorageLayout) GetDescription() string {
-	return NTupleOmitPrefixStorageLayoutDescription
-}
-func (sl *NTupleOmitPrefixStorageLayout) GetDocumentation() string {
-	return NTupleOmitPrefixStorageLayoutDoc
-}
 func (sl *NTupleOmitPrefixStorageLayout) WriteConfig(fsys appendfs.FS) error {
 	configWriter, err := writefs.Create(fsys, "config.json")
 	if err != nil {

@@ -24,7 +24,7 @@ const StorageLayoutHashAndIdNTupleDescription = "Hashed Truncated N-tuple Trees 
 var StorageLayoutHashAndIdNTupleDoc string
 
 func init() {
-	extension.RegisterExtension(StorageLayoutHashAndIdNTupleName, NewStorageLayoutHashAndIdNTuple, nil)
+	extension.RegisterExtension(StorageLayoutHashAndIdNTupleName, NewStorageLayoutHashAndIdNTuple, nil, &StorageLayoutHashAndIdNTupleDoc)
 }
 
 func NewStorageLayoutHashAndIdNTuple() (extension.Extension, error) {
@@ -96,13 +96,6 @@ func (sl *StorageLayoutHashAndIdNTuple) IsRegistered() bool {
 
 func (sl *StorageLayoutHashAndIdNTuple) GetName() string {
 	return StorageLayoutHashAndIdNTupleName
-}
-
-func (sl *StorageLayoutHashAndIdNTuple) GetDescription() string {
-	return StorageLayoutHashAndIdNTupleDescription
-}
-func (sl *StorageLayoutHashAndIdNTuple) GetDocumentation() string {
-	return StorageLayoutHashAndIdNTupleDoc
 }
 
 func (sl *StorageLayoutHashAndIdNTuple) SetParams(params map[string]string) error {

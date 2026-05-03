@@ -27,7 +27,7 @@ const StorageLayoutPairTreeDescription = "pairtree-like storage layout"
 var StorageLayoutPairTreeDoc string
 
 func init() {
-	extension.RegisterExtension(StorageLayoutPairTreeName, NewStorageLayoutPairTree, nil)
+	extension.RegisterExtension(StorageLayoutPairTreeName, NewStorageLayoutPairTree, nil, &StorageLayoutPairTreeDoc)
 }
 
 /*
@@ -125,9 +125,6 @@ func NewStorageLayoutPairTree() (extensiontypes.Extension, error) {
 func (sl *StorageLayoutPairTree) IsObjectExtension() bool      { return false }
 func (sl *StorageLayoutPairTree) IsStorageRootExtension() bool { return true }
 func (sl *StorageLayoutPairTree) GetName() string              { return StorageLayoutPairTreeName }
-
-func (sl *StorageLayoutPairTree) GetDescription() string   { return StorageLayoutPairTreeDescription }
-func (sl *StorageLayoutPairTree) GetDocumentation() string { return "" }
 
 func (sl *StorageLayoutPairTree) SetParams(params map[string]string) error {
 	return nil

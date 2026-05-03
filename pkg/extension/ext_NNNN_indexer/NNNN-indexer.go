@@ -38,7 +38,7 @@ var IndexerDoc string
 func init() {
 	extension.RegisterExtension(IndexerName, func() (extensiontypes.Extension, error) {
 		return NewIndexer("", nil, &ironmaiden.IndexerConfig{}, false, nil)
-	}, GetIndexerParams)
+	}, GetIndexerParams, &IndexerDoc)
 }
 
 type indexerLine struct {
@@ -159,9 +159,6 @@ func (sl *Indexer) GetConfig() any {
 func (sl *Indexer) IsRegistered() bool { return false }
 
 func (sl *Indexer) GetName() string { return IndexerName }
-
-func (sl *Indexer) GetDescription() string   { return IndexerDescription }
-func (sl *Indexer) GetDocumentation() string { return IndexerDoc }
 
 func (sl *Indexer) SetFS(fsys fs.FS, create bool) {
 	if sfs, ok := fsys.(appendfs.FS); ok {

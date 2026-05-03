@@ -24,7 +24,7 @@ const FlatOmitPrefixStorageLayoutDescription = "removes prefix after last occurr
 var FlatOmitPrefixStorageLayoutDoc string
 
 func init() {
-	extension.RegisterExtension(FlatOmitPrefixStorageLayoutName, NewFlatOmitPrefixStorageLayout, nil)
+	extension.RegisterExtension(FlatOmitPrefixStorageLayoutName, NewFlatOmitPrefixStorageLayout, nil, &FlatOmitPrefixStorageLayoutDoc)
 }
 
 func NewFlatOmitPrefixStorageLayout() (extensiontypes.Extension, error) {
@@ -82,12 +82,6 @@ func (sl *FlatOmitPrefixStorageLayout) SetParams(params map[string]string) error
 
 func (sl *FlatOmitPrefixStorageLayout) GetName() string { return FlatOmitPrefixStorageLayoutName }
 
-func (sl *FlatOmitPrefixStorageLayout) GetDescription() string {
-	return FlatOmitPrefixStorageLayoutDescription
-}
-func (sl *FlatOmitPrefixStorageLayout) GetDocumentation() string {
-	return FlatOmitPrefixStorageLayoutDoc
-}
 func (sl *FlatOmitPrefixStorageLayout) WriteConfig(fsys appendfs.FS) error {
 	configWriter, err := writefs.Create(fsys, "config.json")
 	if err != nil {

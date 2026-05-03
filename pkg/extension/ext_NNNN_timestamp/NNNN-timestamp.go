@@ -30,7 +30,7 @@ const TimestampDescription = "signs ocfl versions"
 var TimestampDoc string
 
 func init() {
-	extension.RegisterExtension(TimestampName, NewTimestamp, GetTimestampParams)
+	extension.RegisterExtension(TimestampName, NewTimestamp, GetTimestampParams, &TimestampDoc)
 }
 
 func GetTimestampParams() ([]*extension.ExternalParam, error) {
@@ -197,9 +197,6 @@ func (sl *Timestamp) SetParams(params map[string]string) error {
 }
 
 func (sl *Timestamp) GetName() string { return TimestampName }
-
-func (sl *Timestamp) GetDescription() string   { return TimestampDescription }
-func (sl *Timestamp) GetDocumentation() string { return TimestampDoc }
 
 func (sl *Timestamp) WriteConfig(fsys appendfs.FS) error {
 	configWriter, err := writefs.Create(fsys, "config.json")
