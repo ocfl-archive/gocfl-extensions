@@ -39,7 +39,7 @@ func init() {
 	}, nil, &MigrationDoc)
 }
 
-func InitMigration(migrationConf *ConfigMigration, sourceFS fs.FS, logger ocfllogger.OCFLLogger) {
+func Init(migrationConf *ConfigMigration, sourceFS fs.FS, logger ocfllogger.OCFLLogger) {
 	extension.RegisterExtension(MigrationName, func() (extensiontypes.Extension, error) {
 		mig, err := GetMigrations(migrationConf)
 		if err != nil {

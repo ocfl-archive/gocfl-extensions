@@ -50,7 +50,7 @@ func init() {
 	}, nil, &ThumbnailDoc)
 }
 
-func InitThumbnail(thumbnailConf *ConfigThumbnail, sourceFS fs.FS, logger ocfllogger.OCFLLogger) {
+func Init(thumbnailConf *ConfigThumbnail, sourceFS fs.FS, logger ocfllogger.OCFLLogger) {
 	extension.RegisterExtension(ThumbnailName, func() (extensiontypes.Extension, error) {
 		thumb, err := GetThumbnails(thumbnailConf)
 		if err != nil {

@@ -41,7 +41,7 @@ func init() {
 	}, GetIndexerParams, &IndexerDoc)
 }
 
-func InitIndexer(urlString string, conf *ironmaiden.IndexerConfig, localCache bool, logger ocfllogger.OCFLLogger) {
+func Init(urlString string, conf *ironmaiden.IndexerConfig, localCache bool, logger ocfllogger.OCFLLogger) {
 	extension.RegisterExtension(IndexerName, func() (extensiontypes.Extension, error) {
 		return NewIndexer(urlString, conf, localCache, logger)
 	}, GetIndexerParams, &IndexerDoc)
