@@ -1,4 +1,4 @@
-package thumbnail
+package ext_NNNN_thumbnail
 
 import configutil "github.com/je4/utils/v2/pkg/config"
 

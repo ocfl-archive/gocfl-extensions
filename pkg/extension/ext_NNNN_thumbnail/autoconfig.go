@@ -1,4 +1,4 @@
-package thumbnail
+package ext_NNNN_thumbnail
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ import (
 	"github.com/BurntSushi/toml"
 	configutil "github.com/je4/utils/v2/pkg/config"
 	"github.com/je4/utils/v2/pkg/zLogger"
-	thumbnaildata "github.com/ocfl-archive/gocfl-extensions/pkg/subsystem/thumbnail/data"
+	thumbnaildata "github.com/ocfl-archive/gocfl-extensions/pkg/extension/ext_NNNN_thumbnail/data"
 	"github.com/ocfl-archive/gocfl/v3/pkg/util"
 )
 

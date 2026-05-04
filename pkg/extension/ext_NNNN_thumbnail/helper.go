@@ -1,4 +1,4 @@
-package thumbnail
+package ext_NNNN_thumbnail
 
 import (
 	"regexp"
@@ -9,12 +9,12 @@ import (
 	"github.com/google/shlex"
 )
 
-func GetThumbnails(conf *ConfigThumbnail) (*Thumbnail, error) {
+func GetThumbnails(conf *ConfigThumbnail) (*thumbnail, error) {
 	if conf == nil {
 		return nil, errors.New("thumbnail configuration is nil")
 	}
-	m := &Thumbnail{
-		Functions:  map[string]*Function{},
+	m := &thumbnail{
+		Functions:  map[string]*function{},
 		Background: conf.Background,
 	}
 
@@ -42,7 +42,7 @@ func GetThumbnails(conf *ConfigThumbnail) (*Thumbnail, error) {
 		for _, pro := range fn.Pronoms {
 			pronoms = append(pronoms, strings.TrimSpace(pro))
 		}
-		m.Functions[name] = &Function{
+		m.Functions[name] = &function{
 			thumb:   m,
 			title:   fn.Title,
 			id:      fn.ID,

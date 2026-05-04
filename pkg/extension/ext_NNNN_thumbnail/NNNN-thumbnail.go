@@ -22,7 +22,6 @@ import (
 	"github.com/je4/filesystem/v3/pkg/writefs"
 	ext "github.com/ocfl-archive/gocfl-extensions/pkg/extension"
 	"github.com/ocfl-archive/gocfl-extensions/pkg/extension/ext_NNNN_indexer"
-	"github.com/ocfl-archive/gocfl-extensions/pkg/subsystem/thumbnail"
 	"github.com/ocfl-archive/gocfl/v3/pkg/appendfs"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
 	extensiontypes "github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
@@ -51,7 +50,7 @@ func init() {
 	}, nil, &ThumbnailDoc)
 }
 
-func NewThumbnail(thumb *thumbnail.Thumbnail) *Thumbnail {
+func NewThumbnail(thumb *thumbnail) *Thumbnail {
 	config := &ThumbnailConfig{
 		ExtensionConfig: &extensiontypes.ExtensionConfig{ExtensionName: ThumbnailName},
 		StorageType:     "extension",
@@ -115,7 +114,7 @@ type Thumbnail struct {
 	logger ocfllogger.OCFLLogger
 	//fsys        appendfs.FS
 	lastHead    string
-	thumbnail   *thumbnail.Thumbnail
+	thumbnail   *thumbnail
 	buffer      map[string]*bytes.Buffer
 	writer      *brotli.Writer
 	sourceFS    fs.FS
@@ -239,7 +238,7 @@ func (thumb *Thumbnail) storeThumbnail(obj object.VersionWriter, head *inventory
 	}
 }
 
-func (thumb *Thumbnail) DoThumbnail(obj object.VersionWriter, head *inventorytypes.VersionNumber, thumbFunc *thumbnail.Function, ext string, file io.ReadCloser) (string, string, error) {
+func (thumb *Thumbnail) DoThumbnail(obj object.VersionWriter, head *inventorytypes.VersionNumber, thumbFunc *function, ext string, file io.ReadCloser) (string, string, error) {
 	tmpFile, err := os.CreateTemp(os.TempDir(), "gocfl_*"+ext)
 	if err != nil {
 		return "", "", errors.Wrap(err, "cannot create temp file")
