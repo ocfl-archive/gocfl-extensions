@@ -128,7 +128,7 @@ func (sl *MetaFile) SetParams(params map[string]string) error {
 		urlString = strings.TrimSpace(urlString)
 		if !ok || urlString == "" {
 			sl.metadataSource = nil
-			return nil
+			return errors.Errorf("no source (--%s) configured", name)
 		}
 		u, err := url.Parse(urlString)
 		if err != nil || u.Scheme == "" {
