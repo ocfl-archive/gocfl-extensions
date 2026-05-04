@@ -50,7 +50,19 @@ func init() {
 	}, nil, &ThumbnailDoc)
 }
 
-func NewThumbnail(thumb *thumbnail) *Thumbnail {
+func InitThumbnail(thumbnailConf *ConfigThumbnail, sourceFS fs.FS, logger ocfllogger.OCFLLogger) {
+	extension.RegisterExtension(ThumbnailName, func() (extensiontypes.Extension, error) {
+		thumb, err := GetThumbnails(thumbnailConf)
+		if err != nil {
+			logger.Error().Err(err).Msg("cannot get thumbnails")
+			return nil, errors.Wrap(err, "cannot get thumbnails")
+		}
+		thumb.SetSourceFS(sourceFS)
+		return NewThumbnail(thumb), nil
+	}, nil, &ThumbnailDoc)
+}
+
+func NewThumbnail(thumb *engine) *Thumbnail {
 	config := &ThumbnailConfig{
 		ExtensionConfig: &extensiontypes.ExtensionConfig{ExtensionName: ThumbnailName},
 		StorageType:     "extension",
@@ -114,7 +126,7 @@ type Thumbnail struct {
 	logger ocfllogger.OCFLLogger
 	//fsys        appendfs.FS
 	lastHead    string
-	thumbnail   *thumbnail
+	thumbnail   *engine
 	buffer      map[string]*bytes.Buffer
 	writer      *brotli.Writer
 	sourceFS    fs.FS

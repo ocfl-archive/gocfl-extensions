@@ -23,7 +23,7 @@ type ThumbnailMeta struct {
 }
 
 type function struct {
-	thumb   *thumbnail
+	thumb   *engine
 	command string
 	args    []string
 	timeout time.Duration
@@ -58,20 +58,20 @@ func (f *function) GetID() string {
 	return f.id
 }
 
-type thumbnail struct {
+type engine struct {
 	Functions  map[string]*function
 	SourceFS   fs.FS
 	Background string
 }
 
-func (m *thumbnail) GetFunctionByName(name string) (*function, error) {
+func (m *engine) GetFunctionByName(name string) (*function, error) {
 	if f, ok := m.Functions[strings.ToLower(name)]; ok {
 		return f, nil
 	}
 	return nil, errors.Errorf("Thumbnail.Function.%s does not exist", name)
 }
 
-func (m *thumbnail) GetFunctionByPronom(pronom string) (*function, error) {
+func (m *engine) GetFunctionByPronom(pronom string) (*function, error) {
 	for _, f := range m.Functions {
 		for _, pro := range f.pronoms {
 			if pro == pronom {
@@ -82,7 +82,7 @@ func (m *thumbnail) GetFunctionByPronom(pronom string) (*function, error) {
 	return nil, errors.Errorf("Thumbnail.Source.%s does not exist", pronom)
 }
 
-func (m *thumbnail) GetFunctionByMimetype(mime string) (*function, error) {
+func (m *engine) GetFunctionByMimetype(mime string) (*function, error) {
 	for _, f := range m.Functions {
 		for _, re := range f.mime {
 			if re.MatchString(mime) {
@@ -93,6 +93,6 @@ func (m *thumbnail) GetFunctionByMimetype(mime string) (*function, error) {
 	return nil, errors.Errorf("Thumbnail.Source.%s does not exist", mime)
 }
 
-func (m *thumbnail) SetSourceFS(fs fs.FS) {
+func (m *engine) SetSourceFS(fs fs.FS) {
 	m.SourceFS = fs
 }
