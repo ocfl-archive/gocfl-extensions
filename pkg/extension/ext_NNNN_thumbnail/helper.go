@@ -9,11 +9,11 @@ import (
 	"github.com/google/shlex"
 )
 
-func GetThumbnails(conf *ConfigThumbnail) (*thumbnail, error) {
+func GetThumbnails(conf *ConfigThumbnail) (*engine, error) {
 	if conf == nil {
 		return nil, errors.New("thumbnail configuration is nil")
 	}
-	m := &thumbnail{
+	m := &engine{
 		Functions:  map[string]*function{},
 		Background: conf.Background,
 	}
