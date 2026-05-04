@@ -98,7 +98,7 @@ func (sl *StorageLayoutHashAndIdNTuple) GetName() string {
 	return StorageLayoutHashAndIdNTupleName
 }
 
-func (sl *StorageLayoutHashAndIdNTuple) SetParams(params map[string]string) error {
+func (sl *StorageLayoutHashAndIdNTuple) SetParams(map[string]string) error {
 	return nil
 }
 
@@ -125,7 +125,7 @@ func shouldEscape(c rune) bool {
 }
 
 func escape(str string) string {
-	var result = []byte{}
+	var result []byte
 	for _, c := range []byte(str) {
 		if 'a' <= c && c <= 'z' || 'A' <= c && c <= 'Z' || '0' <= c && c <= '9' || c == '-' || c == '_' {
 			result = append(result, c)
@@ -148,9 +148,9 @@ func (sl *StorageLayoutHashAndIdNTuple) BuildStorageRootPath(storageRoot storage
 	if len(digest) < sl.TupleSize*sl.NumberOfTuples {
 		return "", errors.New(fmt.Sprintf("digest %s to short for %v tuples of %v chars", sl.DigestAlgorithm, sl.NumberOfTuples, sl.TupleSize))
 	}
-	dirparts := []string{}
+	var dirparts []string
 	for i := 0; i < sl.NumberOfTuples; i++ {
-		dirparts = append(dirparts, string(digest[i*sl.TupleSize:(i+1)*sl.TupleSize]))
+		dirparts = append(dirparts, digest[i*sl.TupleSize:(i+1)*sl.TupleSize])
 	}
 	if len(path) > 100 {
 		path = string([]rune(path)[0:100])

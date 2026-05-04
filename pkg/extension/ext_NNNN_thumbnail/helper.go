@@ -27,10 +27,7 @@ func GetThumbnails(conf *ConfigThumbnail) (*thumbnail, error) {
 			return nil, errors.Errorf("Thumbnail.Function.%s is empty", name)
 		}
 		timeout := fn.Timeout
-		if err != nil {
-			return nil, errors.Wrapf(err, "cannot parse timeout of Thumbnail.Function.%s", name)
-		}
-		var mimeRes = []*regexp.Regexp{}
+		var mimeRes []*regexp.Regexp
 		for _, mime := range fn.Mime {
 			re, err := regexp.Compile(mime)
 			if err != nil {

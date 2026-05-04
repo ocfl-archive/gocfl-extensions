@@ -63,6 +63,9 @@ func doMigrate(obj object.VersionWriter, mig *function, ext string, targetNames 
 		_ = tmpFile.Close()
 		return errors.Wrap(err, "cannot copy file")
 	}
+	if err := tmpFile.Close(); err != nil {
+		return errors.Wrap(err, "cannot close temp file")
+	}
 	if err := file.Close(); err != nil {
 		return errors.Wrap(err, "cannot close file")
 	}
@@ -72,9 +75,6 @@ func doMigrate(obj object.VersionWriter, mig *function, ext string, targetNames 
 	}
 	targetFilename := filepath.ToSlash(filepath.Join(filepath.Dir(tmpFilename), "target."+filepath.Base(tmpFilename)+filepath.Ext(targetNames[0])))
 
-	if err := tmpFile.Close(); err != nil {
-		return errors.Wrap(err, "cannot close temp file")
-	}
 	defer func() {
 		_ = os.Remove(tmpFilename)
 		_ = os.Remove(targetFilename)

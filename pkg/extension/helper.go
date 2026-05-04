@@ -20,18 +20,18 @@ func ReadFile(extensionName string, fsys fs.FS, obj object.Object, name string, 
 	var targetname string
 	switch storageType {
 	case "area":
-		path, err := obj.GetExtensionManager().GetAreaPath(storageName)
+		pathName, err := obj.GetExtensionManager().GetAreaPath(storageName)
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot get area path for '%s'", storageName)
 		}
-		targetname = obj.GetInventory().BuildManifestNameVersion(fmt.Sprintf("%s/%s", path, name), version)
+		targetname = obj.GetInventory().BuildManifestNameVersion(fmt.Sprintf("%s/%s", pathName, name), version)
 		//targetname = fmt.Sprintf("%s/content/%s/indexer_%s.jsonl%s", version, path, version, ext)
 	case "path":
-		path, err := obj.GetExtensionManager().GetAreaPath("content")
+		pathName, err := obj.GetExtensionManager().GetAreaPath("content")
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot get area path for '%s'", "content")
 		}
-		targetname = obj.GetInventory().BuildManifestNameVersion(fmt.Sprintf("%s/%s/%s", path, storageName, name), version)
+		targetname = obj.GetInventory().BuildManifestNameVersion(fmt.Sprintf("%s/%s/%s", pathName, storageName, name), version)
 		//targetname = fmt.Sprintf("%s/content/%s/indexer_%s.jsonl%s", v, sl.IndexerConfig.StorageName, v, ext)
 	case "extension":
 		targetname = strings.TrimLeft(fmt.Sprintf("%s/%s", path.Join("extensions", extensionName, storageName), name), "/")
@@ -59,18 +59,18 @@ func ReadJsonL(extensionName string, fsys fs.FS, obj object.Object, version *inv
 	var targetname string
 	switch storageType {
 	case "area":
-		path, err := obj.GetExtensionManager().GetAreaPath(storageName)
+		pathName, err := obj.GetExtensionManager().GetAreaPath(storageName)
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot get area path for '%s'", storageName)
 		}
-		targetname = obj.GetInventory().BuildManifestNameVersion(fmt.Sprintf("%s/%s_%s.jsonl%s", path, name, version, ext), version)
+		targetname = obj.GetInventory().BuildManifestNameVersion(fmt.Sprintf("%s/%s_%s.jsonl%s", pathName, name, version, ext), version)
 		//targetname = fmt.Sprintf("%s/content/%s/indexer_%s.jsonl%s", version, path, version, ext)
 	case "path":
-		path, err := obj.GetExtensionManager().GetAreaPath("content")
+		pathName, err := obj.GetExtensionManager().GetAreaPath("content")
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot get area path for '%s'", "content")
 		}
-		targetname = obj.GetInventory().BuildManifestNameVersion(fmt.Sprintf("%s/%s/%s_%s.jsonl%s", path, storageName, name, version, ext), version)
+		targetname = obj.GetInventory().BuildManifestNameVersion(fmt.Sprintf("%s/%s/%s_%s.jsonl%s", pathName, storageName, name, version, ext), version)
 		//targetname = fmt.Sprintf("%s/content/%s/indexer_%s.jsonl%s", v, sl.IndexerConfig.StorageName, v, ext)
 	case "extension":
 		targetname = strings.TrimLeft(fmt.Sprintf("%s/%s_%s.jsonl%s", path.Join("extensions", extensionName, storageName), name, version, ext), "/")
@@ -140,11 +140,11 @@ func WriteJsonL(extensionName string, obj object.VersionWriter, name string, bro
 			return errors.Wrapf(err, "cannot write '%s'", targetname)
 		}
 	case "path":
-		path, err := obj.GetExtensionManager().GetAreaPath("content")
+		pathName, err := obj.GetExtensionManager().GetAreaPath("content")
 		if err != nil {
 			return errors.Wrapf(err, "cannot get area path for '%s'", "content")
 		}
-		targetname := fmt.Sprintf("%s/%s/%s_%s.jsonl%s", path, storageName, name, head, ext)
+		targetname := fmt.Sprintf("%s/%s/%s_%s.jsonl%s", pathName, storageName, name, head, ext)
 
 		//targetname := fmt.Sprintf("%s/%s_%s.jsonl%s", name, storageName, head, ext)
 		if _, err := obj.AddReader(io.NopCloser(reader), []string{targetname}, "", true, false); err != nil {

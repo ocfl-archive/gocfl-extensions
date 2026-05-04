@@ -201,11 +201,11 @@ func (thumb *Thumbnail) storeThumbnail(obj object.VersionWriter, head *inventory
 		}
 		return fmt.Sprintf("%s/%s", areaPath, targetName), digest, nil
 	case "path":
-		path, err := obj.GetExtensionManager().GetAreaPath("content")
+		pathName, err := obj.GetExtensionManager().GetAreaPath("content")
 		if err != nil {
 			return "", "", errors.Wrapf(err, "cannot get area path for '%s'", "content")
 		}
-		targetname := strings.TrimLeft(filepath.ToSlash(filepath.Join(path, thumb.StorageName, targetName)), "/")
+		targetname := strings.TrimLeft(filepath.ToSlash(filepath.Join(pathName, thumb.StorageName, targetName)), "/")
 
 		//targetname := fmt.Sprintf("%s/%s_%s.jsonl%s", name, storageName, head, ext)
 		if digest, err = obj.AddReader(mFile, []string{targetname}, "", true, false); err != nil {
@@ -248,6 +248,7 @@ func (thumb *Thumbnail) DoThumbnail(obj object.VersionWriter, head *inventorytyp
 		return "", "", errors.Wrap(err, "cannot copy file")
 	}
 	if err := file.Close(); err != nil {
+		_ = tmpFile.Close()
 		return "", "", errors.Wrap(err, "cannot close file")
 	}
 	thumb.counter[head.String()]++
@@ -303,9 +304,6 @@ func (thumb *Thumbnail) UpdateObjectAfter(obj object.VersionWriter) error {
 	head := inventory.GetHead()
 	thumb.buffer[head.String()] = &bytes.Buffer{}
 	thumb.writer = brotli.NewWriter(thumb.buffer[head.String()])
-	if inventory == nil {
-		return errors.Errorf("inventory is nil")
-	}
 
 	if _, ok := thumb.counter[head.String()]; !ok {
 		thumb.counter[head.String()] = 0
@@ -348,7 +346,7 @@ func (thumb *Thumbnail) UpdateObjectAfter(obj object.VersionWriter) error {
 			}
 
 			var file io.ReadCloser
-			var ext string
+			var fExt string
 			if thumb.sourceFS != nil {
 				thumb.logger.Info().Msgf("create thumbnail for %s", m.InternalName[0])
 				stateFiles, err := inventory.GetVersions().GetVersion(inventory.GetHead()).GetState().GetFiles(cs)
@@ -367,12 +365,12 @@ func (thumb *Thumbnail) UpdateObjectAfter(obj object.VersionWriter) error {
 					continue
 					// return errors.Wrapf(err, "cannot open file '%v/%s' in source filesystem", thumb.sourceFS, external)
 				}
-				ext = filepath.Ext(external)
+				fExt = filepath.Ext(external)
 			}
 			if file != nil {
 				//var ml *ThumbnailResult
 				var errStr string
-				targetFile, digest, err := thumb.DoThumbnail(obj, head, thumbnailFunction, ext, file)
+				targetFile, digest, err := thumb.DoThumbnail(obj, head, thumbnailFunction, fExt, file)
 				if err != nil {
 					errStr = err.Error()
 				}

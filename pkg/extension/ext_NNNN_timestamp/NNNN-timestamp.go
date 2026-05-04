@@ -137,8 +137,8 @@ func (sl *Timestamp) trustedTimestamp(object object.Object) error {
 		if err != nil {
 			return errors.Wrap(err, "cannot send request")
 		}
-		defer resp.Body.Close()
 		body, err := io.ReadAll(resp.Body)
+		_ = resp.Body.Close()
 		if err != nil {
 			return errors.Wrap(err, "cannot read response")
 		}
@@ -174,7 +174,7 @@ func (sl *Timestamp) Terminate() error {
 	return nil
 }
 
-func (sl *Timestamp) GetMetadata(sourceFS fs.FS, obj object.Object) (map[string]any, error) {
+func (sl *Timestamp) GetMetadata(fs.FS, object.Object) (map[string]any, error) {
 	return map[string]any{"TimestampAuthority": sl.Authority}, nil
 }
 
@@ -192,7 +192,7 @@ func (sl *Timestamp) SetFS(fsys fs.FS, create bool) {
 	}
 }
 
-func (sl *Timestamp) SetParams(params map[string]string) error {
+func (sl *Timestamp) SetParams(map[string]string) error {
 	return nil
 }
 

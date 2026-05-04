@@ -276,7 +276,7 @@ func (mi *Migration) DoNewVersion(obj object.VersionWriter) error {
 			continue
 		}
 
-		var targetNames = []string{}
+		var targetNames []string
 		manifestFiles, err := manifest.GetFiles(cs)
 		if err != nil {
 			return errors.Errorf("cannot find file with checksum '%s' in object '%s'", cs, obj.GetID())
@@ -301,33 +301,29 @@ func (mi *Migration) DoNewVersion(obj object.VersionWriter) error {
 		mi.migratedFiles[head.String()][cs] = manifestFiles[0]
 
 		var file io.ReadCloser
-		var ext string
-		// no direct object filesystem available here; fall back to sourceFS branch
-		file = nil
-		ext = ""
-		if file == nil {
-			if mi.sourceFS != nil {
-				stateFiles, err := inv.GetVersions().GetVersion(inv.GetHead()).GetState().GetFiles(cs)
-				if err != nil {
-					return errors.Wrapf(err, "cannot get state files for checksum '%s' in object '%s'", cs, obj.GetID())
-				}
-				if len(stateFiles) == 0 {
-					return errors.Errorf("zero state file for checksum '%s' in object '%s'", cs, obj.GetID())
-				}
-				external, err := obj.GetExtensionManager().BuildObjectExtractPath(stateFiles[len(stateFiles)-1], "")
-				if err != nil {
-					return errors.Wrapf(err, "cannot build external path for file '%s' in object '%s'", stateFiles[len(stateFiles)-1], obj.GetID())
-				}
-				file, err = mi.sourceFS.Open(external)
-				if err != nil {
-					return errors.Wrapf(err, "cannot open file '%v/%s' in source filesystem", mi.sourceFS, targetNames[len(targetNames)-1])
-				}
-				ext = filepath.Ext(external)
-			} else {
-				// todo: this is not correct
-				continue
+		var fExt string
+		if mi.sourceFS != nil {
+			stateFiles, err := inv.GetVersions().GetVersion(inv.GetHead()).GetState().GetFiles(cs)
+			if err != nil {
+				return errors.Wrapf(err, "cannot get state files for checksum '%s' in object '%s'", cs, obj.GetID())
 			}
+			if len(stateFiles) == 0 {
+				return errors.Errorf("zero state file for checksum '%s' in object '%s'", cs, obj.GetID())
+			}
+			external, err := obj.GetExtensionManager().BuildObjectExtractPath(stateFiles[len(stateFiles)-1], "")
+			if err != nil {
+				return errors.Wrapf(err, "cannot build external path for file '%s' in object '%s'", stateFiles[len(stateFiles)-1], obj.GetID())
+			}
+			file, err = mi.sourceFS.Open(external)
+			if err != nil {
+				return errors.Wrapf(err, "cannot open file '%v/%s' in source filesystem", mi.sourceFS, targetNames[len(targetNames)-1])
+			}
+			fExt = filepath.Ext(external)
+		} else {
+			// todo: this is not correct
+			continue
 		}
+
 		var ml *migrationLine
 		/*
 			path, err := extensionManager.BuildObjectManifestPath(object, targetNames[0], "content")
@@ -335,7 +331,7 @@ func (mi *Migration) DoNewVersion(obj object.VersionWriter) error {
 				return errors.Wrapf(err, "cannot build state path for file '%s' in object '%s'", targetNames[0], object.GetID())
 			}
 		*/
-		extractTargetNames := []string{}
+		var extractTargetNames []string
 		for _, targetName := range targetNames {
 			extractTargetName, err := obj.GetExtensionManager().BuildObjectExtractPath(targetName, "")
 			if err != nil {
@@ -348,7 +344,7 @@ func (mi *Migration) DoNewVersion(obj object.VersionWriter) error {
 			return errors.Wrapf(err, "cannot build manifest path for file '%s' in object '%s'", extractTargetNames[0], obj.GetID())
 		}
 		path := inv.BuildManifestName(manifestName)
-		if err := doMigrate(obj, mig, ext, extractTargetNames, file); err != nil {
+		if err := doMigrate(obj, mig, fExt, extractTargetNames, file); err != nil {
 			ml = &migrationLine{
 				Path: path,
 				Migration: &MigrationResult{

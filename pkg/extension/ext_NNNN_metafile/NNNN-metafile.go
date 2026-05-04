@@ -208,12 +208,12 @@ func toStringKeys(val interface{}) (interface{}, error) {
 }
 
 func (sl *MetaFile) UpdateObjectBefore(obj object.VersionWriter) error {
-	inventory := obj.GetInventory()
-	if inventory == nil {
+	inv := obj.GetInventory()
+	if inv == nil {
 		return errors.New("no inventory available")
 	}
 	if sl.metadataSource == nil || sl.metadataSource.Path == "" {
-		sl.info[inventory.GetHead().String()] = nil
+		sl.info[inv.GetHead().String()] = nil
 		return nil
 	}
 	if sl.stored {
@@ -223,7 +223,7 @@ func (sl *MetaFile) UpdateObjectBefore(obj object.VersionWriter) error {
 	var err error
 	if sl.metadataSource == nil {
 		// only a problem, if first version
-		if len(util.SeqToSlice(inventory.GetVersions().GetVersionNumbers())) < 2 {
+		if len(util.SeqToSlice(inv.GetVersions().GetVersionNumbers())) < 2 {
 			return errors.New("no metadata source configured")
 		}
 		return nil
@@ -339,7 +339,7 @@ func (sl *MetaFile) UpdateObjectBefore(obj object.VersionWriter) error {
 	}
 
 	// remember the content
-	sl.info[inventory.GetHead().String()] = infoData
+	sl.info[inv.GetHead().String()] = infoData
 	return nil
 }
 
@@ -358,7 +358,7 @@ func downloadFile(u string) ([]byte, error) {
 
 var windowsPathWithDrive = regexp.MustCompile("^/[a-zA-Z]:")
 
-func (sl *MetaFile) UpdateObjectAfter(obj object.VersionWriter) error {
+func (sl *MetaFile) UpdateObjectAfter(object.VersionWriter) error {
 	return nil
 }
 
@@ -368,7 +368,7 @@ func (sl *MetaFile) GetMetadata(sourceFS fs.FS, obj object.Object) (map[string]a
 	inv := obj.GetInventory()
 
 	// walk through versions and get the latest info.json
-	var versions = []*inventory.VersionNumber{}
+	var versions []*inventory.VersionNumber
 	for v := range inv.GetVersions().GetVersionNumbers() {
 		versions = append(versions, v)
 	}

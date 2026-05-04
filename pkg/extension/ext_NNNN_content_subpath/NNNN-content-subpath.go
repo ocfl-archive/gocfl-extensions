@@ -139,7 +139,7 @@ func (sl *ContentSubPath) BuildObjectManifestPath(originalPath string, area stri
 	return path, nil
 }
 
-func (sl *ContentSubPath) UpdateObjectBefore(object object.VersionWriter) error {
+func (sl *ContentSubPath) UpdateObjectBefore(object.VersionWriter) error {
 
 	return nil
 }

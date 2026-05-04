@@ -48,7 +48,7 @@ func Autoconfig(conf *ConfigThumbnail, scripts map[string]string, logger zLogger
 			continue
 		}
 		var isScript bool
-		for script, _ := range scripts {
+		for script := range scripts {
 			if strings.HasPrefix(fn.Command, script) {
 				isScript = true
 			}

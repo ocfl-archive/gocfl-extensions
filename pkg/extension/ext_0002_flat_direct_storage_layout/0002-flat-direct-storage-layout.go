@@ -72,7 +72,7 @@ func (sl *StorageLayoutFlatDirect) Stat(w io.Writer, statInfo []object.StatInfo)
 	return nil
 }
 
-func (sl *StorageLayoutFlatDirect) SetParams(params map[string]string) error {
+func (sl *StorageLayoutFlatDirect) SetParams(map[string]string) error {
 	return nil
 }
 

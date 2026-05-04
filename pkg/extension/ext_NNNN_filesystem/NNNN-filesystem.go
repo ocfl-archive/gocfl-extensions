@@ -108,15 +108,15 @@ func (fi *Filesystem) GetConfig() any {
 	return fi.FilesystemConfig
 }
 
-func (fi *Filesystem) AddFileBefore(object object.VersionWriter, sourceFS fs.FS, source string, dest string, area string, isDir bool) error {
+func (fi *Filesystem) AddFileBefore(object.VersionWriter, fs.FS, string, string, string, bool) error {
 	return nil
 }
 
-func (fi *Filesystem) UpdateFileBefore(object object.VersionWriter, sourceFS fs.FS, source, dest, area string, isDir bool) error {
+func (fi *Filesystem) UpdateFileBefore(object.VersionWriter, fs.FS, string, string, string, bool) error {
 	return nil
 }
 
-func (fi *Filesystem) DeleteFileBefore(versionWriter object.VersionWriter, dest string, area string) error {
+func (fi *Filesystem) DeleteFileBefore(object.VersionWriter, string, string) error {
 	return nil
 }
 
@@ -158,7 +158,7 @@ func (fi *Filesystem) AddFileAfter(versionWriter object.VersionWriter, sourceFS 
 	for _, src := range source {
 		fullpath, err := writefs.Fullpath(sourceFS, src)
 		if err != nil {
-			if errors.Cause(err) == writefs.ErrNotImplemented {
+			if errors.Is(errors.Cause(err), writefs.ErrNotImplemented) {
 				continue
 			}
 			return errors.Wrapf(err, "cannot get fullpath for '%v/%s'", sourceFS, src)
@@ -223,15 +223,15 @@ func (fi *Filesystem) UpdateFileAfter(versionWriter object.VersionWriter, source
 
 }
 
-func (fi *Filesystem) DeleteFileAfter(object object.VersionWriter, dest string, area string) error {
+func (fi *Filesystem) DeleteFileAfter(object.VersionWriter, string, string) error {
 	return nil
 }
 
-func (fi *Filesystem) NeedNewVersion(object object.VersionWriter) (bool, error) {
+func (fi *Filesystem) NeedNewVersion(object.VersionWriter) (bool, error) {
 	return false, nil
 }
 
-func (fi *Filesystem) DoNewVersion(object object.VersionWriter) error {
+func (fi *Filesystem) DoNewVersion(object.VersionWriter) error {
 	return nil
 }
 
@@ -242,9 +242,9 @@ func (fi *Filesystem) GetMetadata(sourceFS fs.FS, obj object.Object) (map[string
 	inventory := obj.GetInventory()
 	manifest := inventory.GetManifest()
 	path2digest := map[string]string{}
-	for checksum, names := range manifest.Iterate() {
+	for cs, names := range manifest.Iterate() {
 		for _, name := range names {
-			path2digest[name] = checksum
+			path2digest[name] = cs
 		}
 	}
 	for v := range inventory.GetVersions().GetVersionNumbers() {
@@ -269,7 +269,7 @@ func (fi *Filesystem) GetMetadata(sourceFS fs.FS, obj object.Object) (map[string
 		r := bufio.NewScanner(reader)
 		r.Buffer(make([]byte, 128*1024), 16*1024*1024)
 		r.Split(bufio.ScanLines)
-		lines := []*FileSystemLine{}
+		var lines []*FileSystemLine
 		for r.Scan() {
 			lineStr := r.Text()
 			var meta = &FileSystemLine{}
@@ -302,7 +302,7 @@ func (fi *Filesystem) GetMetadata(sourceFS fs.FS, obj object.Object) (map[string
 	return retResult, nil
 }
 
-func (fi *Filesystem) UpdateObjectBefore(object object.VersionWriter) error {
+func (fi *Filesystem) UpdateObjectBefore(object.VersionWriter) error {
 	return nil
 }
 
@@ -338,7 +338,7 @@ func (fi *Filesystem) UpdateObjectAfter(object object.VersionWriter) error {
 	return nil
 }
 
-func (fi *Filesystem) SetParams(params map[string]string) error {
+func (fi *Filesystem) SetParams(map[string]string) error {
 	return nil
 }
 

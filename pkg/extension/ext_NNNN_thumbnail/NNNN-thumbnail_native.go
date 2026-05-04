@@ -199,23 +199,23 @@ func (thumb *Thumbnail) AddFileAfter(versionWriter object.VersionWriter, sourceF
 	return nil
 }
 
-func (thumb *Thumbnail) AddFileBefore(object object.VersionWriter, sourceFS fs.FS, source string, dest string, area string, isDir bool) error {
+func (thumb *Thumbnail) AddFileBefore(object.VersionWriter, fs.FS, string, string, string, bool) error {
 	return nil
 }
 
-func (thumb *Thumbnail) UpdateFileBefore(object object.VersionWriter, sourceFS fs.FS, source, dest, area string, isDir bool) error {
+func (thumb *Thumbnail) UpdateFileBefore(object.VersionWriter, fs.FS, string, string, string, bool) error {
 	return nil
 }
 
-func (thumb *Thumbnail) DeleteFileBefore(versionWriter object.VersionWriter, dest string, area string) error {
+func (thumb *Thumbnail) DeleteFileBefore(object.VersionWriter, string, string) error {
 	return nil
 }
 
-func (thumb *Thumbnail) UpdateFileAfter(object object.VersionWriter, sourceFS fs.FS, source, area string, isDir bool) error {
+func (thumb *Thumbnail) UpdateFileAfter(object.VersionWriter, fs.FS, string, string, bool) error {
 	return nil
 }
 
-func (thumb *Thumbnail) DeleteFileAfter(object object.VersionWriter, dest string, area string) error {
+func (thumb *Thumbnail) DeleteFileAfter(object.VersionWriter, string, string) error {
 	return nil
 }
 

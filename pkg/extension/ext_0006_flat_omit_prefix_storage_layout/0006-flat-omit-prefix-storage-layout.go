@@ -76,7 +76,7 @@ func (sl *FlatOmitPrefixStorageLayout) Stat(w io.Writer, statInfo []object.StatI
 	return nil
 }
 
-func (sl *FlatOmitPrefixStorageLayout) SetParams(params map[string]string) error {
+func (sl *FlatOmitPrefixStorageLayout) SetParams(map[string]string) error {
 	return nil
 }
 

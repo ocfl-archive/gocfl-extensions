@@ -60,7 +60,7 @@ func (f *function) GetDestinationName(src string, head string, isMigrated bool) 
 func (f *function) Migrate(source string, dest string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), f.timeout)
 	defer cancel()
-	args := []string{}
+	var args []string
 	for _, arg := range f.args {
 		//		arg = strings.ReplaceAll(arg, "{source}", filepath.Base(source))
 		//		arg = strings.ReplaceAll(arg, "{destination}", filepath.Base(dest))

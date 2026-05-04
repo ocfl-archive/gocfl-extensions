@@ -110,7 +110,7 @@ func (sl *NTupleOmitPrefixStorageLayout) Stat(w io.Writer, statInfo []object.Sta
 	return nil
 }
 
-func (sl *NTupleOmitPrefixStorageLayout) SetParams(params map[string]string) error {
+func (sl *NTupleOmitPrefixStorageLayout) SetParams(map[string]string) error {
 	return nil
 }
 
@@ -195,7 +195,7 @@ func (sl *NTupleOmitPrefixStorageLayout) BuildStorageRootPath(storageRoot storag
 	if sl.TupleSize <= 0 {
 		return "", errors.New("tupleSize must be greater than 0")
 	}
-	var pathComponents = []string{}
+	var pathComponents []string
 	for i := 0; i < targetLength/sl.TupleSize; i++ {
 		start := i * sl.TupleSize
 		end := (i + 1) * sl.TupleSize

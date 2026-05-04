@@ -39,7 +39,7 @@ func (f *function) Thumbnail(source string, dest string, width uint64, height ui
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), f.timeout)
 	defer cancel()
-	args := []string{}
+	var args []string
 	for _, arg := range f.args {
 		arg = strings.ReplaceAll(arg, "{source}", filepath.ToSlash(source))
 		arg = strings.ReplaceAll(arg, "{destination}", filepath.ToSlash(dest))

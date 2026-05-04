@@ -126,7 +126,7 @@ func (sl *StorageLayoutPairTree) IsObjectExtension() bool      { return false }
 func (sl *StorageLayoutPairTree) IsStorageRootExtension() bool { return true }
 func (sl *StorageLayoutPairTree) GetName() string              { return StorageLayoutPairTreeName }
 
-func (sl *StorageLayoutPairTree) SetParams(params map[string]string) error {
+func (sl *StorageLayoutPairTree) SetParams(map[string]string) error {
 	return nil
 }
 
@@ -146,7 +146,7 @@ func (sl *StorageLayoutPairTree) WriteConfig(fsys appendfs.FS) error {
 
 func (sl *StorageLayoutPairTree) BuildStorageRootPath(storageRoot storageroot.StorageRoot, id string) (string, error) {
 	id = sl.idEncode(id)
-	dirparts := []string{}
+	var dirparts []string
 	numParts := int(math.Ceil(float64(len(id)) / float64(sl.ShortyLength)))
 	for i := 0; i < numParts; i++ {
 		left := i * sl.ShortyLength
@@ -160,7 +160,7 @@ func (sl *StorageLayoutPairTree) BuildStorageRootPath(storageRoot storageroot.St
 }
 
 func (sl *StorageLayoutPairTree) idEncode(str string) string {
-	var result = []rune{}
+	var result []rune
 	for _, c := range []rune(str) {
 		isVisible := 0x21 <= c && c <= 0x7e
 		if isVisible {

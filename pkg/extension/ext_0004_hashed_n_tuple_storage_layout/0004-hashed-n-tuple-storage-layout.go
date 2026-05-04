@@ -98,7 +98,7 @@ func (sl *StorageLayoutHashedNTuple) IsRegistered() bool {
 
 func (sl *StorageLayoutHashedNTuple) GetName() string { return StorageLayoutHashedNTupleName }
 
-func (sl *StorageLayoutHashedNTuple) SetParams(params map[string]string) error {
+func (sl *StorageLayoutHashedNTuple) SetParams(map[string]string) error {
 	return nil
 }
 
@@ -126,7 +126,7 @@ func (sl *StorageLayoutHashedNTuple) BuildStorageRootPath(storageRoot storageroo
 	if len(digest) < sl.TupleSize*sl.NumberOfTuples {
 		return "", errors.New(fmt.Sprintf("digest %s to short for %v tuples of %v chars", sl.DigestAlgorithm, sl.NumberOfTuples, sl.TupleSize))
 	}
-	dirparts := []string{}
+	var dirparts []string
 	for i := 0; i < sl.NumberOfTuples; i++ {
 		dirparts = append(dirparts, digest[i*sl.TupleSize:(i+1)*sl.TupleSize])
 	}

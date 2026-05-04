@@ -27,7 +27,7 @@ func (li *LoggingIndexer) WithLogger(logger ocfllogger.OCFLLogger) extensiontype
 	return li
 }
 
-func (sl *LoggingIndexer) Load(data json.RawMessage) error {
+func (sl *LoggingIndexer) Load(json.RawMessage) error {
 	// no config file currently defined; placeholder to satisfy interface
 	return nil
 }
@@ -45,7 +45,7 @@ func (sl *LoggingIndexer) IsRegistered() bool {
 	return false
 }
 
-func (li *LoggingIndexer) SetParams(params map[string]string) error {
+func (li *LoggingIndexer) SetParams(map[string]string) error {
 	//TODO implement me
 	panic("implement me")
 }

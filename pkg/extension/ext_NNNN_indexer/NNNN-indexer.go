@@ -240,7 +240,7 @@ func (sl *Indexer) WriteConfig(fsys appendfs.FS) error {
 	return nil
 }
 
-func (sl *Indexer) UpdateObjectBefore(object object.VersionWriter) error {
+func (sl *Indexer) UpdateObjectBefore(object.VersionWriter) error {
 	return nil
 }
 
@@ -371,15 +371,17 @@ func (sl *Indexer) StreamObject(object object.VersionWriter, reader io.Reader, s
 		}
 		fi, err := tmpFile.Stat()
 		if err != nil {
+			_ = tmpFile.Close()
 			return errors.Wrapf(err, "cannot stat tempfile")
 		}
 		tmpFilename := filepath.ToSlash(filepath.Join(os.TempDir(), fi.Name()))
 		if _, err := io.Copy(tmpFile, reader); err != nil {
+			_ = tmpFile.Close()
 			return errors.Wrapf(err, "cannot write to tempfile")
 		}
-		tmpFile.Close()
+		_ = tmpFile.Close()
 		result, err = sl.indexerActions.DoV2(tmpFilename, stateFiles, sl.Actions)
-		os.Remove(tmpFilename)
+		_ = os.Remove(tmpFilename)
 	} else {
 		result, err = sl.indexerActions.Stream(reader, stateFiles, sl.Actions)
 	}

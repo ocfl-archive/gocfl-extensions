@@ -20,7 +20,6 @@ import (
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/object"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/storageroot"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfllogger"
-	"golang.org/x/exp/constraints"
 )
 
 const DirectCleanName = "0011-direct-clean-path-layout"
@@ -43,20 +42,6 @@ var directCleanRulePeriods = regexp.MustCompile("^\\.+$")
 
 var directCleanErrFilenameTooLong = errors.New("filename too long")
 var directCleanErrPathnameTooLong = errors.New("pathname too long")
-
-func min[T constraints.Ordered](a, b T) T {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max[T constraints.Ordered](a, b T) T {
-	if a > b {
-		return a
-	}
-	return b
-}
 
 func NewDirectClean() (extensiontypes.Extension, error) {
 	config := &DirectCleanConfig{
@@ -161,7 +146,7 @@ func (sl *DirectClean) IsRegistered() bool {
 
 func (sl *DirectClean) GetName() string { return DirectCleanName }
 
-func (sl *DirectClean) SetParams(params map[string]string) error {
+func (sl *DirectClean) SetParams(map[string]string) error {
 	return nil
 }
 
@@ -253,7 +238,7 @@ func (sl *DirectClean) build(fname string) (string, error) {
 	fname = strings.ToValidUTF8(fname, sl.ReplacementString)
 
 	names := strings.Split(fname, "/")
-	result := []string{}
+	var result []string
 
 	for _, n := range names {
 		if len(n) == 0 {

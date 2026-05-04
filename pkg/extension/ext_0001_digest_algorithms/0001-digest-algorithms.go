@@ -84,7 +84,7 @@ func (sl *DigestAlgorithms) GetFixityDigests() []checksum.DigestAlgorithm {
 
 func (sl *DigestAlgorithms) GetName() string { return DigestAlgorithmsName }
 
-func (sl *DigestAlgorithms) SetParams(params map[string]string) error {
+func (sl *DigestAlgorithms) SetParams(map[string]string) error {
 	return nil
 }
 
