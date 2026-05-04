@@ -42,7 +42,7 @@ require (
 	github.com/gosimple/unidecode v1.0.1 // indirect
 	github.com/je4/goffmpeg v0.0.0-20220114092308-33ab9986404d // indirect
 	github.com/je4/trustutil/v2 v2.0.31 // indirect
-	github.com/klauspost/compress v1.18.5 // indirect
+	github.com/klauspost/compress v1.18.6 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.22 // indirect
