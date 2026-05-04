@@ -37,7 +37,13 @@ var IndexerDoc string
 
 func init() {
 	extension.RegisterExtension(IndexerName, func() (extensiontypes.Extension, error) {
-		return NewIndexer("", nil, &ironmaiden.IndexerConfig{}, false, nil)
+		return NewIndexer("", &ironmaiden.IndexerConfig{}, false, nil)
+	}, GetIndexerParams, &IndexerDoc)
+}
+
+func InitIndexer(urlString string, conf *ironmaiden.IndexerConfig, localCache bool, logger ocfllogger.OCFLLogger) {
+	extension.RegisterExtension(IndexerName, func() (extensiontypes.Extension, error) {
+		return NewIndexer(urlString, conf, localCache, logger)
 	}, GetIndexerParams, &IndexerDoc)
 }
 
@@ -60,7 +66,7 @@ func GetIndexerParams() ([]*extension.ExternalParam, error) {
 	}, nil
 }
 
-func NewIndexer(urlString string, fss map[string]fs.FS, conf *ironmaiden.IndexerConfig, localCache bool, logger ocfllogger.OCFLLogger) (*Indexer, error) {
+func NewIndexer(urlString string, conf *ironmaiden.IndexerConfig, localCache bool, logger ocfllogger.OCFLLogger) (*Indexer, error) {
 	var config = &IndexerConfig{
 		ExtensionConfig: &extensiontypes.ExtensionConfig{
 			ExtensionName: IndexerName,
