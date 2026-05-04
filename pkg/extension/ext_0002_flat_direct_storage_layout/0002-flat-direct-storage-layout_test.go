@@ -1,64 +1,51 @@
 package ext_0002_flat_direct_storage_layout
 
 import (
-	"fmt"
+	"encoding/json"
+	"path"
 	"testing"
+
+	"github.com/je4/filesystem/v3/pkg/writefs"
+	extensionbase "github.com/ocfl-archive/gocfl-extensions/pkg/extension"
+	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
+	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension/extensionimpl"
+	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/storageroot"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestFlatDirectory(t *testing.T) {
-	// https://ocfl.github.io/extensions/0002-flat-direct-storage-layout.html
-	// Example 1
-	l := StorageLayoutFlatDirect{}
-	objectID := "object-01"
-	testResult := "object-01"
-	rootPath, err := l.BuildStorageRootPath(nil, objectID)
-	if err != nil {
-		t.Errorf("cannot convert %s", objectID)
+func TestNewStorageLayoutFlatDirect(t *testing.T) {
+	env := extensionbase.SetupTestEnv(t)
+	storageLayoutConfig := &StorageLayoutFlatDirectConfig{
+		ExtensionConfig: &extension.ExtensionConfig{ExtensionName: StorageLayoutFlatDirectName},
 	}
-	if rootPath != testResult {
-		t.Errorf("%s -> %s != %s", objectID, rootPath, testResult)
-	}
-	fmt.Printf("StorageLayoutFlatDirect(%s) -> %s\n", objectID, rootPath)
+	data, _ := json.MarshalIndent(storageLayoutConfig, "", "  ")
+	_, err := writefs.WriteFile(env.ConfigFS, path.Join(StorageLayoutFlatDirectName, "config.json"), data)
+	assert.NoError(t, err)
 
-	objectID = "..hor_rib:lé-$id"
-	testResult = "..hor_rib:lé-$id"
-	rootPath, err = l.BuildStorageRootPath(nil, objectID)
-	if err != nil {
-		t.Errorf("cannot convert %s - %v", objectID, err)
-	} else {
-		if rootPath != testResult {
-			t.Errorf("%s -> %s != %s", objectID, rootPath, testResult)
-		} else {
-			fmt.Printf("StorageLayoutFlatDirect(%s) -> %s\n", objectID, rootPath)
-		}
-	}
+	extensionFactory, err := extensionimpl.NewFactory(nil, env.ConfigFS, env.Logger)
+	assert.NoError(t, err)
 
-	// https://ocfl.github.io/extensions/0002-flat-direct-storage-layout.html
-	// Example 2
-	objectID = "info:fedora/object-01"
-	testResult = "info:fedora/object-01"
-	rootPath, err = l.BuildStorageRootPath(nil, objectID)
-	if err != nil {
-		t.Errorf("cannot convert %s - %v", objectID, err)
-	} else {
-		if rootPath != testResult {
-			t.Errorf("%s -> %s != %s", objectID, rootPath, testResult)
-		} else {
-			fmt.Printf("StorageLayoutFlatDirect(%s) -> %s\n", objectID, rootPath)
-		}
+	genericExtensionManager, err := extensionFactory.LoadExtensionManager(env.ConfigFS)
+	assert.NoError(t, err)
+
+	sl, ok := genericExtensionManager.(storageroot.ExtensionStorageRootPath)
+	assert.True(t, ok, "Extension manager should implement storageroot.ExtensionStorageRootPath interface")
+
+	testCases := []struct {
+		id   string
+		path string
+	}{
+		{"object-01", "object-01"},
+		{"..hor_rib:lé-$id", "..hor_rib:lé-$id"},
+		{"info:fedora/object-01", "info:fedora/object-01"},
+		{"abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghij", "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghij"},
 	}
 
-	objectID = "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghij"
-	testResult = "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghij"
-	rootPath, err = l.BuildStorageRootPath(nil, objectID)
-	if err != nil {
-		t.Errorf("cannot convert %s - %v", objectID, err)
-	} else {
-		if rootPath != testResult {
-			t.Errorf("%s -> %s != %s", objectID, rootPath, testResult)
-		} else {
-			fmt.Printf("StorageLayoutFlatDirect(%s) -> %s\n", objectID, rootPath)
-		}
+	for _, tc := range testCases {
+		t.Run(tc.id, func(t *testing.T) {
+			path, err := sl.BuildStorageRootPath(nil, tc.id)
+			assert.NoError(t, err)
+			assert.Equal(t, tc.path, path)
+		})
 	}
-
 }

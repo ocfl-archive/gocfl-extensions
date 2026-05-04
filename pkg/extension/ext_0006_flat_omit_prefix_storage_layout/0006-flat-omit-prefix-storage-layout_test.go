@@ -1,75 +1,84 @@
 package ext_0006_flat_omit_prefix_storage_layout
 
 import (
-	"fmt"
-
+	"encoding/json"
+	"path"
 	"testing"
 
-	extensiontypes "github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
+	"github.com/je4/filesystem/v3/pkg/writefs"
+	extensionbase "github.com/ocfl-archive/gocfl-extensions/pkg/extension"
+	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
+	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension/extensionimpl"
+	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/storageroot"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestFlatOmitPrefixStorageLayout(t *testing.T) {
-	// https://github.com/OCFL/extensions/blob/main/docs/0006-flat-omit-prefix-storage-layout.md
-	// Example 1
-	l := FlatOmitPrefixStorageLayout{
-		FlatOmitPrefixStorageLayoutConfig: &FlatOmitPrefixStorageLayoutConfig{
-			ExtensionConfig: &extensiontypes.ExtensionConfig{ExtensionName: "0006-flat-omit-prefix-storage-layout"},
-			Delimiter:       ":",
-		},
-	}
-	objectID := "namespace:12887296"
-	testResult := "12887296"
-	rootPath, err := l.BuildStorageRootPath(nil, objectID)
-	if err != nil {
-		t.Errorf("cannot convert %s", objectID)
-	}
-	if rootPath != testResult {
-		t.Errorf("%s -> %s != %s", objectID, rootPath, testResult)
-	}
-	fmt.Printf("FlatOmitPrefixStorageLayout(%s) -> %s\n", objectID, rootPath)
+func TestNewFlatOmitPrefixStorageLayout(t *testing.T) {
+	env := extensionbase.SetupTestEnv(t)
 
-	objectID = "urn:uuid:6e8bc430-9c3a-11d9-9669-0800200c9a66"
-	testResult = "6e8bc430-9c3a-11d9-9669-0800200c9a66"
-	rootPath, err = l.BuildStorageRootPath(nil, objectID)
-	if err != nil {
-		t.Errorf("cannot convert %s - %v", objectID, err)
-	} else {
-		if rootPath != testResult {
-			t.Errorf("%s -> %s != %s", objectID, rootPath, testResult)
-		} else {
-			fmt.Printf("FlatOmitPrefixStorageLayout(%s) -> %s\n", objectID, rootPath)
-		}
+	type testCase struct {
+		id   string
+		path string
 	}
 
-	// Example 1
-	l = FlatOmitPrefixStorageLayout{
-		FlatOmitPrefixStorageLayoutConfig: &FlatOmitPrefixStorageLayoutConfig{
-			ExtensionConfig: &extensiontypes.ExtensionConfig{ExtensionName: "0006-flat-omit-prefix-storage-layout"},
-			Delimiter:       "edu/",
-		},
-	}
-	objectID = "https://institution.edu/3448793"
-	testResult = "3448793"
-	rootPath, err = l.BuildStorageRootPath(nil, objectID)
-	if err != nil {
-		t.Errorf("cannot convert %s", objectID)
-	}
-	if rootPath != testResult {
-		t.Errorf("%s -> %s != %s", objectID, rootPath, testResult)
-	}
-	fmt.Printf("FlatOmitPrefixStorageLayout(%s) -> %s\n", objectID, rootPath)
+	runTest := func(name string, config *FlatOmitPrefixStorageLayoutConfig, cases []testCase) {
+		t.Run(name, func(t *testing.T) {
+			data, _ := json.MarshalIndent(config, "", "  ")
+			configPath := path.Join(FlatOmitPrefixStorageLayoutName, "config.json")
+			_, err := writefs.WriteFile(env.ConfigFS, configPath, data)
+			assert.NoError(t, err)
 
-	objectID = "https://institution.edu/abc/edu/f8.05v"
-	testResult = "f8.05v"
-	rootPath, err = l.BuildStorageRootPath(nil, objectID)
-	if err != nil {
-		t.Errorf("cannot convert %s - %v", objectID, err)
-	} else {
-		if rootPath != testResult {
-			t.Errorf("%s -> %s != %s", objectID, rootPath, testResult)
-		} else {
-			fmt.Printf("FlatOmitPrefixStorageLayout(%s) -> %s\n", objectID, rootPath)
-		}
+			extensionFactory, err := extensionimpl.NewFactory(nil, env.ConfigFS, env.Logger)
+			assert.NoError(t, err)
+
+			genericExtensionManager, err := extensionFactory.LoadExtensionManager(env.ConfigFS)
+			assert.NoError(t, err)
+
+			sl, ok := genericExtensionManager.(storageroot.ExtensionStorageRootPath)
+			assert.True(t, ok, "Extension manager should implement storageroot.ExtensionStorageRootPath interface")
+
+			for _, tc := range cases {
+				t.Run(tc.id, func(t *testing.T) {
+					p, err := sl.BuildStorageRootPath(nil, tc.id)
+					assert.NoError(t, err)
+					assert.Equal(t, tc.path, p)
+				})
+			}
+		})
 	}
 
+	// Example 1: delimiter ":"
+	runTest("Example1", &FlatOmitPrefixStorageLayoutConfig{
+		ExtensionConfig: &extension.ExtensionConfig{ExtensionName: FlatOmitPrefixStorageLayoutName},
+		Delimiter:       ":",
+	}, []testCase{
+		{"namespace:12887296", "12887296"},
+		{"urn:uuid:6e8bc430-9c3a-11d9-9669-0800200c9a66", "6e8bc430-9c3a-11d9-9669-0800200c9a66"},
+	})
+
+	// Example 2: delimiter "edu/"
+	runTest("Example2", &FlatOmitPrefixStorageLayoutConfig{
+		ExtensionConfig: &extension.ExtensionConfig{ExtensionName: FlatOmitPrefixStorageLayoutName},
+		Delimiter:       "edu/",
+	}, []testCase{
+		{"https://institution.edu/3448793", "3448793"},
+		{"https://institution.edu/abc/edu/f8.05v", "f8.05v"},
+	})
+
+	// Example 3: delimiter "info:"
+	runTest("Example3", &FlatOmitPrefixStorageLayoutConfig{
+		ExtensionConfig: &extension.ExtensionConfig{ExtensionName: FlatOmitPrefixStorageLayoutName},
+		Delimiter:       "info:",
+	}, []testCase{
+		{"info:fedora/object-01", "fedora/object-01"},
+		{"https://example.org/info:/12345/x54xz321/s3/f8.05v", "/12345/x54xz321/s3/f8.05v"},
+	})
+
+	// Additional Test: No delimiter present
+	runTest("NoDelimiter", &FlatOmitPrefixStorageLayoutConfig{
+		ExtensionConfig: &extension.ExtensionConfig{ExtensionName: FlatOmitPrefixStorageLayoutName},
+		Delimiter:       ":",
+	}, []testCase{
+		{"object-01", "object-01"},
+	})
 }

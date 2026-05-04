@@ -2,140 +2,93 @@ package ext_0003_hash_and_id_n_tuple_storage_layout
 
 import (
 	"encoding/json"
-	"fmt"
-
+	"path"
 	"testing"
 
-	"github.com/je4/utils/v2/pkg/checksum"
-	extensiontypes "github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
+	"github.com/je4/filesystem/v3/pkg/writefs"
+	extensionbase "github.com/ocfl-archive/gocfl-extensions/pkg/extension"
+	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
+	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension/extensionimpl"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/storageroot"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestHashAndIdNTuple(t *testing.T) {
-	// https://ocfl.github.io/extensions/0003-hash-and-id-n-tuple-storage-layout.html#encapsulation-directory
-	// Example 1
-	ext, err := NewStorageLayoutHashAndIdNTuple()
-	if err != nil {
-		t.Fatalf("cannot create extension: %v", err)
+func TestNewStorageLayoutHashAndIdNTuple(t *testing.T) {
+	env := extensionbase.SetupTestEnv(t)
+
+	type testCase struct {
+		id   string
+		path string
 	}
-	conf1 := &StorageLayoutHashAndIdNTupleConfig{
-		ExtensionConfig: &extensiontypes.ExtensionConfig{ExtensionName: "0003-hash-and-id-n-tuple-storage-layout"},
-		DigestAlgorithm: string(checksum.DigestSHA256),
+
+	runTest := func(name string, config *StorageLayoutHashAndIdNTupleConfig, cases []testCase) {
+		t.Run(name, func(t *testing.T) {
+			data, _ := json.MarshalIndent(config, "", "  ")
+			configPath := path.Join(StorageLayoutHashAndIdNTupleName, "config.json")
+			_, err := writefs.WriteFile(env.ConfigFS, configPath, data)
+			assert.NoError(t, err)
+
+			extensionFactory, err := extensionimpl.NewFactory(nil, env.ConfigFS, env.Logger)
+			assert.NoError(t, err)
+
+			genericExtensionManager, err := extensionFactory.LoadExtensionManager(env.ConfigFS)
+			assert.NoError(t, err)
+
+			sl, ok := genericExtensionManager.(storageroot.ExtensionStorageRootPath)
+			assert.True(t, ok, "Extension manager should implement storageroot.ExtensionStorageRootPath interface")
+
+			for _, tc := range cases {
+				t.Run(tc.id, func(t *testing.T) {
+					p, err := sl.BuildStorageRootPath(nil, tc.id)
+					assert.NoError(t, err)
+					assert.Equal(t, tc.path, p)
+				})
+			}
+		})
+	}
+
+	// Example 1: Default configuration
+	runTest("Example1_Default", &StorageLayoutHashAndIdNTupleConfig{
+		ExtensionConfig: &extension.ExtensionConfig{ExtensionName: StorageLayoutHashAndIdNTupleName},
+		DigestAlgorithm: "sha256",
 		TupleSize:       3,
 		NumberOfTuples:  3,
-	}
-	conf1Bytes, _ := json.Marshal(conf1)
-	if err := ext.Load(conf1Bytes); err != nil {
-		t.Fatalf("cannot load config: %v", err)
-	}
-	l, ok := ext.(storageroot.ExtensionStorageRootPath)
-	if !ok {
-		t.Fatalf("extension does not implement storageroot.ExtensionStorageRootPath")
-	}
+	}, []testCase{
+		{"object-01", "3c0/ff4/240/object-01"},
+		{"..hor/rib:le-$id", "487/326/d8c/%2e%2ehor%2frib%3ale-%24id"},
+	})
 
-	fmt.Printf("\nNewStorageLayoutHashAndIdNTuple(%s, %v, %v)\n", checksum.DigestSHA256, 3, 3)
-	objectID := "object-01"
-	testResult := "3c0/ff4/240/object-01"
-	rootPath, err := l.BuildStorageRootPath(nil, objectID)
-	if err != nil {
-		t.Errorf("cannot convert %s", objectID)
-	}
-	if rootPath != testResult {
-		t.Errorf("%s -> %s != %s", objectID, rootPath, testResult)
-	}
-	fmt.Printf("StorageLayoutHashAndIdNTuple(%s) -> %s\n", objectID, rootPath)
-
-	objectID = "..hor/rib:le-$id"
-	testResult = "487/326/d8c/%2e%2ehor%2frib%3ale-%24id"
-	rootPath, err = l.BuildStorageRootPath(nil, objectID)
-	if err != nil {
-		t.Errorf("cannot convert %s", objectID)
-	}
-	if rootPath != testResult {
-		t.Errorf("%s -> %s != %s", objectID, rootPath, testResult)
-	}
-	fmt.Printf("StorageLayoutHashAndIdNTuple(%s) -> %s\n", objectID, rootPath)
-
-	// https://ocfl.github.io/extensions/0003-hash-and-id-n-tuple-storage-layout.html#encapsulation-directory
-	// Example 2
-	ext2, err := NewStorageLayoutHashAndIdNTuple()
-	if err != nil {
-		t.Fatalf("cannot create extension: %v", err)
-	}
-	conf2 := &StorageLayoutHashAndIdNTupleConfig{
-		ExtensionConfig: &extensiontypes.ExtensionConfig{ExtensionName: "0003-hash-and-id-n-tuple-storage-layout"},
-		DigestAlgorithm: string(checksum.DigestMD5),
+	// Example 2: MD5, 2/15
+	runTest("Example2_MD5", &StorageLayoutHashAndIdNTupleConfig{
+		ExtensionConfig: &extension.ExtensionConfig{ExtensionName: StorageLayoutHashAndIdNTupleName},
+		DigestAlgorithm: "md5",
 		TupleSize:       2,
 		NumberOfTuples:  15,
-	}
-	conf2Bytes, _ := json.Marshal(conf2)
-	if err := ext2.Load(conf2Bytes); err != nil {
-		t.Fatalf("cannot load config: %v", err)
-	}
-	l = ext2.(storageroot.ExtensionStorageRootPath)
+	}, []testCase{
+		{"object-01", "ff/75/53/44/92/48/5e/ab/b3/9f/86/35/67/28/88/object-01"},
+		{"..hor/rib:le-$id", "08/31/97/66/fb/6c/29/35/dd/17/5b/94/26/77/17/%2e%2ehor%2frib%3ale-%24id"},
+	})
 
-	fmt.Printf("\nNewStorageLayoutHashAndIdNTuple(%s, %v, %v)\n", checksum.DigestMD5, 2, 15)
-	objectID = "object-01"
-	testResult = "ff/75/53/44/92/48/5e/ab/b3/9f/86/35/67/28/88/object-01"
-	rootPath, err = l.BuildStorageRootPath(nil, objectID)
-	if err != nil {
-		t.Errorf("cannot convert %s", objectID)
-	}
-	if rootPath != testResult {
-		t.Errorf("%s -> %s != %s", objectID, rootPath, testResult)
-	}
-	fmt.Printf("StorageLayoutHashAndIdNTuple(%s) -> %s\n", objectID, rootPath)
-
-	objectID = "..hor/rib:le-$id"
-	testResult = "08/31/97/66/fb/6c/29/35/dd/17/5b/94/26/77/17/%2e%2ehor%2frib%3ale-%24id"
-	rootPath, err = l.BuildStorageRootPath(nil, objectID)
-	if err != nil {
-		t.Errorf("cannot convert %s", objectID)
-	}
-	if rootPath != testResult {
-		t.Errorf("%s -> %s != %s", objectID, rootPath, testResult)
-	}
-	fmt.Printf("StorageLayoutHashAndIdNTuple(%s) -> %s\n", objectID, rootPath)
-
-	// https://ocfl.github.io/extensions/0003-hash-and-id-n-tuple-storage-layout.html#encapsulation-directory
-	// Example 3
-	ext3, err := NewStorageLayoutHashAndIdNTuple()
-	if err != nil {
-		t.Fatalf("cannot create extension: %v", err)
-	}
-	conf3 := &StorageLayoutHashAndIdNTupleConfig{
-		ExtensionConfig: &extensiontypes.ExtensionConfig{ExtensionName: "0003-hash-and-id-n-tuple-storage-layout"},
-		DigestAlgorithm: string(checksum.DigestSHA256),
+	// Example 3: Edge case 0/0
+	runTest("Example3_EdgeCase", &StorageLayoutHashAndIdNTupleConfig{
+		ExtensionConfig: &extension.ExtensionConfig{ExtensionName: StorageLayoutHashAndIdNTupleName},
+		DigestAlgorithm: "sha256",
 		TupleSize:       0,
 		NumberOfTuples:  0,
-	}
-	conf3Bytes, _ := json.Marshal(conf3)
-	if err := ext3.Load(conf3Bytes); err != nil {
-		t.Fatalf("cannot load config: %v", err)
-	}
-	l = ext3.(storageroot.ExtensionStorageRootPath)
+	}, []testCase{
+		{"object-01", "object-01"},
+		{"..hor/rib:le-$id", "%2e%2ehor%2frib%3ale-%24id"},
+	})
 
-	fmt.Printf("\nNewStorageLayoutHashAndIdNTuple(%s, %v, %v)\n", checksum.DigestSHA256, 0, 0)
-	objectID = "object-01"
-	testResult = "object-01"
-	rootPath, err = l.BuildStorageRootPath(nil, objectID)
-	if err != nil {
-		t.Errorf("cannot convert %s", objectID)
-	}
-	if rootPath != testResult {
-		t.Errorf("%s -> %s != %s", objectID, rootPath, testResult)
-	}
-	fmt.Printf("StorageLayoutHashAndIdNTuple(%s) -> %s\n", objectID, rootPath)
-
-	objectID = "..hor/rib:le-$id"
-	testResult = "%2e%2ehor%2frib%3ale-%24id"
-	rootPath, err = l.BuildStorageRootPath(nil, objectID)
-	if err != nil {
-		t.Errorf("cannot convert %s", objectID)
-	}
-	if rootPath != testResult {
-		t.Errorf("%s -> %s != %s", objectID, rootPath, testResult)
-	}
-	fmt.Printf("StorageLayoutHashAndIdNTuple(%s) -> %s\n", objectID, rootPath)
-
+	// Long ID test (from Python code in MD)
+	longID101 := "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghija"
+	longID101Digest := "5cc73e648fbcff136510e330871180922ddacf193b68fdeff855683a01464220"
+	runTest("LongID", &StorageLayoutHashAndIdNTupleConfig{
+		ExtensionConfig: &extension.ExtensionConfig{ExtensionName: StorageLayoutHashAndIdNTupleName},
+		DigestAlgorithm: "sha256",
+		TupleSize:       3,
+		NumberOfTuples:  3,
+	}, []testCase{
+		{longID101, "5cc/73e/648/abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghij-" + longID101Digest},
+	})
 }
