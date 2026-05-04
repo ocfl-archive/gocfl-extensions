@@ -183,7 +183,12 @@ func (sl *StorageLayoutHashAndNoPrefixIdNTuple) WriteLayout(fsys appendfs.FS) er
 	if err != nil {
 		return errors.Wrap(err, "cannot open ocfl_layout.json")
 	}
-	defer configWriter.Close()
+	defer func(configWriter writefs.FileWrite) {
+		err := configWriter.Close()
+		if err != nil {
+			sl.logger.Error().Err(err).Msg("failed to close configWriter")
+		}
+	}(configWriter)
 	jenc := json.NewEncoder(configWriter)
 	jenc.SetIndent("", "   ")
 	if err := jenc.Encode(struct {
