@@ -39,6 +39,16 @@ func init() {
 	}, nil, &MigrationDoc)
 }
 
+func InitMigration(migrationConf *ConfigMigration, sourceFS fs.FS, logger ocfllogger.OCFLLogger) {
+	extension.RegisterExtension(MigrationName, func() (extensiontypes.Extension, error) {
+		mig, err := GetMigrations(migrationConf)
+		if err != nil {
+			return nil, errors.Wrap(err, "cannot get migrations")
+		}
+		mig.SetSourceFS(sourceFS)
+		return NewMigration(mig).WithLogger(logger), nil
+	}, nil, &MigrationDoc)
+}
 func NewMigration(mig *migration) *Migration {
 	config := &MigrationConfig{
 		ExtensionConfig: &extensiontypes.ExtensionConfig{ExtensionName: MigrationName},
