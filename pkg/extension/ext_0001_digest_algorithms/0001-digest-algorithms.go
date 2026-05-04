@@ -27,11 +27,11 @@ var algorithms = []checksum.DigestAlgorithm{
 	checksum.DigestBlake2b160,
 	checksum.DigestBlake2b256,
 	checksum.DigestBlake2b384,
-	checksum.DigestBlake2b512,
-	checksum.DigestMD5,
+	//	checksum.DigestBlake2b512,
+	//	checksum.DigestMD5,
 	checksum.DigestSHA512,
 	checksum.DigestSHA256,
-	checksum.DigestSHA1,
+	//	checksum.DigestSHA1,
 }
 
 func NewDigestAlgorithms() (extension.Extension, error) {
