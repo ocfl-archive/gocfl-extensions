@@ -1,4 +1,4 @@
-package migration
+package ext_NNNN_migration
 
 import (
 	"context"
@@ -27,7 +27,7 @@ var Strategies = map[string]Strategy{
 	"folder":  StrategyFolder,
 }
 
-type Function struct {
+type function struct {
 	command  string
 	args     []string
 	Strategy Strategy
@@ -41,7 +41,7 @@ type Function struct {
 
 var migrationVersionRegexp = regexp.MustCompile(`^([^.]+)\.(.+)$`)
 
-func (f *Function) GetDestinationName(src string, head string, isMigrated bool) string {
+func (f *function) GetDestinationName(src string, head string, isMigrated bool) string {
 	dest := f.regexp.ReplaceAllString(src, f.replace)
 	if f.Strategy == StrategyFolder {
 		if isMigrated {
@@ -57,7 +57,7 @@ func (f *Function) GetDestinationName(src string, head string, isMigrated bool) 
 	return dest
 }
 
-func (f *Function) Migrate(source string, dest string) error {
+func (f *function) Migrate(source string, dest string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), f.timeout)
 	defer cancel()
 	args := []string{}
@@ -74,24 +74,24 @@ func (f *Function) Migrate(source string, dest string) error {
 	return errors.Wrapf(cmd.Run(), "cannot run command '%s %s'", f.command, strings.Join(args, " "))
 }
 
-func (f *Function) GetID() string {
+func (f *function) GetID() string {
 	return f.id
 }
 
-type Migration struct {
-	Functions map[string]*Function
+type migration struct {
+	Functions map[string]*function
 	//Sources   map[string]string
 	SourceFS fs.FS
 }
 
-func (m *Migration) GetFunctionByName(name string) (*Function, error) {
+func (m *migration) GetFunctionByName(name string) (*function, error) {
 	if f, ok := m.Functions[strings.ToLower(name)]; ok {
 		return f, nil
 	}
 	return nil, errors.Errorf("Migration.Function.%s does not exist", name)
 }
 
-func (m *Migration) GetFunctionByPronom(pronom string) (*Function, error) {
+func (m *migration) GetFunctionByPronom(pronom string) (*function, error) {
 	for _, f := range m.Functions {
 		for _, pro := range f.pronoms {
 			if pro == pronom {
@@ -102,6 +102,6 @@ func (m *Migration) GetFunctionByPronom(pronom string) (*Function, error) {
 	return nil, errors.Errorf("Migration.Source.%s does not exist", pronom)
 }
 
-func (m *Migration) SetSourceFS(fs fs.FS) {
+func (m *migration) SetSourceFS(fs fs.FS) {
 	m.SourceFS = fs
 }

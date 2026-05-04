@@ -1,4 +1,4 @@
-package migration
+package ext_NNNN_migration
 
 import (
 	"io"
@@ -13,9 +13,9 @@ import (
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/object"
 )
 
-func GetMigrations(conf *ConfigMigration) (*Migration, error) {
-	m := &Migration{
-		Functions: map[string]*Function{},
+func GetMigrations(conf *ConfigMigration) (*migration, error) {
+	m := &migration{
+		Functions: map[string]*function{},
 	}
 
 	for name, fn := range conf.Function {
@@ -39,7 +39,7 @@ func GetMigrations(conf *ConfigMigration) (*Migration, error) {
 		if !ok {
 			return nil, errors.Errorf("unknown strategy '%s' in Migration.Function.%s", fn.Strategy, name)
 		}
-		m.Functions[name] = &Function{
+		m.Functions[name] = &function{
 			title:    fn.Title,
 			id:       fn.ID,
 			command:  parts[0],
@@ -54,7 +54,7 @@ func GetMigrations(conf *ConfigMigration) (*Migration, error) {
 	return m, nil
 }
 
-func DoMigrate(obj object.VersionWriter, mig *Function, ext string, targetNames []string, file io.ReadCloser) error {
+func doMigrate(obj object.VersionWriter, mig *function, ext string, targetNames []string, file io.ReadCloser) error {
 	tmpFile, err := os.CreateTemp(os.TempDir(), "gocfl_*"+ext)
 	if err != nil {
 		return errors.Wrap(err, "cannot create temp file")

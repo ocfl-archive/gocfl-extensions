@@ -15,7 +15,6 @@ import (
 	"github.com/je4/filesystem/v3/pkg/writefs"
 	ext "github.com/ocfl-archive/gocfl-extensions/pkg/extension"
 	"github.com/ocfl-archive/gocfl-extensions/pkg/extension/ext_NNNN_indexer"
-	"github.com/ocfl-archive/gocfl-extensions/pkg/subsystem/migration"
 	"github.com/ocfl-archive/gocfl/v3/pkg/appendfs"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
 	extensiontypes "github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
@@ -40,7 +39,7 @@ func init() {
 	}, nil, &MigrationDoc)
 }
 
-func NewMigration(mig *migration.Migration) *Migration {
+func NewMigration(mig *migration) *Migration {
 	config := &MigrationConfig{
 		ExtensionConfig: &extensiontypes.ExtensionConfig{ExtensionName: MigrationName},
 	}
@@ -48,7 +47,7 @@ func NewMigration(mig *migration.Migration) *Migration {
 		MigrationConfig: config,
 		migration:       mig,
 		buffer:          map[string]*bytes.Buffer{},
-		migrationFiles:  map[string]*migration.Function{},
+		migrationFiles:  map[string]*function{},
 		migratedFiles:   map[string]map[string]string{},
 	}
 	//	sl.writer = brotli.NewWriter(sl.buffer)
@@ -94,11 +93,11 @@ type Migration struct {
 	*MigrationConfig
 	//targetFS  appendfs.FS
 	lastHead  *inventorytypes.VersionNumber
-	migration *migration.Migration
+	migration *migration
 	//buffer *bytes.Buffer
 	buffer         map[string]*bytes.Buffer
 	writer         *brotli.Writer
-	migrationFiles map[string]*migration.Function
+	migrationFiles map[string]*function
 	migratedFiles  map[string]map[string]string
 	sourceFS       fs.FS
 	currentHead    string
@@ -227,7 +226,7 @@ func (mi *Migration) NeedNewVersion(object.VersionWriter) (bool, error) {
 // DoNewVersion todo: check for second migration step and do different naming
 func (mi *Migration) DoNewVersion(obj object.VersionWriter) error {
 	defer func() {
-		mi.migrationFiles = map[string]*migration.Function{}
+		mi.migrationFiles = map[string]*function{}
 		mi.done = true
 	}()
 
@@ -349,7 +348,7 @@ func (mi *Migration) DoNewVersion(obj object.VersionWriter) error {
 			return errors.Wrapf(err, "cannot build manifest path for file '%s' in object '%s'", extractTargetNames[0], obj.GetID())
 		}
 		path := inv.BuildManifestName(manifestName)
-		if err := migration.DoMigrate(obj, mig, ext, extractTargetNames, file); err != nil {
+		if err := doMigrate(obj, mig, ext, extractTargetNames, file); err != nil {
 			ml = &migrationLine{
 				Path: path,
 				Migration: &MigrationResult{
@@ -368,7 +367,7 @@ func (mi *Migration) DoNewVersion(obj object.VersionWriter) error {
 				},
 			}
 			switch mig.Strategy {
-			case migration.StrategyReplace:
+			case StrategyReplace:
 				for _, externalFile := range externalFiles {
 					if slices.Contains(targetNames, externalFile) {
 						continue
@@ -377,7 +376,7 @@ func (mi *Migration) DoNewVersion(obj object.VersionWriter) error {
 						return errors.Wrapf(err, "cannot delete file '%s' in object '%s'", externalFile, obj.GetID())
 					}
 				}
-			case migration.StrategyFolder:
+			case StrategyFolder:
 				for _, src := range externalFiles {
 					if slices.Contains(targetNames, src) {
 						continue
