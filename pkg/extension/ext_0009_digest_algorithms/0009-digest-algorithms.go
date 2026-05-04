@@ -7,6 +7,7 @@ import (
 	"github.com/ocfl-archive/gocfl-extensions/pkg/extension/ext_0001_digest_algorithms"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/object"
+	"github.com/ocfl-archive/gocfl/v3/pkg/ocfllogger"
 )
 
 const DigestAlgorithmsName = "0009-digest-algorithms"
@@ -45,6 +46,11 @@ func NewDigestAlgorithms() (extension.Extension, error) {
 
 type DigestAlgorithms struct {
 	*ext_0001_digest_algorithms.DigestAlgorithms
+}
+
+func (sl *DigestAlgorithms) WithLogger(logger ocfllogger.OCFLLogger) extension.Extension {
+	sl.DigestAlgorithms.WithLogger(logger)
+	return sl
 }
 
 func (sl *DigestAlgorithms) IsRegistered() bool {
