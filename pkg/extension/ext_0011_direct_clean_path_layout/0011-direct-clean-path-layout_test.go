@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDirectCleanPathLayout(t *testing.T) {
+func doTestDirectClean(t *testing.T, extensionName string) {
 	env := extensionbase.SetupTestEnv(t)
 
 	type testCase struct {
@@ -25,7 +25,7 @@ func TestDirectCleanPathLayout(t *testing.T) {
 	runTest := func(name string, config *DirectCleanConfig, cases []testCase) {
 		t.Run(name, func(t *testing.T) {
 			data, _ := json.MarshalIndent(config, "", "  ")
-			configPath := path.Join(DirectCleanName, "config.json")
+			configPath := path.Join(extensionName, "config.json")
 			_, err := writefs.WriteFile(env.ConfigFS, configPath, data)
 			assert.NoError(t, err)
 
@@ -57,7 +57,7 @@ func TestDirectCleanPathLayout(t *testing.T) {
 
 	// Example #1: encodeUTF == false
 	runTest("Example1_False", &DirectCleanConfig{
-		ExtensionConfig:             &extension.ExtensionConfig{ExtensionName: DirectCleanName},
+		ExtensionConfig:             &extension.ExtensionConfig{ExtensionName: extensionName},
 		MaxPathnameLen:              32000,
 		MaxPathSegmentLen:           127,
 		UTFEncode:                   false,
@@ -78,7 +78,7 @@ func TestDirectCleanPathLayout(t *testing.T) {
 
 	// Example #2: encodeUTF == true
 	runTest("Example2_True", &DirectCleanConfig{
-		ExtensionConfig:             &extension.ExtensionConfig{ExtensionName: DirectCleanName},
+		ExtensionConfig:             &extension.ExtensionConfig{ExtensionName: extensionName},
 		MaxPathnameLen:              32000,
 		MaxPathSegmentLen:           127,
 		UTFEncode:                   true,
@@ -98,4 +98,8 @@ func TestDirectCleanPathLayout(t *testing.T) {
 		{"https://hdl.handle.net/XXXXX/test/bl ah", "https=u003A/hdl.handle.net/XXXXX/test/bl=u0020ah"},
 		{"abcdefghijabcdefghij abcdefghijabcdefghij abcdefghijabcdefghij abcdefghijabcdefghij abcdefghijabcdefghij abcdefghijabcdefghij abcdefghijabcdefghij abcdefghijabcdefghij abcdefghijabcdefghij abcdefghijabcdefghij abcdefghijabcdefghij abcdefghijabcdefghij abcdefghijabcdefghij", "fallback/b/8/b8acda4abac53237afa03d6bbb078e1bf46b40438bb256df79b8d9ff0e57b32a688156ad21755363ea19953c160c4dd6d4db175b71e9aa87d68937181a9f69d/9"},
 	})
+}
+
+func TestDirectCleanPathLayout(t *testing.T) {
+	doTestDirectClean(t, DirectCleanName)
 }
