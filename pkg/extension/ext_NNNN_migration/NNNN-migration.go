@@ -120,7 +120,7 @@ func (mi *Migration) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.Ext
 	return mi
 }
 
-func (mi *Migration) Load(data json.RawMessage) error {
+func (mi *Migration) Load(data json.RawMessage, extFS fs.FS) error {
 	if err := json.Unmarshal(data, mi.MigrationConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal MigrationConfig '%s'", string(data))
 	}

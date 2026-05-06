@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	"io"
+	"io/fs"
 	"strings"
 
 	"emperror.dev/errors"
@@ -60,7 +61,7 @@ func (sl *NTupleOmitPrefixStorageLayout) WithLogger(logger ocfllogger.OCFLLogger
 	return sl
 }
 
-func (sl *NTupleOmitPrefixStorageLayout) Load(data json.RawMessage) error {
+func (sl *NTupleOmitPrefixStorageLayout) Load(data json.RawMessage, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.NTupleOmitPrefixStorageLayoutConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal NTupleOmitPrefixStorageLayoutConfig '%s'", string(data))
 	}

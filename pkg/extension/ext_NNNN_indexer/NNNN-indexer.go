@@ -125,7 +125,7 @@ func (sl *Indexer) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.Exten
 	return sl
 }
 
-func (sl *Indexer) Load(data json.RawMessage) error {
+func (sl *Indexer) Load(data json.RawMessage, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.IndexerConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal IndexerConfig '%s'", string(data))
 	}

@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"io"
+	"io/fs"
 	"strings"
 
 	"emperror.dev/errors"
@@ -42,7 +43,7 @@ func (sl *DifferentialNTupleOmitPrefixStorageLayout) WithLogger(logger ocfllogge
 	return sl
 }
 
-func (sl *DifferentialNTupleOmitPrefixStorageLayout) Load(data json.RawMessage) error {
+func (sl *DifferentialNTupleOmitPrefixStorageLayout) Load(data json.RawMessage, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.DifferentialNTupleOmitPrefixStorageLayoutConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal DifferentialNTupleOmitPrefixStorageLayoutConfig '%s'", string(data))
 	}

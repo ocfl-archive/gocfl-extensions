@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"hash"
+	"io/fs"
 	"strings"
 
 	"emperror.dev/errors"
@@ -48,7 +49,7 @@ func (sl *StorageLayoutHashedNTuple) WithLogger(logger ocfllogger.OCFLLogger) ex
 	return sl
 }
 
-func (sl *StorageLayoutHashedNTuple) Load(data json.RawMessage) error {
+func (sl *StorageLayoutHashedNTuple) Load(data json.RawMessage, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.StorageLayoutHashedNTupleConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal StorageLayoutHashedNTupleConfig '%s'", string(data))
 	}

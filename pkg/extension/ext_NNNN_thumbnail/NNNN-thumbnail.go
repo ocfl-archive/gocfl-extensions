@@ -142,7 +142,7 @@ func (thumb *Thumbnail) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.
 	return thumb
 }
 
-func (thumb *Thumbnail) Load(data json.RawMessage) error {
+func (thumb *Thumbnail) Load(data json.RawMessage, extFS fs.FS) error {
 	if err := json.Unmarshal(data, thumb.ThumbnailConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal ThumbnailConfig '%s'", string(data))
 	}

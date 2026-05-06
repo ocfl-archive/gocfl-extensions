@@ -63,7 +63,7 @@ func (sl *Timestamp) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.Ext
 	return sl
 }
 
-func (sl *Timestamp) Load(data json.RawMessage) error {
+func (sl *Timestamp) Load(data json.RawMessage, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.TimestampConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal TimestampConfig '%s'", string(data))
 	}

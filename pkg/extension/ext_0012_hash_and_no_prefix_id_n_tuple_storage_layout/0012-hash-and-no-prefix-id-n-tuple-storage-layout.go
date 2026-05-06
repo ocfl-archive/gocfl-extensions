@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"strings"
 
 	"emperror.dev/errors"
@@ -42,7 +43,7 @@ func (sl *StorageLayoutHashAndNoPrefixIdNTuple) WithLogger(logger ocfllogger.OCF
 	return sl
 }
 
-func (sl *StorageLayoutHashAndNoPrefixIdNTuple) Load(data json.RawMessage) error {
+func (sl *StorageLayoutHashAndNoPrefixIdNTuple) Load(data json.RawMessage, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.StorageLayoutHashAndNoPrefixIdNTupleConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal StorageLayoutHashAndNoPrefixIdNTupleConfig '%s'", string(data))
 	}

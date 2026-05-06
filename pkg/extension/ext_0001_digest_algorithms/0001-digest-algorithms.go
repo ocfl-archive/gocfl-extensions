@@ -3,6 +3,7 @@ package ext_0001_digest_algorithms
 import (
 	_ "embed"
 	"encoding/json"
+	"io/fs"
 
 	"emperror.dev/errors"
 	"github.com/je4/filesystem/v3/pkg/writefs"
@@ -59,7 +60,7 @@ func (sl *DigestAlgorithms) WithLogger(logger ocfllogger.OCFLLogger) extension.E
 	return sl
 }
 
-func (sl *DigestAlgorithms) Load(data json.RawMessage) error {
+func (sl *DigestAlgorithms) Load(data json.RawMessage, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.DigestAlgorithmsConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal DigestAlgorithmsConfig0001 '%s'", string(data))
 	}

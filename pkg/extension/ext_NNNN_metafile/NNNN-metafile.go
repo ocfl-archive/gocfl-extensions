@@ -96,15 +96,37 @@ func (sl *MetaFile) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.Exte
 	return sl
 }
 
-func (sl *MetaFile) Load(data json.RawMessage) error {
+func (sl *MetaFile) Load(data json.RawMessage, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.MetaFileConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal MetaFileConfig '%s'", string(data))
 	}
-	// sl.schema und sl.compiledSchema können hier nicht mehr von fsys geladen werden,
-	// da Load nun nur noch das JSON der Konfiguration erhält.
-	// Da sl.MetaSchema ein Pfad ist, müsste dieser woanders aufgelöst werden.
-	// Falls es eine URL ist, könnte es noch funktionieren, aber Load hat kein fsys mehr.
-	// Wir behalten die Struktur bei, aber loggen ggf. Warnungen oder Fehler wenn fsys benötigt würde.
+	if extFS != nil {
+		if sl.MetaSchema != "" {
+			var err error
+			sl.schema, err = fs.ReadFile(extFS, sl.MetaSchema)
+			if err != nil {
+				return errors.Wrapf(err, "cannot read schema from %v/%s", extFS, sl.MetaSchema)
+			}
+		}
+	}
+	if sl.schema == nil && sl.MetaSchemaUrl != "" {
+		var err error
+		sl.schema, err = downloadFile(sl.MetaSchemaUrl)
+		if err != nil {
+			return errors.Wrapf(err, "cannot download schema from %s", sl.MetaSchemaUrl)
+		}
+	}
+	if sl.schema != nil {
+		compiler := jsonschema.NewCompiler()
+		if err := compiler.AddResource("schema.json", bytes.NewReader(sl.schema)); err != nil {
+			return errors.Wrapf(err, "cannot add schema resource")
+		}
+		var err error
+		sl.compiledSchema, err = compiler.Compile("schema.json")
+		if err != nil {
+			return errors.Wrapf(err, "cannot compile schema")
+		}
+	}
 
 	return nil
 }

@@ -90,7 +90,7 @@ func (fi *Filesystem) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.Ex
 	return fi
 }
 
-func (fi *Filesystem) Load(data json.RawMessage) error {
+func (fi *Filesystem) Load(data json.RawMessage, extFS fs.FS) error {
 	if err := json.Unmarshal(data, fi.FilesystemConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal FilesystemConfig '%s'", string(data))
 	}

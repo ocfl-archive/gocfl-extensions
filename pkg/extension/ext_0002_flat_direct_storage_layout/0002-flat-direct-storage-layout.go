@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"io"
+	"io/fs"
 
 	"emperror.dev/errors"
 	"github.com/je4/filesystem/v3/pkg/writefs"
@@ -49,7 +50,7 @@ func (sl *StorageLayoutFlatDirect) WithLogger(logger ocfllogger.OCFLLogger) exte
 	return sl
 }
 
-func (sl *StorageLayoutFlatDirect) Load(data json.RawMessage) error {
+func (sl *StorageLayoutFlatDirect) Load(data json.RawMessage, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.StorageLayoutFlatDirectConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal StorageLayoutFlatDirectConfig '%s'", string(data))
 	}

@@ -53,7 +53,7 @@ func (sl *StorageLayoutPairTree) WithLogger(logger ocfllogger.OCFLLogger) extens
 	return sl
 }
 
-func (sl *StorageLayoutPairTree) Load(data json.RawMessage) error {
+func (sl *StorageLayoutPairTree) Load(data json.RawMessage, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.StorageLayoutPairTreeConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal StorageLayoutPairTreeConfig '%s'", string(data))
 	}

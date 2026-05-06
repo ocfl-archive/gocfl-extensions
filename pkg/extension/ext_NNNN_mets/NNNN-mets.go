@@ -129,7 +129,7 @@ func (me *Mets) Terminate() error {
 	return nil
 }
 
-func (me *Mets) Load(data json.RawMessage) error {
+func (me *Mets) Load(data json.RawMessage, extFS fs.FS) error {
 	if err := json.Unmarshal(data, me.MetsConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal MetsConfig '%s'", string(data))
 	}

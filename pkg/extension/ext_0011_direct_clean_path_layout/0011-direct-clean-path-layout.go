@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"hash"
+	"io/fs"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -96,7 +97,7 @@ func (sl *DirectClean) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.E
 	return sl
 }
 
-func (sl *DirectClean) Load(data json.RawMessage) error {
+func (sl *DirectClean) Load(data json.RawMessage, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.DirectCleanConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal DirectCleanConfig '%s'", string(data))
 	}

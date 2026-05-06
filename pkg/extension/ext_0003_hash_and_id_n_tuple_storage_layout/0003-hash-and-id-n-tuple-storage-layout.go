@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 
 	"hash"
 	"strings"
@@ -47,7 +48,7 @@ func (sl *StorageLayoutHashAndIdNTuple) WithLogger(logger ocfllogger.OCFLLogger)
 	return sl
 }
 
-func (sl *StorageLayoutHashAndIdNTuple) Load(data json.RawMessage) error {
+func (sl *StorageLayoutHashAndIdNTuple) Load(data json.RawMessage, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.StorageLayoutHashAndIdNTupleConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal StorageLayoutHashAndIdNTupleConfig '%s'", string(data))
 	}
