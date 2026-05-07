@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/je4/filesystem/v3/pkg/writefs"
-	extensionbase "github.com/ocfl-archive/gocfl-extensions/pkg/extension"
+	"github.com/ocfl-archive/gocfl-extensions/test"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension/extensionimpl"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/object"
@@ -15,7 +15,7 @@ import (
 )
 
 func doTestDirectClean(t *testing.T, extensionName string) {
-	env := extensionbase.SetupTestEnv(t)
+	env := test.SetupTestEnv(t)
 
 	type testCase struct {
 		id   string
@@ -29,7 +29,7 @@ func doTestDirectClean(t *testing.T, extensionName string) {
 			_, err := writefs.WriteFile(env.ConfigFS, configPath, data)
 			assert.NoError(t, err)
 
-			extensionFactory, err := extensionimpl.NewFactory(nil, env.ConfigFS, env.Logger)
+			extensionFactory, err := extensionimpl.NewFactory(nil, env.Logger)
 			assert.NoError(t, err)
 
 			genericExtensionManager, err := extensionFactory.LoadExtensionManager(env.ConfigFS)

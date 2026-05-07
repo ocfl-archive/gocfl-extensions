@@ -6,23 +6,21 @@ import (
 	"testing"
 
 	"github.com/je4/utils/v2/pkg/checksum"
-	extensiontypes "github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
 )
 
 func TestPairtreeIDEncode(t *testing.T) {
 	fmt.Printf("(NewPairTreeStorageLayout(%s, %s, %v, %s)\n", "", "", 2, checksum.DigestSHA256)
 
-	ptsl := NewStorageLayoutPairTree(&StorageLayoutPairTreeConfig{
-		ExtensionConfig: &extensiontypes.ExtensionConfig{ExtensionName: "gocfl-pairtree"},
-		UriBase:         "",
-		StoreDir:        "",
-		ShortyLength:    2,
-		DigestAlgorithm: string(checksum.DigestSHA256),
-	})
+	ext, err := NewStorageLayoutPairTree()
 	if err != nil {
-		t.Errorf("instantiate failed - %v", err)
-		return
+		t.Fatalf("instantiate failed - %v", err)
 	}
+	ptsl, ok := ext.(*StorageLayoutPairTree)
+	if !ok {
+		t.Fatal("extension is not a StorageLayoutPairTree")
+	}
+	ptsl.ShortyLength = 2
+	ptsl.DigestAlgorithm = string(checksum.DigestSHA256)
 
 	sourceID := "ark:/13030/xt12t3"
 	testResult := "ar/k+/=1/30/30/=x/t1/2t/3"
@@ -36,7 +34,7 @@ func TestPairtreeIDEncode(t *testing.T) {
 	/* wrong example????
 	sourceID = "http://n2t.info/urn:nbn:se:kb:repos-1"
 	testResult = "ht/tp/+=/=n/2t/,i/nf/o=/ur/n+/n/bn/+s/e+/kb/+/re/p/OS/-1"
-	dest = ptsl.idToDirpath(sourceID)
+	dest, _ = ptsl.BuildStorageRootPath(nil, sourceID)
 	if dest != testResult {
 		t.Errorf("IDEncode(%s) => %s != %s", sourceID, dest, testResult)
 	} else {

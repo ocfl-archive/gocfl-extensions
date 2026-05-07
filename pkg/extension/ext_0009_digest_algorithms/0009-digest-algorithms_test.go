@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/je4/filesystem/v3/pkg/writefs"
-	extensionbase "github.com/ocfl-archive/gocfl-extensions/pkg/extension"
 	"github.com/ocfl-archive/gocfl-extensions/pkg/extension/ext_0001_digest_algorithms"
+	"github.com/ocfl-archive/gocfl-extensions/test"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension/extensionimpl"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/object"
@@ -15,14 +15,14 @@ import (
 )
 
 func TestNewDigestAlgorithms(t *testing.T) {
-	env := extensionbase.SetupTestEnv(t)
+	env := test.SetupTestEnv(t)
 	digestAlgorithmsConfig := &ext_0001_digest_algorithms.DigestAlgorithmsConfig{
 		ExtensionConfig: &extension.ExtensionConfig{ExtensionName: DigestAlgorithmsName},
 	}
 	data, _ := json.MarshalIndent(digestAlgorithmsConfig, "", "  ")
 	_, err := writefs.WriteFile(env.ConfigFS, path.Join(DigestAlgorithmsName, "config.json"), data)
 	assert.NoError(t, err)
-	extensionFactory, err := extensionimpl.NewFactory(nil, env.ConfigFS, env.Logger)
+	extensionFactory, err := extensionimpl.NewFactory(nil, env.Logger)
 	assert.NoError(t, err)
 	genericExtensionManager, err := extensionFactory.LoadExtensionManager(env.ConfigFS)
 	assert.NoError(t, err)
