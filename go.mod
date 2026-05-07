@@ -16,10 +16,11 @@ require (
 	github.com/je4/filesystem/v3 v3.0.55
 	github.com/je4/utils/v2 v2.0.68
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
-	github.com/ocfl-archive/gocfl/v3 v3.0.0-20260503122146-50d63229122a
+	github.com/ocfl-archive/gocfl/v3 v3.0.0-20260507164017-6607de0148a2
 	github.com/ocfl-archive/indexer/v3 v3.0.44
 	github.com/rs/zerolog v1.35.1
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
+	github.com/spf13/afero v1.15.0
 	github.com/stretchr/testify v1.11.1
 	go.yaml.in/yaml/v3 v3.0.4
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f
@@ -75,7 +76,6 @@ require (
 	github.com/ross-spencer/wikiprov v1.0.0 // indirect
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/smallstep/certinfo v1.16.0 // indirect
-	github.com/spf13/afero v1.15.0 // indirect
 	github.com/tamerh/xml-stream-parser v1.5.0 // indirect
 	github.com/tamerh/xpath v1.0.0 // indirect
 	github.com/tinylib/msgp v1.6.4 // indirect
