@@ -10,7 +10,7 @@ import (
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension/extensionimpl"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/storageroot"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewStorageLayoutFlatDirect(t *testing.T) {
@@ -20,16 +20,13 @@ func TestNewStorageLayoutFlatDirect(t *testing.T) {
 	}
 	data, _ := json.MarshalIndent(storageLayoutConfig, "", "  ")
 	_, err := writefs.WriteFile(env.ConfigFS, path.Join(StorageLayoutFlatDirectName, "config.json"), data)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	extensionFactory, err := extensionimpl.NewFactory(nil, env.Logger)
-	assert.NoError(t, err)
+	extensionFactory, err := extensionimpl.NewFactory[storageroot.ExtensionManager](nil, env.Logger)
+	require.NoError(t, err)
 
-	genericExtensionManager, err := extensionFactory.LoadExtensionManager(env.ConfigFS)
-	assert.NoError(t, err)
-
-	sl, ok := genericExtensionManager.(storageroot.ExtensionStorageRootPath)
-	assert.True(t, ok, "Extension manager should implement storageroot.ExtensionStorageRootPath interface")
+	sl, err := extensionFactory.LoadExtensionManager(env.ConfigFS)
+	require.NoError(t, err)
 
 	testCases := []struct {
 		id   string
@@ -44,8 +41,8 @@ func TestNewStorageLayoutFlatDirect(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.id, func(t *testing.T) {
 			path, err := sl.BuildStorageRootPath(nil, tc.id)
-			assert.NoError(t, err)
-			assert.Equal(t, tc.path, path)
+			require.NoError(t, err)
+			require.Equal(t, tc.path, path)
 		})
 	}
 }

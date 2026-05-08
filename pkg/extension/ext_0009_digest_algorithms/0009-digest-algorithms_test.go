@@ -11,7 +11,7 @@ import (
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension/extensionimpl"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/object"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewDigestAlgorithms(t *testing.T) {
@@ -21,13 +21,11 @@ func TestNewDigestAlgorithms(t *testing.T) {
 	}
 	data, _ := json.MarshalIndent(digestAlgorithmsConfig, "", "  ")
 	_, err := writefs.WriteFile(env.ConfigFS, path.Join(DigestAlgorithmsName, "config.json"), data)
-	assert.NoError(t, err)
-	extensionFactory, err := extensionimpl.NewFactory(nil, env.Logger)
-	assert.NoError(t, err)
-	genericExtensionManager, err := extensionFactory.LoadExtensionManager(env.ConfigFS)
-	assert.NoError(t, err)
-	testFixityDigest, ok := genericExtensionManager.(object.ExtensionFixityDigest)
-	assert.True(t, ok, "Extension manager should implement ExtensionFixityDigest interface")
+	require.NoError(t, err)
+	extensionFactory, err := extensionimpl.NewFactory[object.ExtensionManager](nil, env.Logger)
+	require.NoError(t, err)
+	testFixityDigest, err := extensionFactory.LoadExtensionManager(env.ConfigFS)
+	require.NoError(t, err)
 
 	digests := testFixityDigest.GetFixityDigests()
 	expectedDigests := []string{
@@ -46,7 +44,7 @@ func TestNewDigestAlgorithms(t *testing.T) {
 		digestStrings = append(digestStrings, string(d))
 	}
 	for _, expected := range expectedDigests {
-		assert.Contains(t, digestStrings, expected)
+		require.Contains(t, digestStrings, expected)
 	}
-	assert.Equal(t, len(expectedDigests), len(digestStrings), "Digests should match the ones in 0009-digest-algorithms.md")
+	require.Equal(t, len(expectedDigests), len(digestStrings), "Digests should match the ones in 0009-digest-algorithms.md")
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/ocfl-archive/gocfl-extensions/test"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension/extensionimpl"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/storageroot"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestStorageLayoutHashAndNoPrefixIdNTuple(t *testing.T) {
@@ -150,20 +150,17 @@ func TestStorageLayoutHashAndNoPrefixIdNTuple(t *testing.T) {
 			data, _ := json.MarshalIndent(conf, "", "  ")
 			configPath := path.Join("0012-hash-and-no-prefix-id-n-tuple-storage-layout", "config.json")
 			_, err := writefs.WriteFile(env.ConfigFS, configPath, data)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
-			extensionFactory, err := extensionimpl.NewFactory(nil, env.Logger)
-			assert.NoError(t, err)
+			extensionFactory, err := extensionimpl.NewFactory[storageroot.ExtensionManager](nil, env.Logger)
+			require.NoError(t, err)
 
-			genericExtensionManager, err := extensionFactory.LoadExtensionManager(env.ConfigFS)
-			assert.NoError(t, err)
-
-			sl, ok := genericExtensionManager.(storageroot.ExtensionStorageRootPath)
-			assert.True(t, ok, "Extension manager should implement storageroot.ExtensionStorageRootPath interface")
+			sl, err := extensionFactory.LoadExtensionManager(env.ConfigFS)
+			require.NoError(t, err)
 
 			path, err := sl.BuildStorageRootPath(nil, tc.objectID)
-			assert.NoError(t, err)
-			assert.Equal(t, tc.expectedPath, path)
+			require.NoError(t, err)
+			require.Equal(t, tc.expectedPath, path)
 		})
 	}
 }

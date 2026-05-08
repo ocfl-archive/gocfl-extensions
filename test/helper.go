@@ -28,7 +28,6 @@ import (
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/version"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfllogger"
 	"github.com/rs/zerolog"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -215,11 +214,11 @@ func SetupFullTestEnv(t *testing.T, extensionParams map[string]string, tempFS, s
 	storageRootExtManager0, err := extFactory.LoadExtensionManager(storageRootExtensionFS)
 	require.NoError(t, err)
 	storageRootExtManager, ok := storageRootExtManager0.(storageroot.ExtensionManager)
-	assert.True(t, ok, "extension manager should implement storageroot.ExtensionManager")
+	require.True(t, ok, "extension manager should implement storageroot.ExtensionManager")
 	objectExtManager0, err := extFactory.LoadExtensionManager(objectExtensionFS)
 	require.NoError(t, err)
 	objectExtManager, ok := objectExtManager0.(object.ExtensionManager)
-	assert.True(t, ok, "extension manager should implement object.ExtensionManager")
+	require.True(t, ok, "extension manager should implement object.ExtensionManager")
 
 	ocflVer := version.Version1_1
 	fact := factoryimpl.NewFactory(ocflVer, extFactory, logger)
@@ -232,7 +231,7 @@ func SetupFullTestEnv(t *testing.T, extensionParams map[string]string, tempFS, s
 
 	// Initialize storage root
 	initializer := sr.GetInitializer()
-	assert.NotNil(t, initializer)
+	require.NotNil(t, initializer)
 	initializer.WithFS(srFS)
 
 	err = initializer.Init()
