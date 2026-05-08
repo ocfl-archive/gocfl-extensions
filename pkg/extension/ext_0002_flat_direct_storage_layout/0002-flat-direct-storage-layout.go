@@ -22,7 +22,7 @@ const StorageLayoutFlatDirectDescription = "one to one mapping without changes"
 var StorageLayoutFlatDirectDoc string
 
 func init() {
-	extension.RegisterExtension(StorageLayoutFlatDirectName, NewStorageLayoutFlatDirect, nil, &StorageLayoutFlatDirectDoc)
+	extension.RegisterExtensionStorageRoot(StorageLayoutFlatDirectName, NewStorageLayoutFlatDirect, nil, &StorageLayoutFlatDirectDoc)
 }
 
 func NewStorageLayoutFlatDirect() (extension.Extension, error) {

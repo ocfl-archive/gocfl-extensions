@@ -32,7 +32,7 @@ const FilesystemDescription = "preserves filesytem metadata"
 var FilesystemDoc string
 
 func init() {
-	extension.RegisterExtension(FilesystemName, NewFilesystem, nil, &FilesystemDoc)
+	extension.RegisterExtensionObject(FilesystemName, NewFilesystem, nil, &FilesystemDoc)
 }
 
 func NewFilesystem() (extensiontypes.Extension, error) {

@@ -37,7 +37,7 @@ const MetaFileDescription = "adds a file in extension folder"
 var MetaFileDoc string
 
 func init() {
-	extension.RegisterExtension(MetaFileName, NewMetaFile, GetMetaFileParams, &MetaFileDoc)
+	extension.RegisterExtensionObject(MetaFileName, NewMetaFile, GetMetaFileParams, &MetaFileDoc)
 }
 
 func GetMetaFileParams() ([]*extension.ExternalParam, error) {

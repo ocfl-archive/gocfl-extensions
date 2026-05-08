@@ -44,7 +44,7 @@ const METSDescription = "METS/EAD3/PREMIS metadata"
 var METSDoc string
 
 func init() {
-	extension.RegisterExtension(METSName, NewMets, GetMetsParams, &METSDoc)
+	extension.RegisterExtensionObject(METSName, NewMets, GetMetsParams, &METSDoc)
 }
 
 type metsInternalFiledata struct {

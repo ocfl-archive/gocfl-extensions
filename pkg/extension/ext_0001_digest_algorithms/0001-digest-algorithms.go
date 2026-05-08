@@ -21,7 +21,8 @@ const DigestAlgorithmsDescription = "controlled vocabulary of digest algorithm n
 var DigestAlgorithmsDoc string
 
 func init() {
-	extension.RegisterExtension(DigestAlgorithmsName, NewDigestAlgorithms, nil, &DigestAlgorithmsDoc)
+	extension.RegisterExtensionStorageRoot(DigestAlgorithmsName, NewDigestAlgorithms, nil, &DigestAlgorithmsDoc)
+	extension.RegisterExtensionObject(DigestAlgorithmsName, NewDigestAlgorithms, nil, &DigestAlgorithmsDoc)
 }
 
 var algorithms = []checksum.DigestAlgorithm{

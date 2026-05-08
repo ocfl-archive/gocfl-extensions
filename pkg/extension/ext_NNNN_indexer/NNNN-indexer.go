@@ -36,13 +36,13 @@ const IndexerDescription = "technical metadata for all files"
 var IndexerDoc string
 
 func init() {
-	extension.RegisterExtension(IndexerName, func() (extensiontypes.Extension, error) {
+	extension.RegisterExtensionObject(IndexerName, func() (extensiontypes.Extension, error) {
 		return NewIndexer("", &ironmaiden.IndexerConfig{}, false, nil)
 	}, GetIndexerParams, &IndexerDoc)
 }
 
 func Init(urlString string, conf *ironmaiden.IndexerConfig, localCache bool, logger ocfllogger.OCFLLogger) {
-	extension.RegisterExtension(IndexerName, func() (extensiontypes.Extension, error) {
+	extension.RegisterExtensionObject(IndexerName, func() (extensiontypes.Extension, error) {
 		return NewIndexer(urlString, conf, localCache, logger)
 	}, GetIndexerParams, &IndexerDoc)
 }

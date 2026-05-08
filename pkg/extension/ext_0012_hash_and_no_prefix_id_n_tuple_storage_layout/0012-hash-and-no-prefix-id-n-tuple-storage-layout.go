@@ -23,7 +23,7 @@ const StorageLayoutHashAndNoPrefixIdNTupleDescription = "Hashed Truncated N-tupl
 var StorageLayoutHashAndNoPrefixIdNTupleDoc string
 
 func init() {
-	extension.RegisterExtension(StorageLayoutHashAndNoPrefixIdNTupleName, NewStorageLayoutHashAndNoPrefixIdNTuple, nil, &StorageLayoutHashAndNoPrefixIdNTupleDoc)
+	extension.RegisterExtensionStorageRoot(StorageLayoutHashAndNoPrefixIdNTupleName, NewStorageLayoutHashAndNoPrefixIdNTuple, nil, &StorageLayoutHashAndNoPrefixIdNTupleDoc)
 }
 
 func NewStorageLayoutHashAndNoPrefixIdNTuple() (extension.Extension, error) {

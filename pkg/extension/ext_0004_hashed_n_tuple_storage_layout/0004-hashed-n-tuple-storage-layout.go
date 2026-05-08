@@ -25,7 +25,7 @@ const StorageLayoutHashedNTupleDescription = "Hashed N-tuple Storage Layout"
 var StorageLayoutHashedNTupleDoc string
 
 func init() {
-	extension.RegisterExtension(StorageLayoutHashedNTupleName, NewStorageLayoutHashedNTuple, nil, &StorageLayoutHashedNTupleDoc)
+	extension.RegisterExtensionStorageRoot(StorageLayoutHashedNTupleName, NewStorageLayoutHashedNTuple, nil, &StorageLayoutHashedNTupleDoc)
 }
 
 func NewStorageLayoutHashedNTuple() (extensiontypes.Extension, error) {

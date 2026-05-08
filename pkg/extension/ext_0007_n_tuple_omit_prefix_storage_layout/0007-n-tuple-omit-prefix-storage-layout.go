@@ -25,7 +25,7 @@ const NTupleOmitPrefixStorageLayoutDescription = "pairtree-like root directory s
 var NTupleOmitPrefixStorageLayoutDoc string
 
 func init() {
-	extension.RegisterExtension(NTupleOmitPrefixStorageLayoutName, NewNTupleOmitPrefixStorageLayout, nil, &NTupleOmitPrefixStorageLayoutDoc)
+	extension.RegisterExtensionStorageRoot(NTupleOmitPrefixStorageLayoutName, NewNTupleOmitPrefixStorageLayout, nil, &NTupleOmitPrefixStorageLayoutDoc)
 }
 
 // function, which takes a string as

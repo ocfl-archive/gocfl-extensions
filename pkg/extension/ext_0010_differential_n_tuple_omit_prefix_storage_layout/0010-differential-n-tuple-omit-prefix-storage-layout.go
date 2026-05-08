@@ -24,7 +24,7 @@ const DifferentialNTupleOmitPrefixStorageLayoutDescription = "pairtree-inspired 
 var DifferentialNTupleOmitPrefixStorageLayoutDoc string
 
 func init() {
-	extension.RegisterExtension(DifferentialNTupleOmitPrefixStorageLayoutName, NewDifferentialNTupleOmitPrefixStorageLayout, nil, &DifferentialNTupleOmitPrefixStorageLayoutDoc)
+	extension.RegisterExtensionStorageRoot(DifferentialNTupleOmitPrefixStorageLayoutName, NewDifferentialNTupleOmitPrefixStorageLayout, nil, &DifferentialNTupleOmitPrefixStorageLayoutDoc)
 }
 
 func NewDifferentialNTupleOmitPrefixStorageLayout() (extensiontypes.Extension, error) {

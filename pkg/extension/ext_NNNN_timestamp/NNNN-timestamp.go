@@ -30,7 +30,7 @@ const TimestampDescription = "signs ocfl versions"
 var TimestampDoc string
 
 func init() {
-	extension.RegisterExtension(TimestampName, NewTimestamp, GetTimestampParams, &TimestampDoc)
+	extension.RegisterExtensionObject(TimestampName, NewTimestamp, GetTimestampParams, &TimestampDoc)
 }
 
 func GetTimestampParams() ([]*extension.ExternalParam, error) {

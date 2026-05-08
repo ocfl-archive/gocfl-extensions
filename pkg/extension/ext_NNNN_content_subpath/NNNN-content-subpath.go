@@ -26,7 +26,7 @@ const ContentSubPathDescription = "prepend a path inside the version content"
 var ContentSubPathDoc string
 
 func init() {
-	extension.RegisterExtension(ContentSubPathName, NewContentSubPath, GetContentSubPathParams, &ContentSubPathDoc)
+	extension.RegisterExtensionObject(ContentSubPathName, NewContentSubPath, GetContentSubPathParams, &ContentSubPathDoc)
 }
 
 func GetContentSubPathParams() ([]*extension.ExternalParam, error) {

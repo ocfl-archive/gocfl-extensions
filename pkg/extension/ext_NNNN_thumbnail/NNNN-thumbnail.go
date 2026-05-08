@@ -45,13 +45,13 @@ const ThumbnailDescription = "preservation management - file thumbnail"
 var ThumbnailDoc string
 
 func init() {
-	extension.RegisterExtension(ThumbnailName, func() (extensiontypes.Extension, error) {
+	extension.RegisterExtensionObject(ThumbnailName, func() (extensiontypes.Extension, error) {
 		return NewThumbnail(nil), nil
 	}, nil, &ThumbnailDoc)
 }
 
 func Init(thumbnailConf *ConfigThumbnail, sourceFS fs.FS, logger ocfllogger.OCFLLogger) {
-	extension.RegisterExtension(ThumbnailName, func() (extensiontypes.Extension, error) {
+	extension.RegisterExtensionObject(ThumbnailName, func() (extensiontypes.Extension, error) {
 		thumb, err := GetThumbnails(thumbnailConf)
 		if err != nil {
 			logger.Error().Err(err).Msg("cannot get thumbnails")

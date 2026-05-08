@@ -24,7 +24,7 @@ const FlatOmitPrefixStorageLayoutDescription = "removes prefix after last occurr
 var FlatOmitPrefixStorageLayoutDoc string
 
 func init() {
-	extension.RegisterExtension(FlatOmitPrefixStorageLayoutName, NewFlatOmitPrefixStorageLayout, nil, &FlatOmitPrefixStorageLayoutDoc)
+	extension.RegisterExtensionStorageRoot(FlatOmitPrefixStorageLayoutName, NewFlatOmitPrefixStorageLayout, nil, &FlatOmitPrefixStorageLayoutDoc)
 }
 
 func NewFlatOmitPrefixStorageLayout() (extensiontypes.Extension, error) {

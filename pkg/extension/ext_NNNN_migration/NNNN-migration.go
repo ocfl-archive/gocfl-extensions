@@ -34,13 +34,13 @@ const MigrationDescription = "preservation management - file migration"
 var MigrationDoc string
 
 func init() {
-	extension.RegisterExtension(MigrationName, func() (extensiontypes.Extension, error) {
+	extension.RegisterExtensionObject(MigrationName, func() (extensiontypes.Extension, error) {
 		return NewMigration(nil), nil
 	}, nil, &MigrationDoc)
 }
 
 func Init(migrationConf *ConfigMigration, sourceFS fs.FS, logger ocfllogger.OCFLLogger) {
-	extension.RegisterExtension(MigrationName, func() (extensiontypes.Extension, error) {
+	extension.RegisterExtensionObject(MigrationName, func() (extensiontypes.Extension, error) {
 		mig, err := GetMigrations(migrationConf)
 		if err != nil {
 			return nil, errors.Wrap(err, "cannot get migrations")

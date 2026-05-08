@@ -124,26 +124,29 @@ func SetupTestEnv(t *testing.T) *TestEnv {
 	}
 }
 
+// FullTestEnv contains all components required for a complete OCFL test.
 type FullTestEnv struct {
-	DestFS                             vfsrw.VFSRW
-	SourceFS                           appendfs.FS
-	ReadSRFS                           fs.FS
-	ExtFactory                         extension.Factory
-	OCFLFactory                        factory.Factory
-	StorageRoot                        storageroot.StorageRoot
-	Logger                             zLogger.ZLogger
-	OCFLLogger                         ocfllogger.OCFLLogger
-	DefaultStorageRootExtensionManager storageroot.ExtensionManager
-	DefaultObjectExtensionManager      object.ExtensionManager
+	DestFS                      vfsrw.VFSRW                  // The underlying virtual read/write file system.
+	TargetFS                    appendfs.FS                  // File system for write access (append support).
+	ReadSRFS                    fs.FS                        // Read-only file system for the storage root.
+	ExtFactory                  extension.Factory            // Factory for OCFL extensions.
+	OCFLFactory                 factory.Factory              // Factory for OCFL objects and storage roots.
+	StorageRoot                 storageroot.StorageRoot      // The initialized OCFL storage root.
+	OCFLLogger                  ocfllogger.OCFLLogger        // OCFL-specific logger.
+	StorageRootExtensionManager storageroot.ExtensionManager // manager for storage root extensions.
+	ObjectExtensionManager      object.ExtensionManager      // manager for object extensions.
 }
 
+// SetupFullTestEnv initializes a complete test environment including an in-memory file system and OCFL storage root.
 func SetupFullTestEnv(t *testing.T, extensionParams map[string]string, tempFS, storageRootExtensionFS, objectExtensionFS fs.FS) *FullTestEnv {
 	ctx := t.Context()
+	// Logger setup
 	out := zerolog.ConsoleWriter{Out: os.Stderr}
 	zlogger := zerolog.New(out)
 	var _zlogger zLogger.ZLogger = &zlogger
 	logger := ocfllogger.NewOCFLLogger(ctx, &zlogger, nil, version.Version1_1, nil)
 
+	// In-memory VFS configuration (afero mem://)
 	cfg := vfsrw.Config{
 		"testmem": &vfsrw.VFS{
 			Name: "testmem",
@@ -154,11 +157,14 @@ func SetupFullTestEnv(t *testing.T, extensionParams map[string]string, tempFS, s
 		},
 	}
 
+	// Initialize VFS
 	vfs, err := vfsrw.NewFS(cfg, _zlogger)
 	require.NoError(t, err)
 	t.Cleanup(func() {
 		_ = vfs.Close()
 	})
+
+	// Create directory structure in VFS
 	err = writefs.MkDir(vfs, "vfs://testmem/storageroot")
 	require.NoError(t, err)
 	err = writefs.MkDir(vfs, "vfs://testmem/extensionconfig")
@@ -169,14 +175,19 @@ func SetupFullTestEnv(t *testing.T, extensionParams map[string]string, tempFS, s
 	extConfigFS, err := writefs.Sub(vfs, "vfs://testmem/extensionconfig")
 	require.NoError(t, err)
 
+	// Copy default configurations
 	err = copyRecursive(defaultconfig.DefaultConfig, extConfigFS, "", "")
 	require.NoError(t, err)
+
+	// copy custom storage root extension configurations
 	if storageRootExtensionFS != nil {
 		err = copyRecursive(storageRootExtensionFS, extConfigFS, "", "storageroot")
 		require.NoError(t, err)
 	}
 	storageRootExtensionFS, err = fs.Sub(extConfigFS, "storageroot")
 	require.NoError(t, err)
+
+	// copy custom object extension configurations
 	if objectExtensionFS != nil {
 		err = copyRecursive(objectExtensionFS, extConfigFS, "", "object")
 		require.NoError(t, err)
@@ -184,16 +195,21 @@ func SetupFullTestEnv(t *testing.T, extensionParams map[string]string, tempFS, s
 	objectExtensionFS, err = fs.Sub(extConfigFS, "object")
 	require.NoError(t, err)
 
+	// Copy additional temporary files
 	if tempFS != nil {
 		err = copyRecursive(tempFS, vfs, "", "vfs://testmem/temp")
 		require.NoError(t, err)
 	}
 
-	destFS := appendfs.FS(vfs)
+	// Create writable file system used for initialization
+	destFS, err := appendfs.New(vfs)
+	require.NoError(t, err)
 
+	// storage root subdirectory for initialization
 	srFS, err := appendfs.Sub(destFS, "vfs://testmem/storageroot")
 	require.NoError(t, err)
 
+	// Initialize extension factory and managers
 	extFactory, err := extensionimpl.NewFactory(extensionParams, logger)
 	require.NoError(t, err)
 	storageRootExtManager0, err := extFactory.LoadExtensionManager(storageRootExtensionFS)
@@ -208,12 +224,13 @@ func SetupFullTestEnv(t *testing.T, extensionParams map[string]string, tempFS, s
 	ocflVer := version.Version1_1
 	fact := factoryimpl.NewFactory(ocflVer, extFactory, logger)
 
+	// Create and configure storage root base object
 	sr := storagerootimpl.NewStorageRootBase(ctx, fact, ocflVer, extFactory, logger)
 	sr.WithWriteFS(srFS)
 	sr.WithDigestAlgorithm(checksum.DigestSHA512)
-
 	sr.WithExtensionManager(storageRootExtManager)
 
+	// Initialize storage root
 	initializer := sr.GetInitializer()
 	assert.NotNil(t, initializer)
 	initializer.WithFS(srFS)
@@ -221,24 +238,23 @@ func SetupFullTestEnv(t *testing.T, extensionParams map[string]string, tempFS, s
 	err = initializer.Init()
 	require.NoError(t, err)
 
-	// Lese-Dateisystem für Storage Root (als fs.FS) neu laden
-	// Wir nutzen hier das ursprüngliche destFS, da es für In-Memory VFS okay ist.
-	// In echten Szenarien (ZIP) müsste das Dateisystem neu geöffnet werden.
+	// Reload read-only file system for storage root (as fs.FS)
+	// We use the original destFS here as it's fine for in-memory VFS.
+	// In real scenarios (ZIP), the file system would need to be reopened.
 	readSRFS_append, err := appendfs.Sub(destFS, "vfs://testmem/storageroot")
 	require.NoError(t, err)
 	readSRFS := fs.FS(readSRFS_append)
 
 	return &FullTestEnv{
-		DestFS:                             vfs,
-		SourceFS:                           srFS,
-		ReadSRFS:                           readSRFS,
-		ExtFactory:                         extFactory,
-		OCFLFactory:                        fact,
-		StorageRoot:                        sr,
-		Logger:                             _zlogger,
-		OCFLLogger:                         logger,
-		DefaultStorageRootExtensionManager: storageRootExtManager,
-		DefaultObjectExtensionManager:      objectExtManager,
+		DestFS:                      vfs,
+		TargetFS:                    srFS,
+		ReadSRFS:                    readSRFS,
+		ExtFactory:                  extFactory,
+		OCFLFactory:                 fact,
+		StorageRoot:                 sr,
+		OCFLLogger:                  logger,
+		StorageRootExtensionManager: storageRootExtManager,
+		ObjectExtensionManager:      objectExtManager,
 	}
 }
 
@@ -246,9 +262,9 @@ func CreateTestObject(t *testing.T, env *FullTestEnv, objID string) (object.Obje
 	objFolder, err := env.StorageRoot.IdToFolder(objID)
 	require.NoError(t, err)
 
-	objFS, err := appendfs.Sub(env.SourceFS, objFolder)
+	objFS, err := appendfs.Sub(env.TargetFS, objFolder)
 	require.NoError(t, err)
-	obj, err := env.StorageRoot.CreateObject(objID, checksum.DigestSHA512, []checksum.DigestAlgorithm{}, env.DefaultObjectExtensionManager)
+	obj, err := env.StorageRoot.CreateObject(objID, checksum.DigestSHA512, []checksum.DigestAlgorithm{}, env.ObjectExtensionManager)
 	require.NoError(t, err)
 
 	objInit := obj.GetInitializer(objFS)
