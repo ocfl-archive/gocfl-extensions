@@ -17,7 +17,7 @@ import (
 	"emperror.dev/errors"
 	"github.com/google/uuid"
 	"github.com/gosimple/slug"
-	"github.com/je4/filesystem/v3/pkg/writefs"
+	"github.com/je4/filesystem/v4/pkg/writefs"
 	"github.com/ocfl-archive/gocfl-extensions/pkg/extension/ext_NNNN_content_subpath"
 	"github.com/ocfl-archive/gocfl-extensions/pkg/extension/ext_NNNN_filesystem"
 	"github.com/ocfl-archive/gocfl-extensions/pkg/extension/ext_NNNN_indexer"
