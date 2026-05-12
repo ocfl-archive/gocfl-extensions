@@ -26,6 +26,7 @@ import (
 const DirectCleanName = "0011-direct-clean-path-layout"
 
 func init() {
+	extension.RegisterExtensionStorageRoot(DirectCleanName, NewDirectClean, nil, &DirectCleanDoc)
 	extension.RegisterExtensionObject(DirectCleanName, NewDirectClean, nil, &DirectCleanDoc)
 }
 

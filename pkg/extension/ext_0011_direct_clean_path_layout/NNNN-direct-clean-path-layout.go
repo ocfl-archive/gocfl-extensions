@@ -12,6 +12,7 @@ const LegacyDirectCleanDescription = "Maps OCFL object identifiers to storage pa
 
 func init() {
 	extension.RegisterExtensionStorageRoot(LegacyDirectCleanName, NewLegacyDirectClean, nil, &DirectCleanDoc)
+	extension.RegisterExtensionObject(LegacyDirectCleanName, NewLegacyDirectClean, nil, &DirectCleanDoc)
 }
 
 func NewLegacyDirectClean() (extension.Extension, error) {

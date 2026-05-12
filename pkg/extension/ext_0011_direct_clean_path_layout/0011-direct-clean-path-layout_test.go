@@ -24,9 +24,10 @@ func doTestDirectClean(t *testing.T, extensionName string) {
 
 	runTest := func(name string, config *DirectCleanConfig, cases []testCase) {
 		t.Run(name, func(t *testing.T) {
-			data, _ := json.MarshalIndent(config, "", "  ")
+			data, err := json.MarshalIndent(config, "", "  ")
+			require.NoError(t, err)
 			configPath := path.Join(extensionName, "config.json")
-			_, err := writefs.WriteFile(env.ConfigFS, configPath, data)
+			_, err = writefs.WriteFile(env.ConfigFS, configPath, data)
 			require.NoError(t, err)
 
 			srExtensionFactory, err := extensionimpl.NewFactory[storageroot.ExtensionManager](nil, env.Logger)

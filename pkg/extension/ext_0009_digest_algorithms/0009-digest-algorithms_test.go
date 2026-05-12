@@ -19,8 +19,9 @@ func TestNewDigestAlgorithms(t *testing.T) {
 	digestAlgorithmsConfig := &ext_0001_digest_algorithms.DigestAlgorithmsConfig{
 		ExtensionConfig: &extension.ExtensionConfig{ExtensionName: DigestAlgorithmsName},
 	}
-	data, _ := json.MarshalIndent(digestAlgorithmsConfig, "", "  ")
-	_, err := writefs.WriteFile(env.ConfigFS, path.Join(DigestAlgorithmsName, "config.json"), data)
+	data, err := json.MarshalIndent(digestAlgorithmsConfig, "", "  ")
+	require.NoError(t, err)
+	_, err = writefs.WriteFile(env.ConfigFS, path.Join(DigestAlgorithmsName, "config.json"), data)
 	require.NoError(t, err)
 	extensionFactory, err := extensionimpl.NewFactory[object.ExtensionManager](nil, env.Logger)
 	require.NoError(t, err)

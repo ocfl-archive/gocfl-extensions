@@ -125,15 +125,17 @@ func SetupTestEnv(t *testing.T) *TestEnv {
 
 // FullTestEnv contains all components required for a complete OCFL test.
 type FullTestEnv struct {
-	DestFS                      vfsrw.VFSRW                  // The underlying virtual read/write file system.
-	TargetFS                    appendfs.FS                  // File system for write access (append support).
-	ReadSRFS                    fs.FS                        // Read-only file system for the storage root.
-	ExtFactory                  extension.Factory            // Factory for OCFL extensions.
-	OCFLFactory                 factory.Factory              // Factory for OCFL objects and storage roots.
-	StorageRoot                 storageroot.StorageRoot      // The initialized OCFL storage root.
-	OCFLLogger                  ocfllogger.OCFLLogger        // OCFL-specific logger.
-	StorageRootExtensionManager storageroot.ExtensionManager // manager for storage root extensions.
-	ObjectExtensionManager      object.ExtensionManager      // manager for object extensions.
+	DestFS                      vfsrw.VFSRW                                     // The underlying virtual read/write file system.
+	TargetFS                    appendfs.FS                                     // File system for write access (append support).
+	ReadSRFS                    fs.FS                                           // Read-only file system for the storage root.
+	ExtFactorySR                extension.Factory[storageroot.ExtensionManager] // Factory for OCFL storage root extensions.
+	ExtFactoryObj               extension.Factory[object.ExtensionManager]      // Factory for OCFL object extensions.
+	OCFLFactorySR               factory.FactoryStorageRoot                      // Factory for OCFL storage roots.
+	OCFLFactoryObj              factory.FactoryObject                           // Factory for OCFL objects.
+	StorageRoot                 storageroot.StorageRoot                         // The initialized OCFL storage root.
+	OCFLLogger                  ocfllogger.OCFLLogger                           // OCFL-specific logger.
+	StorageRootExtensionManager storageroot.ExtensionManager                    // manager for storage root extensions.
+	ObjectExtensionManager      object.ExtensionManager                         // manager for object extensions.
 }
 
 // SetupFullTestEnv initializes a complete test environment including an in-memory file system and OCFL storage root.
@@ -209,22 +211,22 @@ func SetupFullTestEnv(t *testing.T, extensionParams map[string]string, tempFS, s
 	require.NoError(t, err)
 
 	// Initialize extension factory and managers
-	extFactory, err := extensionimpl.NewFactory(extensionParams, logger)
+	extFactorySR, err := extensionimpl.NewFactory[storageroot.ExtensionManager](extensionParams, logger)
 	require.NoError(t, err)
-	storageRootExtManager0, err := extFactory.LoadExtensionManager(storageRootExtensionFS)
+	extFactoryObj, err := extensionimpl.NewFactory[object.ExtensionManager](extensionParams, logger)
 	require.NoError(t, err)
-	storageRootExtManager, ok := storageRootExtManager0.(storageroot.ExtensionManager)
-	require.True(t, ok, "extension manager should implement storageroot.ExtensionManager")
-	objectExtManager0, err := extFactory.LoadExtensionManager(objectExtensionFS)
+
+	storageRootExtManager, err := extFactorySR.LoadExtensionManager(storageRootExtensionFS)
 	require.NoError(t, err)
-	objectExtManager, ok := objectExtManager0.(object.ExtensionManager)
-	require.True(t, ok, "extension manager should implement object.ExtensionManager")
+	objectExtManager, err := extFactoryObj.LoadExtensionManager(objectExtensionFS)
+	require.NoError(t, err)
 
 	ocflVer := version.Version1_1
-	fact := factoryimpl.NewFactory(ocflVer, extFactory, logger)
+	factSR := factoryimpl.NewFactoryStorageRoot(ocflVer, extFactorySR, logger)
+	factObj := factoryimpl.NewFactoryObject(ocflVer, extFactoryObj, logger)
 
 	// Create and configure storage root base object
-	sr := storagerootimpl.NewStorageRootBase(ctx, fact, ocflVer, extFactory, logger)
+	sr := storagerootimpl.NewStorageRootBase(ctx, factSR, ocflVer, extFactorySR, logger)
 	sr.WithWriteFS(srFS)
 	sr.WithDigestAlgorithm(checksum.DigestSHA512)
 	sr.WithExtensionManager(storageRootExtManager)
@@ -248,8 +250,10 @@ func SetupFullTestEnv(t *testing.T, extensionParams map[string]string, tempFS, s
 		DestFS:                      vfs,
 		TargetFS:                    srFS,
 		ReadSRFS:                    readSRFS,
-		ExtFactory:                  extFactory,
-		OCFLFactory:                 fact,
+		ExtFactorySR:                extFactorySR,
+		ExtFactoryObj:               extFactoryObj,
+		OCFLFactorySR:               factSR,
+		OCFLFactoryObj:              factObj,
 		StorageRoot:                 sr,
 		OCFLLogger:                  logger,
 		StorageRootExtensionManager: storageRootExtManager,
@@ -263,8 +267,9 @@ func CreateTestObject(t *testing.T, env *FullTestEnv, objID string) (object.Obje
 
 	objFS, err := appendfs.Sub(env.TargetFS, objFolder)
 	require.NoError(t, err)
-	obj, err := env.StorageRoot.CreateObject(objID, checksum.DigestSHA512, []checksum.DigestAlgorithm{}, env.ObjectExtensionManager)
-	require.NoError(t, err)
+
+	obj := env.OCFLFactoryObj.NewObject(t.Context())
+	obj.WithExtensionManager(env.ObjectExtensionManager)
 
 	objInit := obj.GetInitializer(objFS)
 	err = objInit.Init(objID, checksum.DigestSHA512, []checksum.DigestAlgorithm{})
@@ -281,8 +286,8 @@ func ReloadObject(t *testing.T, env *FullTestEnv, objID string) (object.Object, 
 	objFS, err := fs.Sub(env.ReadSRFS, objFolder)
 	require.NoError(t, err)
 
-	loadedObj := env.OCFLFactory.NewObject(t.Context())
-	loader := loadedObj.GetLoader(objFS, env.ExtFactory)
+	loadedObj := env.OCFLFactoryObj.NewObject(t.Context())
+	loader := loadedObj.GetLoader(objFS, env.ExtFactoryObj)
 	err = loader.Load()
 	require.NoError(t, err)
 

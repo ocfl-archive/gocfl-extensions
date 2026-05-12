@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/je4/filesystem/v4/pkg/writefs"
+	"github.com/ocfl-archive/gocfl-extensions/pkg/extension/ext_0012_hash_and_no_prefix_id_n_tuple_storage_layout"
 	"github.com/ocfl-archive/gocfl-extensions/test"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension/extensionimpl"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/storageroot"
@@ -140,16 +141,17 @@ func TestStorageLayoutHashAndNoPrefixIdNTuple(t *testing.T) {
 				NumberOfTuples  int      `json:"numberOfTuples"`
 				Delimiters      []string `json:"delimiters"`
 			}{
-				ExtensionName:   "0012-hash-and-no-prefix-id-n-tuple-storage-layout",
+				ExtensionName:   ext_0012_hash_and_no_prefix_id_n_tuple_storage_layout.StorageLayoutHashAndNoPrefixIdNTupleName,
 				DigestAlgorithm: tc.digestAlgorithm,
 				TupleSize:       tc.tupleSize,
 				NumberOfTuples:  tc.numberOfTuples,
 				Delimiters:      tc.delimiters,
 			}
 
-			data, _ := json.MarshalIndent(conf, "", "  ")
-			configPath := path.Join("0012-hash-and-no-prefix-id-n-tuple-storage-layout", "config.json")
-			_, err := writefs.WriteFile(env.ConfigFS, configPath, data)
+			data, err := json.MarshalIndent(conf, "", "  ")
+			require.NoError(t, err)
+			configPath := path.Join(ext_0012_hash_and_no_prefix_id_n_tuple_storage_layout.StorageLayoutHashAndNoPrefixIdNTupleName, "config.json")
+			_, err = writefs.WriteFile(env.ConfigFS, configPath, data)
 			require.NoError(t, err)
 
 			extensionFactory, err := extensionimpl.NewFactory[storageroot.ExtensionManager](nil, env.Logger)
