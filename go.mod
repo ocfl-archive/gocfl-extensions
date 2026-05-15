@@ -13,10 +13,10 @@ require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/google/uuid v1.6.0
 	github.com/gosimple/slug v1.15.0
-	github.com/je4/filesystem/v4 v4.0.9
+	github.com/je4/filesystem/v4 v4.0.12
 	github.com/je4/utils/v2 v2.0.68
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
-	github.com/ocfl-archive/gocfl/v3 v3.0.0-20260512122646-04fa0e18e8fe
+	github.com/ocfl-archive/gocfl/v3 v3.0.0-20260515084643-96cfdec5cf0e
 	github.com/ocfl-archive/indexer/v3 v3.0.44
 	github.com/rs/zerolog v1.35.1
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
@@ -84,7 +84,7 @@ require (
 	go.opentelemetry.io/otel v1.43.0 // indirect
 	go.opentelemetry.io/otel/metric v1.43.0 // indirect
 	go.opentelemetry.io/otel/trace v1.43.0 // indirect
-	go.step.sm/crypto v0.79.0 // indirect
+	go.step.sm/crypto v0.81.0 // indirect
 	go.ub.unibas.ch/cloud/certloader/v2 v2.0.24 // indirect
 	go.ub.unibas.ch/cloud/genericproto/v2 v2.0.4 // indirect
 	go.ub.unibas.ch/cloud/minikvstore v1.0.2 // indirect
@@ -97,7 +97,7 @@ require (
 	golang.org/x/text v0.37.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260511170946-3700d4141b60 // indirect
-	google.golang.org/grpc v1.81.0 // indirect
+	google.golang.org/grpc v1.81.1 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

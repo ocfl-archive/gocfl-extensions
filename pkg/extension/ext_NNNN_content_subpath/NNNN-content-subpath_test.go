@@ -60,9 +60,9 @@ func TestContentSubPath(t *testing.T) {
 
 	t.Run("IntegrationWithObject", func(t *testing.T) {
 		objID := "test-object"
-		obj, objFS := test.CreateTestObject(t, env, objID)
+		obj, _ := test.CreateTestObject(t, env, objID)
 
-		vw, err := obj.StartUpdate(objFS, "initial version", "Junie", "junie@jetbrains.com", false)
+		vw, err := obj.StartUpdate("initial version", "Junie", "junie@jetbrains.com", false)
 		require.NoError(t, err)
 
 		// Test file in default 'content' area

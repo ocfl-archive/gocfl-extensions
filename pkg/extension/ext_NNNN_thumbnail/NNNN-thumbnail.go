@@ -207,13 +207,13 @@ func (thumb *Thumbnail) storeThumbnail(obj object.VersionWriter, head *inventory
 		if digest, err = obj.AddReader(mFile, []string{targetName}, thumb.StorageName, true, false); err != nil {
 			return "", "", errors.Wrapf(err, "cannot write '%s'", targetName)
 		}
-		areaPath, err := obj.GetExtensionManager().GetAreaPath(thumb.StorageName)
+		areaPath, err := obj.GetObject().GetExtensionManager().GetAreaPath(thumb.StorageName)
 		if err != nil {
 			return "", "", errors.Wrapf(err, "cannot get area path for '%s'", thumb.StorageName)
 		}
 		return fmt.Sprintf("%s/%s", areaPath, targetName), digest, nil
 	case "path":
-		pathName, err := obj.GetExtensionManager().GetAreaPath("content")
+		pathName, err := obj.GetObject().GetExtensionManager().GetAreaPath("content")
 		if err != nil {
 			return "", "", errors.Wrapf(err, "cannot get area path for '%s'", "content")
 		}
@@ -225,7 +225,7 @@ func (thumb *Thumbnail) storeThumbnail(obj object.VersionWriter, head *inventory
 		}
 		return targetname, digest, nil
 	case "extension":
-		fsys := obj.GetFS()
+		fsys := obj.GetObject().GetWriteFS()
 		extFS, err := writefs.Sub(fsys, path.Join("extensions", thumb.GetName()))
 		if err != nil {
 			return "", "", errors.Wrapf(err, "cannot create subfs %v/%s", fsys, path.Join("extensions", thumb.GetName()))
@@ -312,7 +312,7 @@ func (thumb *Thumbnail) UpdateObjectBefore(object.VersionWriter) error {
 }
 
 func (thumb *Thumbnail) UpdateObjectAfter(obj object.VersionWriter) error {
-	inventory := obj.GetInventory()
+	inventory := obj.GetObject().GetInventory()
 	head := inventory.GetHead()
 	thumb.buffer[head.String()] = &bytes.Buffer{}
 	thumb.writer = brotli.NewWriter(thumb.buffer[head.String()])
@@ -322,7 +322,7 @@ func (thumb *Thumbnail) UpdateObjectAfter(obj object.VersionWriter) error {
 	}
 
 	// first get the metadata from the object
-	extractor := obj.GetExtractor(obj.GetFS(), nil)
+	extractor := obj.GetObject().GetExtractor()
 	meta, err := extractor.GetMetadata()
 	if err != nil {
 		return errors.Wrapf(err, "cannot get metadata from object %s", obj.GetID())
@@ -368,9 +368,9 @@ func (thumb *Thumbnail) UpdateObjectAfter(obj object.VersionWriter) error {
 				if len(stateFiles) == 0 {
 					return errors.Errorf("zero state file for checksum '%s' in object '%s'", cs, obj.GetID())
 				}
-				external, err := obj.GetExtensionManager().BuildObjectExtractPath(stateFiles[len(stateFiles)-1], "")
+				external, err := obj.GetObject().GetExtensionManager().BuildObjectExtractPath(stateFiles[len(stateFiles)-1], "")
 				if err != nil {
-					return errors.Wrapf(err, "cannot build external path for file '%s' in object '%s'", stateFiles[len(stateFiles)-1], obj.GetID())
+					return errors.Wrapf(err, "cannot build external path for file '%s' in object '%s'", stateFiles[len(stateFiles)-1], obj.GetObject().GetID())
 				}
 				file, err = thumb.sourceFS.Open(external)
 				if err != nil {

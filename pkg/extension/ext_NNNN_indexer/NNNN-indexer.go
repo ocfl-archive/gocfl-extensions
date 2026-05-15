@@ -267,9 +267,9 @@ func (sl *Indexer) UpdateObjectAfter(object object.VersionWriter) error {
 		return errors.Wrap(err, "cannot close brotli writer")
 	}
 	sl.writer = nil
-	head := object.GetInventory().GetHead()
+	head := object.GetObject().GetInventory().GetHead()
 	if !head.IsValid() {
-		return errors.Errorf("no head for object '%s'", object.GetID())
+		return errors.Errorf("no head for object '%s'", object.GetObject().GetID())
 	}
 	buffer, ok := sl.buffer[head.String()]
 	if !ok {
@@ -355,7 +355,7 @@ func (sl *Indexer) StreamObject(object object.VersionWriter, reader io.Reader, s
 		return errors.New("Please enable indexer in config file")
 	}
 
-	inventory := object.GetInventory()
+	inventory := object.GetObject().GetInventory()
 	head := inventory.GetHead()
 	if _, ok := sl.buffer[head.String()]; !ok {
 		sl.buffer[head.String()] = &bytes.Buffer{}

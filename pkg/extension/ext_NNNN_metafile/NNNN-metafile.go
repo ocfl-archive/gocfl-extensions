@@ -230,7 +230,7 @@ func toStringKeys(val interface{}) (interface{}, error) {
 }
 
 func (sl *MetaFile) UpdateObjectBefore(obj object.VersionWriter) error {
-	inv := obj.GetInventory()
+	inv := obj.GetObject().GetInventory()
 	if inv == nil {
 		return errors.New("no inventory available")
 	}
@@ -341,7 +341,7 @@ func (sl *MetaFile) UpdateObjectBefore(obj object.VersionWriter) error {
 			return errors.Wrapf(err, "cannot write '%s'", targetname)
 		}
 	case "path":
-		path, err := obj.GetExtensionManager().GetAreaPath("content")
+		path, err := obj.GetObject().GetExtensionManager().GetAreaPath("content")
 		if err != nil {
 			return errors.Wrapf(err, "cannot get area path for '%s'", "content")
 		}
@@ -353,8 +353,8 @@ func (sl *MetaFile) UpdateObjectBefore(obj object.VersionWriter) error {
 		}
 	case "extension":
 		targetname := strings.TrimLeft(filepath.ToSlash(filepath.Join("extensions", sl.GetName(), sl.StorageName, sl.MetaName)), "/")
-		if _, err := writefs.WriteFile(obj.GetFS(), targetname, infoData); err != nil {
-			return errors.Wrapf(err, "cannot write file '%v/%s'", obj.GetFS(), targetname)
+		if _, err := writefs.WriteFile(obj.GetObject().GetWriteFS(), targetname, infoData); err != nil {
+			return errors.Wrapf(err, "cannot write file '%v/%s'", obj.GetObject().GetWriteFS(), targetname)
 		}
 	default:
 		return errors.Errorf("unsupported storage type '%s'", sl.StorageType)

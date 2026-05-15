@@ -30,7 +30,7 @@ func (thumb *Thumbnail) StreamObject(object object.VersionWriter, reader io.Read
 		thumb.logger.Info().Msgf("unsupported target image format '%s'", thumb.ThumbnailConfig.Ext)
 		return nil
 	}
-	inventory := object.GetInventory()
+	inventory := object.GetObject().GetInventory()
 	head := inventory.GetHead()
 	if _, ok := thumb.counter[head.String()]; !ok {
 		thumb.counter[head.String()] = 0
@@ -134,7 +134,7 @@ func (thumb *Thumbnail) StreamObject(object object.VersionWriter, reader io.Read
 }
 
 func (thumb *Thumbnail) AddFileAfter(versionWriter object.VersionWriter, sourceFS fs.FS, source []string, internalPath, digest, area string, isDir bool) error {
-	inventory := versionWriter.GetInventory()
+	inventory := versionWriter.GetObject().GetInventory()
 	head := inventory.GetHead()
 	if _, ok := thumb.counter[head.String()]; !ok {
 		thumb.counter[head.String()] = 0

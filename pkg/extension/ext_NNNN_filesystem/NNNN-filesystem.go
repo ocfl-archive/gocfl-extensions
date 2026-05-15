@@ -125,7 +125,7 @@ func (fi *Filesystem) AddFileAfter(versionWriter object.VersionWriter, sourceFS 
 		return nil
 	}
 
-	inventory := versionWriter.GetInventory()
+	inventory := versionWriter.GetObject().GetInventory()
 	latestVersion := inventory.GetVersions().GetVersion(inventory.GetVersions().LatestVersionNumber())
 
 	var err error
@@ -172,7 +172,7 @@ func (fi *Filesystem) AddFileAfter(versionWriter object.VersionWriter, sourceFS 
 		if err := fsMeta.init(fullpath, stat); err != nil {
 			return errors.Wrapf(err, "cannot init fsMeta for '%s'", fullpath)
 		}
-		newSrc, err := versionWriter.GetExtensionManager().BuildObjectStatePath(src, area)
+		newSrc, err := versionWriter.GetObject().GetExtensionManager().BuildObjectStatePath(src, area)
 		if err != nil {
 			return errors.Wrapf(err, "cannot build object extract path for '%s'", src)
 		}
@@ -316,9 +316,9 @@ func (fi *Filesystem) UpdateObjectAfter(object object.VersionWriter) error {
 	if err := fi.writer.Close(); err != nil {
 		return errors.Wrap(err, "cannot close brotli writer")
 	}
-	head := object.GetInventory().GetHead()
+	head := object.GetObject().GetInventory().GetHead()
 	if !head.IsValid() {
-		return errors.Errorf("no head for object '%s'", object.GetID())
+		return errors.Errorf("no head for object '%s'", object.GetObject().GetID())
 	}
 	buffer, ok := fi.buffer[head.String()]
 	if !ok {

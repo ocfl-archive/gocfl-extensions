@@ -178,13 +178,13 @@ func (mi *Migration) alreadyMigrated(cs string) bool {
 }
 
 func (mi *Migration) UpdateObjectAfter(obj object.VersionWriter) error {
-	inventory := obj.GetInventory()
+	inventory := obj.GetObject().GetInventory()
 	if inventory == nil {
 		return errors.Errorf("inventory is nil")
 	}
 
 	// first get the metadata from the object
-	extractor := obj.GetExtractor(obj.GetFS(), nil)
+	extractor := obj.GetObject().GetExtractor()
 	meta, err := extractor.GetMetadata()
 	if err != nil {
 		return errors.Wrapf(err, "cannot get metadata from object %s", obj.GetID())
@@ -240,7 +240,7 @@ func (mi *Migration) DoNewVersion(obj object.VersionWriter) error {
 		mi.done = true
 	}()
 
-	migrationMetadata, err := mi.GetMetadata(nil, obj)
+	migrationMetadata, err := mi.GetMetadata(nil, obj.GetObject())
 	if err != nil {
 		return errors.Wrapf(err, "cannot get migration metadata for object '%s'", obj.GetID())
 	}
@@ -250,7 +250,7 @@ func (mi *Migration) DoNewVersion(obj object.VersionWriter) error {
 			_ = meta
 		}
 	}
-	inv := obj.GetInventory()
+	inv := obj.GetObject().GetInventory()
 	head := inv.GetHead()
 	/*
 		extensionManager := object.GetExtensionManager()
@@ -320,7 +320,7 @@ func (mi *Migration) DoNewVersion(obj object.VersionWriter) error {
 			if len(stateFiles) == 0 {
 				return errors.Errorf("zero state file for checksum '%s' in object '%s'", cs, obj.GetID())
 			}
-			external, err := obj.GetExtensionManager().BuildObjectExtractPath(stateFiles[len(stateFiles)-1], "")
+			external, err := obj.GetObject().GetExtensionManager().BuildObjectExtractPath(stateFiles[len(stateFiles)-1], "")
 			if err != nil {
 				return errors.Wrapf(err, "cannot build external path for file '%s' in object '%s'", stateFiles[len(stateFiles)-1], obj.GetID())
 			}
@@ -343,15 +343,15 @@ func (mi *Migration) DoNewVersion(obj object.VersionWriter) error {
 		*/
 		var extractTargetNames []string
 		for _, targetName := range targetNames {
-			extractTargetName, err := obj.GetExtensionManager().BuildObjectExtractPath(targetName, "")
+			extractTargetName, err := obj.GetObject().GetExtensionManager().BuildObjectExtractPath(targetName, "")
 			if err != nil {
-				return errors.Wrapf(err, "cannot build extract path for file '%s' in object '%s'", targetName, obj.GetID())
+				return errors.Wrapf(err, "cannot build extract path for file '%s' in object '%s'", targetName, obj.GetObject().GetID())
 			}
 			extractTargetNames = append(extractTargetNames, extractTargetName)
 		}
-		manifestName, err := obj.GetExtensionManager().BuildObjectManifestPath(extractTargetNames[0], "content")
+		manifestName, err := obj.GetObject().GetExtensionManager().BuildObjectManifestPath(extractTargetNames[0], "content")
 		if err != nil {
-			return errors.Wrapf(err, "cannot build manifest path for file '%s' in object '%s'", extractTargetNames[0], obj.GetID())
+			return errors.Wrapf(err, "cannot build manifest path for file '%s' in object '%s'", extractTargetNames[0], obj.GetObject().GetID())
 		}
 		path := inv.BuildManifestName(manifestName)
 		if err := doMigrate(obj, mig, fExt, extractTargetNames, file); err != nil {

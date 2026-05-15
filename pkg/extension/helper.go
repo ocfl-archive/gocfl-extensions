@@ -132,7 +132,7 @@ func WriteJsonL(extensionName string, obj object.VersionWriter, name string, bro
 		return errors.Errorf("invalid compression '%s'", compress)
 	}
 
-	head := obj.GetInventory().GetHead()
+	head := obj.GetObject().GetInventory().GetHead()
 	switch strings.ToLower(storageType) {
 	case "area":
 		targetname := fmt.Sprintf("%s_%s.jsonl%s", name, head, ext)
@@ -140,7 +140,7 @@ func WriteJsonL(extensionName string, obj object.VersionWriter, name string, bro
 			return errors.Wrapf(err, "cannot write '%s'", targetname)
 		}
 	case "path":
-		pathName, err := obj.GetExtensionManager().GetAreaPath("content")
+		pathName, err := obj.GetObject().GetExtensionManager().GetAreaPath("content")
 		if err != nil {
 			return errors.Wrapf(err, "cannot get area path for '%s'", "content")
 		}

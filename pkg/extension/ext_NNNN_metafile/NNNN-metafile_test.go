@@ -78,7 +78,7 @@ func TestMetaFile_AddObject(t *testing.T) {
 	// 4. Test-Objekt erstellen
 	objID := "test-object"
 	obj, objFS := test.CreateTestObject(t, env, objID)
-	versionWriter, err := obj.StartUpdate(objFS, "initial data", "Jane Doe", "mailto:dummy", false)
+	versionWriter, err := obj.StartUpdate("initial data", "Jane Doe", "mailto:dummy", false)
 	require.NoError(t, err)
 	err = versionWriter.AddFile(configFS, "temp/data.txt", false, "content", false, false)
 	require.NoError(t, err)

@@ -234,8 +234,8 @@ type metaFileBase struct {
 */
 
 func (me *Mets) UpdateObjectAfter(obj object.VersionWriter) error {
-	inventory := obj.GetInventory()
-	extractor := obj.GetExtractor(obj.GetFS(), nil)
+	inventory := obj.GetObject().GetInventory()
+	extractor := obj.GetObject().GetExtractor()
 	metadata, err := extractor.GetMetadata()
 	if err != nil {
 		return errors.Wrap(err, "cannot get metadata from object")
@@ -286,7 +286,7 @@ func (me *Mets) UpdateObjectAfter(obj object.VersionWriter) error {
 			return errors.Wrapf(err, "cannot build names for %s", me.PremisFile)
 		}
 	case "path":
-		path, err := obj.GetExtensionManager().GetAreaPath("content")
+		path, err := obj.GetObject().GetExtensionManager().GetAreaPath("content")
 		if err != nil {
 			return errors.Wrapf(err, "cannot get area path for '%s'", "content")
 		}
@@ -301,13 +301,13 @@ func (me *Mets) UpdateObjectAfter(obj object.VersionWriter) error {
 			return errors.Wrapf(err, "cannot build names for %s", premisName)
 		}
 	case "extension":
-		metsName := strings.TrimLeft(filepath.ToSlash(filepath.Join(me.StorageName, fmt.Sprintf(me.MetsFile, obj.GetOCFLVersion()))), "/")
+		metsName := strings.TrimLeft(filepath.ToSlash(filepath.Join(me.StorageName, fmt.Sprintf(me.MetsFile, obj.GetObject().GetInventory().GetID()))), "/")
 		metsNames = &object.NamesStruct{
 			ExternalPaths: []string{me.MetsFile},
 			InternalPath:  metsName,
 			ManifestPath:  "",
 		}
-		premisName := strings.TrimLeft(filepath.ToSlash(filepath.Join(me.StorageName, fmt.Sprintf(me.PremisFile, obj.GetOCFLVersion()))), "/")
+		premisName := strings.TrimLeft(filepath.ToSlash(filepath.Join(me.StorageName, fmt.Sprintf(me.PremisFile, obj.GetObject().GetInventory().GetID()))), "/")
 		premisNames = &object.NamesStruct{
 			ExternalPaths: []string{me.PremisFile},
 			InternalPath:  premisName,
@@ -1326,7 +1326,7 @@ func (me *Mets) UpdateObjectAfter(obj object.VersionWriter) error {
 			return errors.Wrapf(err, "cannot write '%s'", "schemas/xlink.xsd")
 		}
 	case "path":
-		path, err := obj.GetExtensionManager().GetAreaPath("content")
+		path, err := obj.GetObject().GetExtensionManager().GetAreaPath("content")
 		if err != nil {
 			return errors.Wrapf(err, "cannot get area path for '%s'", "content")
 		}
@@ -1353,8 +1353,8 @@ func (me *Mets) UpdateObjectAfter(obj object.VersionWriter) error {
 			return errors.Wrapf(err, "cannot write '%s'", "schemas/xlink.xsd")
 		}
 	case "extension":
-		metsName := strings.TrimLeft(filepath.ToSlash(filepath.Join(me.StorageName, fmt.Sprintf(me.MetsFile, obj.GetOCFLVersion()))), "/")
-		premisName := strings.TrimLeft(filepath.ToSlash(filepath.Join(me.StorageName, fmt.Sprintf(me.PremisFile, obj.GetOCFLVersion()))), "/")
+		metsName := strings.TrimLeft(filepath.ToSlash(filepath.Join(me.StorageName, fmt.Sprintf(me.MetsFile, obj.GetObject().GetInventory().GetID()))), "/")
+		premisName := strings.TrimLeft(filepath.ToSlash(filepath.Join(me.StorageName, fmt.Sprintf(me.PremisFile, obj.GetObject().GetInventory().GetID()))), "/")
 		if _, err := writefs.WriteFile(me.fsys, metsName, metsBytes); err != nil {
 			return errors.Wrapf(err, "cannot write file '%v/%s'", me.fsys, metsName)
 		}
