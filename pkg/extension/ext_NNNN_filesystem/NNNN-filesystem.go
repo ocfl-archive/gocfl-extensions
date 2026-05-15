@@ -13,10 +13,10 @@ import (
 
 	"emperror.dev/errors"
 	"github.com/andybalholm/brotli"
+	"github.com/je4/filesystem/v4/pkg/appendfs"
 	"github.com/je4/filesystem/v4/pkg/writefs"
 	"github.com/je4/utils/v2/pkg/checksum"
 	ext "github.com/ocfl-archive/gocfl-extensions/pkg/extension"
-	"github.com/ocfl-archive/gocfl/v3/pkg/appendfs"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
 	extensiontypes "github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
 	inventorytypes "github.com/ocfl-archive/gocfl/v3/pkg/ocfl/inventory"

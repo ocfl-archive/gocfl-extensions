@@ -13,10 +13,10 @@ require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/google/uuid v1.6.0
 	github.com/gosimple/slug v1.15.0
-	github.com/je4/filesystem/v4 v4.0.12
+	github.com/je4/filesystem/v4 v4.0.13
 	github.com/je4/utils/v2 v2.0.68
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
-	github.com/ocfl-archive/gocfl/v3 v3.0.0-20260515084643-96cfdec5cf0e
+	github.com/ocfl-archive/gocfl/v3 v3.0.0-20260515094657-e3ac51bb745e
 	github.com/ocfl-archive/indexer/v3 v3.0.44
 	github.com/rs/zerolog v1.35.1
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1

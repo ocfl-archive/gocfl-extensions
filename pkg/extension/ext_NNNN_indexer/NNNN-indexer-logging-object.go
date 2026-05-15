@@ -6,7 +6,7 @@ import (
 	"io/fs"
 	"net/url"
 
-	"github.com/ocfl-archive/gocfl/v3/pkg/appendfs"
+	"github.com/je4/filesystem/v4/pkg/appendfs"
 	extensiontypes "github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfllogger"
 )

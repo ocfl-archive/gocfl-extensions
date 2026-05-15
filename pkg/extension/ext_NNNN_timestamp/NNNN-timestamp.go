@@ -15,8 +15,8 @@ import (
 
 	"emperror.dev/errors"
 	"github.com/digitorus/timestamp"
+	"github.com/je4/filesystem/v4/pkg/appendfs"
 	"github.com/je4/filesystem/v4/pkg/writefs"
-	"github.com/ocfl-archive/gocfl/v3/pkg/appendfs"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
 	extensiontypes "github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/object"
