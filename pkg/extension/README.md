@@ -36,3 +36,26 @@ Diese Erweiterungen sind (noch) nicht offiziell registriert und verwenden den Pl
 - [NNNN-pairtree-storage-layout](ext_NNNN_pairtree_storage_layout/README.md)
 - [NNNN-thumbnail](ext_NNNN_thumbnail/README.md)
 - [NNNN-timestamp](ext_NNNN_timestamp/README.md)
+
+## Initialisierung komplexer Erweiterungen
+
+Einige Erweiterungen sind komplexer Natur und erfordern zusätzliche Konfigurationsdaten (z. B. für die METS-Erzeugung, Bildkonvertierung oder Metadaten-Extraktion). Wenn diese Erweiterungen verwendet werden, müssen sie oft manuell initialisiert und konfiguriert werden, bevor sie in den OCFL-Prozess integriert werden können.
+
+Dies geschieht in der Regel durch Aufruf einer `Init`-Funktion der Erweiterung, die die notwendigen Laufzeitdaten (wie Logger oder Dateisystem-Referenzen) setzt.
+
+### Beispiel: Initialisierung der Migration- und Thumbnail-Erweiterung
+
+Das folgende Beispiel zeigt, wie Erweiterungen im `gocfl-cli` Projekt vor der Verwendung initialisiert werden:
+
+```go
+// Initialisierung der Migration-Erweiterung mit Konfiguration und Quell-Dateisystem
+ext_NNNN_migration.Init(&conf.Migration, sourceFS, logger)
+
+// Initialisierung der Thumbnail-Erweiterung
+ext_NNNN_thumbnail.Init(conf.Thumbnail, sourceFS, logger)
+
+// Initialisierung der Indexer-Erweiterung
+ext_NNNN_indexer.Init(addr, conf.Indexer, localCache, logger)
+```
+
+Durch diese `Init`-Aufrufe registrieren sich die Erweiterungen selbst mit der notwendigen Laufzeitkonfiguration im globalen OCFL-Erweiterungs-Manager, sodass sie während des Ingest-Prozesses korrekt aufgerufen werden können.
