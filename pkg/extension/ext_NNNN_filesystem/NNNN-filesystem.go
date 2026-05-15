@@ -1,3 +1,6 @@
+// Package ext_NNNN_filesystem implementiert die OCFL-Erweiterung NNNN-filesystem.
+//
+// Diese Erweiterung bietet Unterstützung für Dateisystem-spezifische Operationen.
 package ext_NNNN_filesystem
 
 import (

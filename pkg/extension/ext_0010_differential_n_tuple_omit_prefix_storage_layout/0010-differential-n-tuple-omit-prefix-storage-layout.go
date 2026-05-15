@@ -1,3 +1,6 @@
+// Package ext_0010_differential_n_tuple_omit_prefix_storage_layout implementiert die OCFL-Erweiterung 0010-differential-n-tuple-omit-prefix-storage-layout.
+//
+// Diese Erweiterung bietet ein differentielles n-Tupel Speicherlayout, bei dem Präfixe weggelassen werden.
 package ext_0010_differential_n_tuple_omit_prefix_storage_layout
 
 import (

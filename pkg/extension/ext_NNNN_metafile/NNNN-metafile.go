@@ -1,3 +1,6 @@
+// Package ext_NNNN_metafile implementiert die OCFL-Erweiterung NNNN-metafile.
+//
+// Diese Erweiterung bietet Unterstützung für die Verwaltung von Metadaten-Dateien.
 package ext_NNNN_metafile
 
 import (

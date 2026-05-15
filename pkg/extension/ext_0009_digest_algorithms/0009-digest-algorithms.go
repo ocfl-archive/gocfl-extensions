@@ -1,3 +1,6 @@
+// Package ext_0009_digest_algorithms implementiert die OCFL-Erweiterung 0009-digest-algorithms.
+//
+// Diese Erweiterung bietet ein kontrolliertes Vokabular von Digest-Algorithmus-Namen.
 package ext_0009_digest_algorithms
 
 import (

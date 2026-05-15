@@ -1,3 +1,6 @@
+// Package ext_0006_flat_omit_prefix_storage_layout implementiert die OCFL-Erweiterung 0006-flat-omit-prefix-storage-layout.
+//
+// Diese Erweiterung bietet ein flaches Speicherlayout, bei dem Präfixe weggelassen werden.
 package ext_0006_flat_omit_prefix_storage_layout
 
 import (

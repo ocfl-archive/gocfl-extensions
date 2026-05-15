@@ -1,3 +1,6 @@
+// Package ext_0012_hash_and_no_prefix_id_n_tuple_storage_layout implementiert die OCFL-Erweiterung 0012-hash-and-no-prefix-id-n-tuple-storage-layout.
+//
+// Diese Erweiterung bietet ein Speicherlayout basierend auf Hashes und ID-n-Tupeln ohne Präfix.
 package ext_0012_hash_and_no_prefix_id_n_tuple_storage_layout
 
 import (

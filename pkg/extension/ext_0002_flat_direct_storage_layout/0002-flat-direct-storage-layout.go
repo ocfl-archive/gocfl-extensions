@@ -1,3 +1,6 @@
+// Package ext_0002_flat_direct_storage_layout implementiert die OCFL-Erweiterung 0002-flat-direct-storage-layout.
+//
+// Diese Erweiterung bietet ein eins-zu-eins Mapping ohne Änderungen für das Speicherlayout.
 package ext_0002_flat_direct_storage_layout
 
 import (

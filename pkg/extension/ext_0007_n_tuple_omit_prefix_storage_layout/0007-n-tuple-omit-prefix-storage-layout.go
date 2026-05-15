@@ -1,3 +1,6 @@
+// Package ext_0007_n_tuple_omit_prefix_storage_layout implementiert die OCFL-Erweiterung 0007-n-tuple-omit-prefix-storage-layout.
+//
+// Diese Erweiterung bietet ein n-Tupel Speicherlayout, bei dem Präfixe weggelassen werden.
 package ext_0007_n_tuple_omit_prefix_storage_layout
 
 import (

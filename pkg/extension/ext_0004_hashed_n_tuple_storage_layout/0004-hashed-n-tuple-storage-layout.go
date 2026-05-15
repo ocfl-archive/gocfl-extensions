@@ -1,3 +1,6 @@
+// Package ext_0004_hashed_n_tuple_storage_layout implementiert die OCFL-Erweiterung 0004-hashed-n-tuple-storage-layout.
+//
+// Diese Erweiterung bietet ein Speicherlayout basierend auf gehashten n-Tupeln.
 package ext_0004_hashed_n_tuple_storage_layout
 
 import (

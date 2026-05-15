@@ -103,8 +103,8 @@ github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 h1:zYyBkD/k9seD2A7fsi6
 github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646/go.mod h1:jpp1/29i3P1S/RLdc7JQKbRpFeM1dOBd8T9ki5s+AY8=
 github.com/ocfl-archive/error v1.0.5 h1:nPidx9HBSiViSDZHfVY8nIabBeOSO5vLFOcUMgt7yLo=
 github.com/ocfl-archive/error v1.0.5/go.mod h1:vOwIAdG34QlD9ExXUXu8QSywUKIIMN31ykQ2U0LvOMs=
-github.com/ocfl-archive/gocfl/v3 v3.0.0-20260515094657-e3ac51bb745e h1:h9PFKh7WHWvxHKQFiJGSmKytCa7FvX8+Vt32NTsyLdA=
-github.com/ocfl-archive/gocfl/v3 v3.0.0-20260515094657-e3ac51bb745e/go.mod h1:t+wlFitxhYL6DCDXDHosQRQqtGPI+y9omlAk6xiD0a0=
+github.com/ocfl-archive/gocfl/v3 v3.0.0-20260515150745-b92f63120f8a h1:m/Fo9ryaoCsHDImyZodagSXQn8fZiHft2yWElfbVcPI=
+github.com/ocfl-archive/gocfl/v3 v3.0.0-20260515150745-b92f63120f8a/go.mod h1:jJhAidxVAjoVW1Vf+09ceEgx9ORPKL9nz+kykx1bJDo=
 github.com/ocfl-archive/indexer/v3 v3.0.44 h1:JrSkHQ5xLnV7gq/0PKtDAXzyZaq1fMHzqlQ9yJ7UXVM=
 github.com/ocfl-archive/indexer/v3 v3.0.44/go.mod h1:gLVOsu6ZPeEyHCrbRF64hGYjrov0dBCg5oKiwYUxKUA=
 github.com/op/go-logging v0.0.0-20160315200505-970db520ece7 h1:lDH9UUVJtmYCjyT0CI4q8xvlXPxeZ0gYCVvWbmPlp88=

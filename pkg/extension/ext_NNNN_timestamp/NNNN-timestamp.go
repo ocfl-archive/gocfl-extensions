@@ -1,3 +1,6 @@
+// Package ext_NNNN_timestamp implementiert die OCFL-Erweiterung NNNN-timestamp.
+//
+// Diese Erweiterung bietet Unterstützung für die Zeitstempelung von Inhalten.
 package ext_NNNN_timestamp
 
 import (

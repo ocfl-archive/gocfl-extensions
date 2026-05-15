@@ -1,3 +1,6 @@
+// Package ext_NNNN_migration implementiert die OCFL-Erweiterung NNNN-migration.
+//
+// Diese Erweiterung bietet Unterstützung für die Migration von Dateiformaten.
 package ext_NNNN_migration
 
 import (

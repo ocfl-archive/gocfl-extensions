@@ -1,3 +1,6 @@
+// Package ext_NNNN_thumbnail implementiert die OCFL-Erweiterung NNNN-thumbnail.
+//
+// Diese Erweiterung bietet Unterstützung für die automatische Generierung von Vorschaubildern.
 package ext_NNNN_thumbnail
 
 import (

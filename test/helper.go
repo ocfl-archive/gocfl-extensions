@@ -231,7 +231,7 @@ func SetupFullTestEnv(t *testing.T, extensionParams map[string]string, tempFS, s
 		DestFS:                      vfs,
 		TargetFS:                    srFS,
 		ReadSRFS:                    readSRFS,
-		OCFLFactorySR:               initocfl.NewFactoryStorageRoot(ocflVer, nil, logger), // not used anymore but kept for struct compatibility
+		OCFLFactorySR:               nil, // not used anymore but kept for struct compatibility
 		StorageRoot:                 sr,
 		OCFLLogger:                  logger,
 		StorageRootExtensionManager: storageRootExtManager,
@@ -264,7 +264,7 @@ func ReloadObject(t *testing.T, env *FullTestEnv, objID string) (object.Object, 
 	objFS, err := fs.Sub(env.ReadSRFS, objFolder)
 	require.NoError(t, err)
 
-	loadedObj, err := initocfl.LoadObject(t.Context(), objFS, version.Version1_1, env.OCFLLogger)
+	loadedObj, err := initocfl.LoadObject(t.Context(), objFS, env.OCFLLogger)
 	require.NoError(t, err)
 
 	if env.ObjectExtensionManager != nil {

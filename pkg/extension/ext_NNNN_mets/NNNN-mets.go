@@ -1,3 +1,6 @@
+// Package ext_NNNN_mets implementiert die OCFL-Erweiterung NNNN-mets.
+//
+// Diese Erweiterung bietet Unterstützung für METS/EAD3/PREMIS Metadaten.
 package ext_NNNN_mets
 
 import (

@@ -1,3 +1,7 @@
+// Package ext_0001_digest_algorithms implementiert die OCFL-Erweiterung 0001-digest-algorithms.
+//
+// Diese Erweiterung bietet ein kontrolliertes Vokabular von Digest-Algorithmus-Namen,
+// die zur Angabe des jeweiligen Algorithmus in Fixity-Blöcken von OCFL-Objekten verwendet werden können.
 package ext_0001_digest_algorithms
 
 import (

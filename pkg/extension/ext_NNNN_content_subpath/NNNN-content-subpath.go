@@ -1,3 +1,6 @@
+// Package ext_NNNN_content_subpath implementiert die OCFL-Erweiterung NNNN-content-subpath.
+//
+// Diese Erweiterung ermöglicht die Definition von Subpfaden innerhalb des Content-Bereichs.
 package ext_NNNN_content_subpath
 
 import (

@@ -1,3 +1,6 @@
+// Package ext_0003_hash_and_id_n_tuple_storage_layout implementiert die OCFL-Erweiterung 0003-hash-and-id-n-tuple-storage-layout.
+//
+// Diese Erweiterung bietet ein Speicherlayout, das auf Hashes und ID-n-Tupeln basiert.
 package ext_0003_hash_and_id_n_tuple_storage_layout
 
 import (

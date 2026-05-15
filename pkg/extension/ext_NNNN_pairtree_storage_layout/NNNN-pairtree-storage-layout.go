@@ -1,3 +1,6 @@
+// Package ext_NNNN_pairtree_storage_layout implementiert die OCFL-Erweiterung NNNN-pairtree-storage-layout.
+//
+// Diese Erweiterung bietet ein Pairtree-Speicherlayout.
 package ext_NNNN_pairtree_storage_layout
 
 import (

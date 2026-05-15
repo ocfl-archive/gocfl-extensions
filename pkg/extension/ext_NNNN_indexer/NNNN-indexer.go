@@ -1,3 +1,6 @@
+// Package ext_NNNN_indexer implementiert die OCFL-Erweiterung NNNN-indexer.
+//
+// Diese Erweiterung bietet Unterstützung für die Indizierung von Inhalten.
 package ext_NNNN_indexer
 
 import (

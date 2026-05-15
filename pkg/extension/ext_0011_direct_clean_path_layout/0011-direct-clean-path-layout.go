@@ -1,3 +1,6 @@
+// Package ext_0011_direct_clean_path_layout implementiert die OCFL-Erweiterung 0011-direct-clean-path-layout.
+//
+// Diese Erweiterung bietet ein direktes, bereinigtes Pfad-Layout.
 package ext_0011_direct_clean_path_layout
 
 import (
