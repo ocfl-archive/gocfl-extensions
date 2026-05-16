@@ -16,7 +16,7 @@ require (
 	github.com/je4/filesystem/v4 v4.0.13
 	github.com/je4/utils/v2 v2.0.68
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
-	github.com/ocfl-archive/gocfl/v3 v3.0.0-20260515150745-b92f63120f8a
+	github.com/ocfl-archive/gocfl/v3 v3.0.0-20260516174650-cb14abcdeb24
 	github.com/ocfl-archive/indexer/v3 v3.0.44
 	github.com/rs/zerolog v1.35.1
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
