@@ -3,6 +3,7 @@ package ext_0011_direct_clean_path_layout
 import (
 	"emperror.dev/errors"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
+	"github.com/ocfl-archive/gocfl/v3/pkg/ocfllogger"
 )
 
 // fallback for object with unregigered naming
@@ -25,6 +26,11 @@ func NewLegacyDirectClean() (extension.Extension, error) {
 
 type LegacyDirectClean struct {
 	*DirectClean
+}
+
+func (sl *LegacyDirectClean) WithLogger(logger ocfllogger.OCFLLogger) extension.Extension {
+	sl.DirectClean.WithLogger(logger)
+	return sl
 }
 
 func (sl *LegacyDirectClean) IsRegistered() bool {
