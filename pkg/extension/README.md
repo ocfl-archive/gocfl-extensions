@@ -1,16 +1,16 @@
 # OCFL Extensions
 
-Dieses Paket enthält verschiedene Erweiterungen für den GOCFL-Lade- und Verwaltungsprozess.
+This package contains various extensions for the GOCFL loading and management process.
 
-Es wird zwischen registrierten Erweiterungen, die im [OCFL Extensions Repository](https://ocfl.github.io/extensions/) gelistet sind, und unregistrierten (lokalen oder experimentellen) Erweiterungen unterschieden.
+A distinction is made between registered extensions, which are listed in the [OCFL Extensions Repository](https://ocfl.github.io/extensions/), and unregistered (local or experimental) extensions.
 
-## Übersicht der Erweiterungen
+## Overview of Extensions
 
-Jede Erweiterung befindet sich in einem eigenen Unterverzeichnis und implementiert spezifische Funktionalitäten wie Speicherlayouts, Digest-Algorithmen oder Metadaten-Erzeugung.
+Each extension is located in its own subdirectory and implements specific functionalities such as storage layouts, digest algorithms, or metadata generation.
 
-### Registrierte Erweiterungen
+### Registered Extensions
 
-Diese Erweiterungen folgen der offiziellen OCFL-Nummerierung und sind unter [https://ocfl.github.io/extensions/](https://ocfl.github.io/extensions/) dokumentiert.
+These extensions follow the official OCFL numbering and are documented at [https://ocfl.github.io/extensions/](https://ocfl.github.io/extensions/).
 
 - [0001-digest-algorithms](ext_0001_digest_algorithms/README.md)
 - [0002-flat-direct-storage-layout](ext_0002_flat_direct_storage_layout/README.md)
@@ -23,9 +23,9 @@ Diese Erweiterungen folgen der offiziellen OCFL-Nummerierung und sind unter [htt
 - [0011-direct-clean-path-layout](ext_0011_direct_clean_path_layout/README.md)
 - [0012-hash-and-no-prefix-id-n-tuple-storage-layout](ext_0012_hash_and_no_prefix_id_n_tuple_storage_layout/README.md)
 
-### Unregistrierte Erweiterungen
+### Unregistered Extensions
 
-Diese Erweiterungen sind (noch) nicht offiziell registriert und verwenden den Platzhalter `NNNN` in ihrer Bezeichnung.
+These extensions are not (yet) officially registered and use the placeholder `NNNN` in their designation.
 
 - [NNNN-content-subpath](ext_NNNN_content_subpath/README.md)
 - [NNNN-filesystem](ext_NNNN_filesystem/README.md)
@@ -37,25 +37,46 @@ Diese Erweiterungen sind (noch) nicht offiziell registriert und verwenden den Pl
 - [NNNN-thumbnail](ext_NNNN_thumbnail/README.md)
 - [NNNN-timestamp](ext_NNNN_timestamp/README.md)
 
-## Initialisierung komplexer Erweiterungen
+## Initialization of Complex Extensions
 
-Einige Erweiterungen sind komplexer Natur und erfordern zusätzliche Konfigurationsdaten (z. B. für die METS-Erzeugung, Bildkonvertierung oder Metadaten-Extraktion). Wenn diese Erweiterungen verwendet werden, müssen sie oft manuell initialisiert und konfiguriert werden, bevor sie in den OCFL-Prozess integriert werden können.
+Some extensions are complex in nature and require additional configuration data (e.g., for METS generation, image conversion, or metadata extraction). 
 
-Dies geschieht in der Regel durch Aufruf einer `Init`-Funktion der Erweiterung, die die notwendigen Laufzeitdaten (wie Logger oder Dateisystem-Referenzen) setzt.
+### Registration vs. Initialization
 
-### Beispiel: Initialisierung der Migration- und Thumbnail-Erweiterung
+1.  **Simple Extensions & Read-Only Mode:**
+    For simple extensions (like storage layouts or digest algorithms) and for complex extensions used only in **read-only** mode (e.g., when validating or extracting an existing OCFL object), a side-effect import is sufficient for registration:
+    ```go
+    import _ "github.com/ocfl-archive/gocfl-extensions/pkg/extension/ext_NNNN_indexer"
+    ```
 
-Das folgende Beispiel zeigt, wie Erweiterungen im `gocfl-cli` Projekt vor der Verwendung initialisiert werden:
+2.  **Active Usage (init, add, update):**
+    For operations that modify or create OCFL structures (like `init`, `add`, or `update`), complex extensions must be manually initialized and configured before they can be used. This ensures they have access to required resources like loggers, file systems, or specific service addresses.
 
+This is usually done by calling an `Init` function of the extension, which sets the necessary runtime data and registers it in the global OCFL extension manager.
+
+### Examples: Initializing Complex Extensions
+
+The following examples show how complex extensions are initialized (as seen in the `gocfl-cli` project):
+
+#### Indexer Extension
+The indexer extension extracts metadata from files and stores it in a search index.
 ```go
-// Initialisierung der Migration-Erweiterung mit Konfiguration und Quell-Dateisystem
-ext_NNNN_migration.Init(&conf.Migration, sourceFS, logger)
-
-// Initialisierung der Thumbnail-Erweiterung
-ext_NNNN_thumbnail.Init(conf.Thumbnail, sourceFS, logger)
-
-// Initialisierung der Indexer-Erweiterung
+// Initialize the indexer extension with service address, configuration, local cache and logger
 ext_NNNN_indexer.Init(addr, conf.Indexer, localCache, logger)
 ```
 
-Durch diese `Init`-Aufrufe registrieren sich die Erweiterungen selbst mit der notwendigen Laufzeitkonfiguration im globalen OCFL-Erweiterungs-Manager, sodass sie während des Ingest-Prozesses korrekt aufgerufen werden können.
+#### Migration Extension
+The migration extension handles format migrations during the ingest process.
+```go
+// Initialize the migration extension with configuration and source file system
+ext_NNNN_migration.Init(&conf.Migration, sourceFS, logger)
+```
+
+#### Thumbnail Extension
+The thumbnail extension automatically generates preview images for supported file types.
+```go
+// Initialize the thumbnail extension with configuration and source file system
+ext_NNNN_thumbnail.Init(conf.Thumbnail, sourceFS, logger)
+```
+
+Through these `Init` calls, the extensions register themselves with the necessary runtime configuration in the global OCFL extension manager, so that they can be correctly called during the ingest process.

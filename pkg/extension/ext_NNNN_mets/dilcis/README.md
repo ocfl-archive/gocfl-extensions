@@ -1,6 +1,6 @@
 # DILCIS Go Packages
 
-Dieses Verzeichnis enthält Go-Datenstrukturen und Hilfsfunktionen für die Arbeit mit DILCIS (Digital Information LifeCycle Interoperability Standard) XML-Schemas.
+This directory contains Go data structures and helper functions for working with DILCIS (Digital Information LifeCycle Interoperability Standard) XML schemas.
 
-Für detaillierte Informationen zur METS-Erweiterung siehe:
+For detailed information on the METS extension see:
 - [NNNN-mets.md](../NNNN-mets.md)

@@ -1,28 +1,28 @@
-# Test-Infrastruktur
+# Test Infrastructure
 
-Dieses Verzeichnis enthält Hilfsmittel und Konfigurationen für die Durchführung von Tests innerhalb des `gocfl-extensions` Projekts.
+This directory contains tools and configurations for performing tests within the `gocfl-extensions` project.
 
-## Inhalt
+## Content
 
-- `helper.go`: Enthält Funktionen zum Aufsetzen von Testumgebungen, einschließlich In-Memory-Dateisystemen (VFS) und OCFL-Storage-Roots.
-    - `SetupTestEnv`: Initialisiert eine einfache Testumgebung mit Logger und VFS.
-    - `SetupFullTestEnv`: Erstellt eine komplette OCFL-Testumgebung inklusive konfigurierbarer Erweiterungsmanager für Storage-Roots und Objekte.
-    - `CreateTestObject`: Hilfsfunktion zum Erstellen eines neuen OCFL-Objekts innerhalb der Testumgebung.
-    - `ReloadObject`: Hilfsfunktion zum Laden eines existierenden OCFL-Objekts zu Testzwecken.
-- `defaultconfig/`: Enthält Standard-Konfigurationsdateien (JSON) für die Initialisierung von OCFL-Strukturen in Tests.
-    - `object/`: Standardkonfigurationen für OCFL-Objekte.
-    - `storageroot/`: Standardkonfigurationen für OCFL-Storage-Roots.
-    - `embed.go`: Stellt die Konfigurationen via `go:embed` für die Verwendung in Go-Tests bereit.
+- `helper.go`: Contains functions for setting up test environments, including in-memory file systems (VFS) and OCFL storage roots.
+    - `SetupTestEnv`: Initializes a simple test environment with a logger and VFS.
+    - `SetupFullTestEnv`: Creates a complete OCFL test environment including configurable extension managers for storage roots and objects.
+    - `CreateTestObject`: Helper function to create a new OCFL object within the test environment.
+    - `ReloadObject`: Helper function to load an existing OCFL object for testing purposes.
+- `defaultconfig/`: Contains default configuration files (JSON) for initializing OCFL structures in tests.
+    - `object/`: Default configurations for OCFL objects.
+    - `storageroot/`: Default configurations for OCFL storage roots.
+    - `embed.go`: Provides the configurations via `go:embed` for use in Go tests.
 
-## Verwendung in Tests
+## Usage in Tests
 
-Die Hilfsfunktionen in `helper.go` sind darauf ausgelegt, die Erstellung von Integrationstests zu vereinfachen, die das Zusammenspiel verschiedener OCFL-Erweiterungen verifizieren.
+The helper functions in `helper.go` are designed to simplify the creation of integration tests that verify the interaction of various OCFL extensions.
 
-Beispiel für die Initialisierung einer Testumgebung:
+Example of initializing a test environment:
 
 ```go
-func TestMeineErweiterung(t *testing.T) {
+func TestMyExtension(t *testing.T) {
     env := test.SetupFullTestEnv(t, nil, nil, nil, nil)
-    // ... Testlogik ...
+    // ... test logic ...
 }
 ```

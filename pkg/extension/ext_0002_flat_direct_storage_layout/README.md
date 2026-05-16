@@ -1,5 +1,15 @@
 # 0002-flat-direct-storage-layout
 
-Diese OCFL-Erweiterung implementiert ein eins-zu-eins Mapping für das Speicherlayout.
+This OCFL extension provides support for a flat direct storage layout.
 
-Weitere Informationen finden Sie in der [0002-flat-direct-storage-layout.md](0002-flat-direct-storage-layout.md).
+Further information can be found in [0002-flat-direct-storage-layout.md](0002-flat-direct-storage-layout.md).
+
+## Usage
+
+### Activation
+
+Extensions must be explicitly activated by importing them for their side effects (using the blank identifier `_`). This registers the extension within the `gocfl` library.
+
+```go
+import _ "github.com/ocfl-archive/gocfl-extensions/pkg/extension/ext_0002_flat_direct_storage_layout"
+```
