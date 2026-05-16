@@ -40,9 +40,16 @@ const MetaFileDescription = "adds a file in extension folder"
 var MetaFileDoc string
 
 func init() {
-	extension.RegisterExtensionObject(MetaFileName, NewMetaFile, GetMetaFileParams, &MetaFileDoc)
+	extension.RegisterExtensionObject(MetaFileName, func() (extensiontypes.Extension, error) {
+		return NewMetaFile(nil, nil)
+	}, GetMetaFileParams, &MetaFileDoc)
 }
 
+func Init(fSys fs.FS, logger ocfllogger.OCFLLogger) {
+	extension.RegisterExtensionObject(MetaFileName, func() (extensiontypes.Extension, error) {
+		return NewMetaFile(fSys, logger)
+	}, GetMetaFileParams, &MetaFileDoc)
+}
 func GetMetaFileParams() ([]*extension.ExternalParam, error) {
 	return []*extension.ExternalParam{
 		{
@@ -62,7 +69,7 @@ func GetMetaFileParams() ([]*extension.ExternalParam, error) {
 	}, nil
 }
 
-func NewMetaFile() (extensiontypes.Extension, error) {
+func NewMetaFile(fSys fs.FS, logger ocfllogger.OCFLLogger) (extensiontypes.Extension, error) {
 	var config = &MetaFileConfig{
 		ExtensionConfig: &extensiontypes.ExtensionConfig{
 			ExtensionName: MetaFileName,
@@ -71,7 +78,9 @@ func NewMetaFile() (extensiontypes.Extension, error) {
 	sl := &MetaFile{
 		MetaFileConfig: config,
 		//schema:         schema,
-		info: map[string][]byte{},
+		info:   map[string][]byte{},
+		fSys:   fSys,
+		logger: logger,
 	}
 	return sl, nil
 }
@@ -92,6 +101,7 @@ type MetaFile struct {
 	stored         bool
 	info           map[string][]byte
 	logger         ocfllogger.OCFLLogger
+	fSys           fs.FS
 }
 
 func (sl *MetaFile) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.Extension {
@@ -258,6 +268,9 @@ func (sl *MetaFile) UpdateObjectBefore(obj object.VersionWriter) error {
 	switch strings.ToLower(sl.metadataSource.Scheme) {
 	case "http":
 		fname = strings.Replace(sl.metadataSource.String(), "$ID", obj.GetID(), -1)
+		if sl.logger != nil {
+			sl.logger.Info().Msgf("downloading metafile from%s", fname)
+		}
 		resp, err := http.Get(fname)
 		if err != nil {
 			return errors.Wrapf(err, "cannot get '%s'", fname)
@@ -265,6 +278,9 @@ func (sl *MetaFile) UpdateObjectBefore(obj object.VersionWriter) error {
 		rc = resp.Body
 	case "https":
 		fname = strings.Replace(sl.metadataSource.String(), "$ID", obj.GetID(), -1)
+		if sl.logger != nil {
+			sl.logger.Info().Msgf("downloading metafile from%s", fname)
+		}
 		resp, err := http.Get(fname)
 		if err != nil {
 			return errors.Wrapf(err, "cannot get '%s'", fname)
@@ -272,6 +288,9 @@ func (sl *MetaFile) UpdateObjectBefore(obj object.VersionWriter) error {
 		rc = resp.Body
 	case "file":
 		fname = strings.Replace(sl.metadataSource.Path, "$ID", obj.GetID(), -1)
+		if sl.logger != nil {
+			sl.logger.Info().Msgf("reading metafile from%s", fname)
+		}
 		fname = "/" + strings.TrimLeft(fname, "/")
 		if windowsPathWithDrive.Match([]byte(fname)) {
 			fname = strings.TrimLeft(fname, "/")
@@ -280,9 +299,24 @@ func (sl *MetaFile) UpdateObjectBefore(obj object.VersionWriter) error {
 		if err != nil {
 			return errors.Wrapf(err, "cannot open '%s'", fname)
 		}
+	case "vfs":
+		if sl.fSys == nil {
+			return errors.New("no file system configured")
+		}
+		fname = strings.Replace(sl.metadataSource.String(), "$ID", obj.GetID(), -1)
+		if sl.logger != nil {
+			sl.logger.Info().Msgf("reading metafile from%s", fname)
+		}
+		rc, err = sl.fSys.Open(fname)
+		if err != nil {
+			return errors.Wrapf(err, "cannot open '%s'", fname)
+		}
 	case "":
 		fname = strings.Replace(sl.metadataSource.Path, "$ID", obj.GetID(), -1)
 		fname = "/" + strings.TrimLeft(fname, "/")
+		if sl.logger != nil {
+			sl.logger.Info().Msgf("reading metafile from%s", fname)
+		}
 		rc, err = os.Open(fname)
 		if err != nil {
 			return errors.Wrapf(err, "cannot open '%s'", fname)
