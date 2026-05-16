@@ -213,7 +213,7 @@ func SetupFullTestEnv(t *testing.T, extensionParams map[string]string, tempFS, s
 	require.NoError(t, err)
 
 	// Initialize storage root
-	sr, err := initocfl.InitStorageRoot(ctx, srFS, ocflVer, logger)
+	sr, err := initocfl.InitStorageRoot(ctx, srFS, nil, ocflVer, checksum.DigestSHA512, nil, logger)
 	require.NoError(t, err)
 
 	if storageRootExtManager != nil {
@@ -246,7 +246,7 @@ func CreateTestObject(t *testing.T, env *FullTestEnv, objID string) (object.Obje
 	objFS, err := appendfs.Sub(env.TargetFS, objFolder)
 	require.NoError(t, err)
 
-	obj, err := initocfl.InitObject(t.Context(), objFS, version.Version1_1, objID, checksum.DigestSHA512, env.OCFLLogger)
+	obj, err := initocfl.InitObject(t.Context(), objFS, nil, version.Version1_1, objID, checksum.DigestSHA512, nil, env.OCFLLogger)
 	require.NoError(t, err)
 
 	if env.ObjectExtensionManager != nil {
@@ -264,7 +264,7 @@ func ReloadObject(t *testing.T, env *FullTestEnv, objID string) (object.Object, 
 	objFS, err := fs.Sub(env.ReadSRFS, objFolder)
 	require.NoError(t, err)
 
-	loadedObj, err := initocfl.LoadObject(t.Context(), objFS, env.OCFLLogger)
+	loadedObj, _, err := initocfl.LoadObject(t.Context(), objFS, nil, env.OCFLLogger)
 	require.NoError(t, err)
 
 	if env.ObjectExtensionManager != nil {
