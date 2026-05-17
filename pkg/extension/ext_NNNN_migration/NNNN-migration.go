@@ -15,8 +15,8 @@ import (
 
 	"emperror.dev/errors"
 	"github.com/andybalholm/brotli"
-	"github.com/je4/filesystem/v4/pkg/appendfs"
-	"github.com/je4/filesystem/v4/pkg/writefs"
+	"github.com/ocfl-archive/filesystem/pkg/appendfs"
+	"github.com/ocfl-archive/filesystem/pkg/writefs"
 	ext "github.com/ocfl-archive/gocfl-extensions/pkg/extension"
 	"github.com/ocfl-archive/gocfl-extensions/pkg/extension/ext_NNNN_indexer"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"

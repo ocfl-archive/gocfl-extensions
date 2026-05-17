@@ -10,8 +10,8 @@ import (
 	"path"
 	"testing"
 
-	"github.com/je4/filesystem/v4/pkg/aferoFS"
-	"github.com/je4/filesystem/v4/pkg/writefs"
+	"github.com/ocfl-archive/filesystem/pkg/aferoFS"
+	"github.com/ocfl-archive/filesystem/pkg/writefs"
 	"github.com/ocfl-archive/gocfl-extensions/test"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
 	"github.com/rs/zerolog"
