@@ -20,5 +20,5 @@ For active use, this extension must be manually initialized.
 
 ```go
 // Initialize the indexer extension with service address, configuration, local cache and logger
-ext_NNNN_indexer.Init(addr, conf.Indexer, localCache, logger)
+ext_NNNN_indexer.Init(addr, &conf.Indexer, localCache, logger)
 ```

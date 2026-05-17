@@ -69,7 +69,13 @@ For **active** use, complex extensions must be manually initialized. The followi
 ##### Indexer Extension
 ```go
 // Initialize the indexer extension with service address, configuration, local cache and logger
-ext_NNNN_indexer.Init(addr, conf.Indexer, localCache, logger)
+ext_NNNN_indexer.Init(addr, &conf.Indexer, localCache, logger)
+```
+
+##### Metafile Extension
+```go
+// Initialize the metafile extension with a filesystem and a logger
+ext_NNNN_metafile.Init(fSys, logger)
 ```
 
 ##### Migration Extension
@@ -81,7 +87,7 @@ ext_NNNN_migration.Init(&conf.Migration, sourceFS, logger)
 ##### Thumbnail Extension
 ```go
 // Initialize the thumbnail extension with configuration and source file system
-ext_NNNN_thumbnail.Init(conf.Thumbnail, sourceFS, logger)
+ext_NNNN_thumbnail.Init(&conf.Thumbnail, sourceFS, logger)
 ```
 
 ## Documentation

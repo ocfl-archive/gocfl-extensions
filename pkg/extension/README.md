@@ -62,7 +62,7 @@ The following examples show how complex extensions are initialized (as seen in t
 The indexer extension extracts metadata from files and stores it in a search index.
 ```go
 // Initialize the indexer extension with service address, configuration, local cache and logger
-ext_NNNN_indexer.Init(addr, conf.Indexer, localCache, logger)
+ext_NNNN_indexer.Init(addr, &conf.Indexer, localCache, logger)
 ```
 
 #### Migration Extension
@@ -76,7 +76,7 @@ ext_NNNN_migration.Init(&conf.Migration, sourceFS, logger)
 The thumbnail extension automatically generates preview images for supported file types.
 ```go
 // Initialize the thumbnail extension with configuration and source file system
-ext_NNNN_thumbnail.Init(conf.Thumbnail, sourceFS, logger)
+ext_NNNN_thumbnail.Init(&conf.Thumbnail, sourceFS, logger)
 ```
 
 Through these `Init` calls, the extensions register themselves with the necessary runtime configuration in the global OCFL extension manager, so that they can be correctly called during the ingest process.

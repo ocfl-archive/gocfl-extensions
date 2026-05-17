@@ -13,3 +13,12 @@ Extensions must be explicitly activated by importing them for their side effects
 ```go
 import _ "github.com/ocfl-archive/gocfl-extensions/pkg/extension/ext_NNNN_metafile"
 ```
+
+### Manual Initialization
+
+For active use, this extension must be manually initialized.
+
+```go
+// Initialize the metafile extension with a filesystem and a logger
+ext_NNNN_metafile.Init(fSys, logger)
+```

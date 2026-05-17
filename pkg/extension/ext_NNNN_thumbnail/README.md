@@ -20,5 +20,5 @@ For active use, this extension must be manually initialized.
 
 ```go
 // Initialize the thumbnail extension with configuration and source file system
-ext_NNNN_thumbnail.Init(conf.Thumbnail, sourceFS, logger)
+ext_NNNN_thumbnail.Init(&conf.Thumbnail, sourceFS, logger)
 ```
