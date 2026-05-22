@@ -15,8 +15,8 @@ require (
 	github.com/gosimple/slug v1.15.0
 	github.com/je4/utils/v2 v2.0.68
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
-	github.com/ocfl-archive/filesystem v1.0.3
-	github.com/ocfl-archive/gocfl/v3 v3.0.3
+	github.com/ocfl-archive/filesystem v1.0.5
+	github.com/ocfl-archive/gocfl/v3 v3.0.4
 	github.com/ocfl-archive/indexer/v3 v3.0.44
 	github.com/rs/zerolog v1.35.1
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
@@ -24,7 +24,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	go.yaml.in/yaml/v3 v3.0.4
 	golang.org/x/exp v0.0.0-20260508232706-74f9aab9d74a
-	golang.org/x/image v0.40.0
+	golang.org/x/image v0.41.0
 	gopkg.in/gographics/imagick.v3 v3.7.3
 )
 
@@ -91,12 +91,12 @@ require (
 	go.ub.unibas.ch/cloud/miniresolverclient v1.0.2 // indirect
 	go.ub.unibas.ch/cloud/minivaultclient v1.0.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.51.0 // indirect
-	golang.org/x/net v0.54.0 // indirect
-	golang.org/x/sys v0.44.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260519071638-aa98bba5eb94 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260522162733-96412231522c // indirect
 	google.golang.org/grpc v1.81.1 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

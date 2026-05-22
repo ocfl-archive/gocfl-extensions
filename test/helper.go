@@ -18,8 +18,8 @@ import (
 	"github.com/ocfl-archive/gocfl-extensions/test/defaultconfig"
 	"github.com/ocfl-archive/gocfl/v3/pkg/extensions/ext_NNNN_gocfl_extension_manager"
 	"github.com/ocfl-archive/gocfl/v3/pkg/extensions/ext_initial"
+	"github.com/ocfl-archive/gocfl/v3/pkg/initocfl"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
-	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/initocfl"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/object"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/storageroot"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/version"
@@ -73,7 +73,7 @@ func copyFile(srcFS, dstFS fs.FS, src, dest string) error {
 
 type TestEnv struct {
 	ConfigFS fs.FS
-	Logger   *ocfllogger.OCFLLoggerImpl
+	Logger   ocfllogger.OCFLLogger
 }
 
 func SetupTestEnv(t *testing.T) *TestEnv {
@@ -81,7 +81,7 @@ func SetupTestEnv(t *testing.T) *TestEnv {
 	out := zerolog.ConsoleWriter{Out: os.Stderr}
 	zlogger := zerolog.New(out)
 	var _zlogger zLogger.ZLogger = &zlogger
-	logger := ocfllogger.NewOCFLLogger(ctx, &zlogger, nil, version.Version1_1, nil)
+	logger := initocfl.NewOCFLLogger(ctx, &zlogger, nil, version.Version1_1, nil)
 
 	cfg := vfsrw.Config{
 		"extensionconfig": &vfsrw.VFS{
@@ -139,7 +139,7 @@ func SetupFullTestEnv(t *testing.T, extensionParams map[string]string, tempFS, s
 	out := zerolog.ConsoleWriter{Out: os.Stderr}
 	zlogger := zerolog.New(out)
 	var _zlogger zLogger.ZLogger = &zlogger
-	logger := ocfllogger.NewOCFLLogger(ctx, &zlogger, nil, version.Version1_1, nil)
+	logger := initocfl.NewOCFLLogger(ctx, &zlogger, nil, version.Version1_1, nil)
 
 	// In-memory VFS configuration (afero mem://)
 	cfg := vfsrw.Config{
@@ -201,9 +201,11 @@ func SetupFullTestEnv(t *testing.T, extensionParams map[string]string, tempFS, s
 	require.NoError(t, err)
 
 	// storage root subdirectory for initialization
-	srFS, err := appendfs.Sub(destFS, "vfs://testmem/storageroot")
+	srFS, closer, err := appendfs.Sub(destFS, "vfs://testmem/storageroot")
 	require.NoError(t, err)
-
+	t.Cleanup(func() {
+		_ = closer.Close()
+	})
 	ocflVer := version.Version1_1
 
 	// Initialize extension factory and managers
@@ -223,8 +225,11 @@ func SetupFullTestEnv(t *testing.T, extensionParams map[string]string, tempFS, s
 	// Reload read-only file system for storage root (as fs.FS)
 	// We use the original destFS here as it's fine for in-memory VFS.
 	// In real scenarios (ZIP), the file system would need to be reopened.
-	readSRFS_append, err := appendfs.Sub(destFS, "vfs://testmem/storageroot")
+	readSRFS_append, closer, err := appendfs.Sub(destFS, "vfs://testmem/storageroot")
 	require.NoError(t, err)
+	t.Cleanup(func() {
+		_ = closer.Close()
+	})
 	readSRFS := fs.FS(readSRFS_append)
 
 	return &FullTestEnv{
@@ -243,8 +248,11 @@ func CreateTestObject(t *testing.T, env *FullTestEnv, objID string) (object.Obje
 	objFolder, err := env.StorageRoot.IdToFolder(objID)
 	require.NoError(t, err)
 
-	objFS, err := appendfs.Sub(env.TargetFS, objFolder)
+	objFS, closer, err := appendfs.Sub(env.TargetFS, objFolder)
 	require.NoError(t, err)
+	t.Cleanup(func() {
+		_ = closer.Close()
+	})
 
 	obj, err := initocfl.InitObject(t.Context(), objFS, nil, version.Version1_1, objID, checksum.DigestSHA512, nil, env.OCFLLogger)
 	require.NoError(t, err)
@@ -264,8 +272,11 @@ func ReloadObject(t *testing.T, env *FullTestEnv, objID string) (object.Object, 
 	objFS, err := fs.Sub(env.ReadSRFS, objFolder)
 	require.NoError(t, err)
 
-	loadedObj, _, err := initocfl.LoadObject(t.Context(), objFS, nil, env.OCFLLogger)
+	loadedObj, err := initocfl.LoadObject(t.Context(), objFS, nil, env.OCFLLogger)
 	require.NoError(t, err)
+	t.Cleanup(func() {
+		_ = loadedObj.Close()
+	})
 
 	if env.ObjectExtensionManager != nil {
 		loadedObj.WithExtensionManager(env.ObjectExtensionManager)
