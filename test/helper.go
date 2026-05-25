@@ -18,7 +18,7 @@ import (
 	"github.com/ocfl-archive/gocfl-extensions/test/defaultconfig"
 	"github.com/ocfl-archive/gocfl/v3/pkg/extensions/ext_NNNN_gocfl_extension_manager"
 	"github.com/ocfl-archive/gocfl/v3/pkg/extensions/ext_initial"
-	"github.com/ocfl-archive/gocfl/v3/pkg/initocfl"
+	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/object"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/storageroot"
@@ -81,7 +81,7 @@ func SetupTestEnv(t *testing.T) *TestEnv {
 	out := zerolog.ConsoleWriter{Out: os.Stderr}
 	zlogger := zerolog.New(out)
 	var _zlogger zLogger.ZLogger = &zlogger
-	logger := initocfl.NewOCFLLogger(ctx, &zlogger, nil, version.Version1_1, nil)
+	logger := ocfl.NewOCFLLogger(ctx, &zlogger, nil, version.Version1_1, nil)
 
 	cfg := vfsrw.Config{
 		"extensionconfig": &vfsrw.VFS{
@@ -139,7 +139,7 @@ func SetupFullTestEnv(t *testing.T, extensionParams map[string]string, tempFS, s
 	out := zerolog.ConsoleWriter{Out: os.Stderr}
 	zlogger := zerolog.New(out)
 	var _zlogger zLogger.ZLogger = &zlogger
-	logger := initocfl.NewOCFLLogger(ctx, &zlogger, nil, version.Version1_1, nil)
+	logger := ocfl.NewOCFLLogger(ctx, &zlogger, nil, version.Version1_1, nil)
 
 	// In-memory VFS configuration (afero mem://)
 	cfg := vfsrw.Config{
@@ -209,13 +209,13 @@ func SetupFullTestEnv(t *testing.T, extensionParams map[string]string, tempFS, s
 	ocflVer := version.Version1_1
 
 	// Initialize extension factory and managers
-	storageRootExtManager, _, err := initocfl.SetupExtensionManager[storageroot.ExtensionManager](extensionParams, storageRootExtensionFS, logger)
+	storageRootExtManager, _, err := ocfl.SetupExtensionManager[storageroot.ExtensionManager](extensionParams, storageRootExtensionFS, logger)
 	require.NoError(t, err)
-	objectExtManager, _, err := initocfl.SetupExtensionManager[object.ExtensionManager](extensionParams, objectExtensionFS, logger)
+	objectExtManager, _, err := ocfl.SetupExtensionManager[object.ExtensionManager](extensionParams, objectExtensionFS, logger)
 	require.NoError(t, err)
 
 	// Initialize storage root
-	sr, err := initocfl.InitStorageRoot(ctx, srFS, nil, ocflVer, checksum.DigestSHA512, nil, logger)
+	sr, err := ocfl.InitStorageRoot(ctx, srFS, nil, ocflVer, checksum.DigestSHA512, nil, logger)
 	require.NoError(t, err)
 
 	if storageRootExtManager != nil {
@@ -254,7 +254,7 @@ func CreateTestObject(t *testing.T, env *FullTestEnv, objID string) (object.Obje
 		_ = closer.Close()
 	})
 
-	obj, err := initocfl.InitObject(t.Context(), objFS, nil, version.Version1_1, objID, checksum.DigestSHA512, nil, env.OCFLLogger)
+	obj, err := ocfl.InitObject(t.Context(), objFS, nil, version.Version1_1, objID, checksum.DigestSHA512, nil, env.OCFLLogger)
 	require.NoError(t, err)
 
 	if env.ObjectExtensionManager != nil {
@@ -272,7 +272,7 @@ func ReloadObject(t *testing.T, env *FullTestEnv, objID string) (object.Object, 
 	objFS, err := fs.Sub(env.ReadSRFS, objFolder)
 	require.NoError(t, err)
 
-	loadedObj, err := initocfl.LoadObject(t.Context(), objFS, nil, env.OCFLLogger)
+	loadedObj, err := ocfl.LoadObject(t.Context(), objFS, nil, env.OCFLLogger)
 	require.NoError(t, err)
 	t.Cleanup(func() {
 		_ = loadedObj.Close()
