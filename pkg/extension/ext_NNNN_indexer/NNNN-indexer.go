@@ -40,13 +40,17 @@ var IndexerDoc string
 
 func init() {
 	extension.RegisterExtensionObject(IndexerName, func() (extensiontypes.Extension, error) {
-		return NewIndexer("", &ironmaiden.IndexerConfig{}, false, nil)
+		return NewIndexer("", &ironmaiden.IndexerConfig{}, false)
 	}, GetIndexerParams, &IndexerDoc)
 }
 
 func Init(urlString string, conf *ironmaiden.IndexerConfig, localCache bool, logger ocfllogger.OCFLLogger) {
 	extension.RegisterExtensionObject(IndexerName, func() (extensiontypes.Extension, error) {
-		return NewIndexer(urlString, conf, localCache, logger)
+		indexer, err := NewIndexer(urlString, conf, localCache)
+		if err != nil {
+			return nil, errors.Wrap(err, "cannot init indexer")
+		}
+		return indexer.WithLogger(logger), nil
 	}, GetIndexerParams, &IndexerDoc)
 }
 
@@ -69,7 +73,7 @@ func GetIndexerParams() ([]*extension.ExternalParam, error) {
 	}, nil
 }
 
-func NewIndexer(urlString string, conf *ironmaiden.IndexerConfig, localCache bool, logger ocfllogger.OCFLLogger) (*Indexer, error) {
+func NewIndexer(urlString string, conf *ironmaiden.IndexerConfig, localCache bool) (*Indexer, error) {
 	var config = &IndexerConfig{
 		ExtensionConfig: &extensiontypes.ExtensionConfig{
 			ExtensionName: IndexerName,
@@ -84,16 +88,6 @@ func NewIndexer(urlString string, conf *ironmaiden.IndexerConfig, localCache boo
 		localCache:    localCache,
 	}
 
-	if logger != nil {
-		indexerActions, availableActions, indexerCloser, err := indexerutil.InitIndexer(conf, logger.Logger())
-		//indexerActions, err := ironmaiden.InitActionDispatcher(fss, conf, logger.Logger())
-		if err != nil {
-			return nil, errors.Wrapf(err, "cannot init indexer")
-		}
-		sl.indexerActions = indexerActions.ActionDispatcher()
-		sl.availableActions = availableActions
-		sl.indexerCloser = indexerCloser
-	}
 	var err error
 	if sl.indexerURL, err = url.Parse(urlString); err != nil {
 		return nil, err
@@ -125,6 +119,16 @@ type Indexer struct {
 
 func (sl *Indexer) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.Extension {
 	sl.logger = logger.With("extension", IndexerName)
+	if sl.indexerActions == nil {
+		conf := &ironmaiden.IndexerConfig{} // Default config or from sl.IndexerConfig?
+		// Note: IndexerConfig from extension might need mapping to ironmaiden.IndexerConfig
+		indexerActions, availableActions, indexerCloser, err := indexerutil.InitIndexer(conf, sl.logger.Logger())
+		if err == nil {
+			sl.indexerActions = indexerActions.ActionDispatcher()
+			sl.availableActions = availableActions
+			sl.indexerCloser = indexerCloser
+		}
+	}
 	return sl
 }
 
