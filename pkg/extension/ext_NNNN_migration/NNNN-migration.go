@@ -188,6 +188,7 @@ func (mi *Migration) UpdateObjectAfter(obj object.VersionWriter) error {
 
 	// first get the metadata from the object
 	extractor := obj.GetObject().GetExtractor()
+	defer extractor.Close()
 	meta, err := extractor.GetMetadata()
 	if err != nil {
 		return errors.Wrapf(err, "cannot get metadata from object %s", obj.GetID())

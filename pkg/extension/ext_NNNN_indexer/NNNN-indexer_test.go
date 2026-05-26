@@ -73,7 +73,7 @@ func TestIndexer_AddObject(t *testing.T) {
 	require.NoError(t, err)
 
 	// Verifikation: Prüfen ob Indexer-Datei existiert
-	indexerPath := "v1/extensions/NNNN-indexer/metadata/indexer_v1.jsonl"
+	indexerPath := "extensions/NNNN-indexer/metadata/indexer_v1.jsonl"
 	data, err := fs.ReadFile(objFS, indexerPath)
 	require.NoError(t, err, "Indexer output file should exist at %s", indexerPath)
 
