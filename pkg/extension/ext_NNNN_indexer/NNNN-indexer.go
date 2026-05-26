@@ -6,14 +6,10 @@ package ext_NNNN_indexer
 import (
 	"bufio"
 	"bytes"
-	"crypto/tls"
 	_ "embed"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/fs"
-	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -40,16 +36,13 @@ var IndexerDoc string
 
 func init() {
 	extension.RegisterExtensionObject(IndexerName, func() (extensiontypes.Extension, error) {
-		return NewIndexer("", &ironmaiden.IndexerConfig{}, false)
+		return NewIndexer(&ironmaiden.IndexerConfig{}, false), nil
 	}, GetIndexerParams, &IndexerDoc)
 }
 
-func Init(urlString string, conf *ironmaiden.IndexerConfig, localCache bool, logger ocfllogger.OCFLLogger) {
+func Init(conf *ironmaiden.IndexerConfig, localCache bool, logger ocfllogger.OCFLLogger) {
 	extension.RegisterExtensionObject(IndexerName, func() (extensiontypes.Extension, error) {
-		indexer, err := NewIndexer(urlString, conf, localCache)
-		if err != nil {
-			return nil, errors.Wrap(err, "cannot init indexer")
-		}
+		indexer := NewIndexer(conf, localCache)
 		return indexer.WithLogger(logger), nil
 	}, GetIndexerParams, &IndexerDoc)
 }
@@ -63,17 +56,10 @@ var actions = []string{"siegfried", "ffprobe", "identify", "tika", "fulltext", "
 var compress = []string{"brotli", "gzip", "none"}
 
 func GetIndexerParams() ([]*extension.ExternalParam, error) {
-	return []*extension.ExternalParam{
-		{
-			ExtensionName: IndexerName,
-			Param:         "addr",
-			//File:          "Addr",
-			Description: "url for indexer format recognition service",
-		},
-	}, nil
+	return []*extension.ExternalParam{}, nil
 }
 
-func NewIndexer(urlString string, conf *ironmaiden.IndexerConfig, localCache bool) (*Indexer, error) {
+func NewIndexer(conf *ironmaiden.IndexerConfig, localCache bool) *Indexer {
 	var config = &IndexerConfig{
 		ExtensionConfig: &extensiontypes.ExtensionConfig{
 			ExtensionName: IndexerName,
@@ -82,17 +68,14 @@ func NewIndexer(urlString string, conf *ironmaiden.IndexerConfig, localCache boo
 		Compress: "none",
 	}
 	sl := &Indexer{
-		IndexerConfig: config,
-		buffer:        map[string]*bytes.Buffer{},
-		active:        true,
-		localCache:    localCache,
+		IndexerConfig:       config,
+		buffer:              map[string]*bytes.Buffer{},
+		active:              true,
+		localCache:          localCache,
+		indexerActionConfig: conf,
 	}
 
-	var err error
-	if sl.indexerURL, err = url.Parse(urlString); err != nil {
-		return nil, err
-	}
-	return sl, nil
+	return sl
 }
 
 type IndexerConfig struct {
@@ -104,25 +87,23 @@ type IndexerConfig struct {
 }
 type Indexer struct {
 	*IndexerConfig
-	indexerURL       *url.URL
-	buffer           map[string]*bytes.Buffer
-	writer           *brotli.Writer
-	active           bool
-	indexerActions   *ironmaiden.ActionDispatcher
-	currentHead      string
-	localCache       bool
-	fsys             appendfs.FS
-	logger           ocfllogger.OCFLLogger
-	availableActions []string
-	indexerCloser    io.Closer
+	buffer              map[string]*bytes.Buffer
+	writer              *brotli.Writer
+	active              bool
+	indexerActions      *ironmaiden.ActionDispatcher
+	currentHead         string
+	localCache          bool
+	fsys                appendfs.FS
+	logger              ocfllogger.OCFLLogger
+	availableActions    []string
+	indexerCloser       io.Closer
+	indexerActionConfig *ironmaiden.IndexerConfig
 }
 
 func (sl *Indexer) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.Extension {
 	sl.logger = logger.With("extension", IndexerName)
 	if sl.indexerActions == nil {
-		conf := &ironmaiden.IndexerConfig{} // Default config or from sl.IndexerConfig?
-		// Note: IndexerConfig from extension might need mapping to ironmaiden.IndexerConfig
-		indexerActions, availableActions, indexerCloser, err := indexerutil.InitIndexer(conf, sl.logger.Logger())
+		indexerActions, availableActions, indexerCloser, err := indexerutil.InitIndexer(sl.indexerActionConfig, sl.logger.Logger())
 		if err == nil {
 			sl.indexerActions = indexerActions.ActionDispatcher()
 			sl.availableActions = availableActions
@@ -184,59 +165,7 @@ func (sl *Indexer) GetFS() fs.FS {
 }
 
 func (sl *Indexer) SetParams(params map[string]string) error {
-	var err error
-	name := fmt.Sprintf("ext-%s-%s", IndexerName, "addr")
-	urlString, _ := params[name]
-	if urlString == "" {
-		if sl.indexerURL != nil && sl.indexerURL.String() != "" {
-			result, code, err := sl.post("{}")
-			if err != nil {
-				return errors.Wrapf(err, "cannot post to '%s'", urlString)
-			}
-			if code != http.StatusBadRequest {
-				return errors.Errorf("cannot post to '%s' - %v:'%s'", urlString, code, result)
-			}
-			_ = result
-			return nil
-		}
-		return nil
-		// return errors.Errorf("url '%s' not set", name)
-	}
-	if sl.indexerURL, err = url.Parse(urlString); err != nil {
-		return errors.Wrapf(err, "cannot parse '%s' '%s'", name, urlString)
-	}
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
-	result, code, err := sl.post("")
-	if err != nil {
-		return errors.Wrapf(err, "cannot post to '%s'", urlString)
-	}
-	if code != http.StatusBadRequest {
-		return errors.Errorf("cannot post to '%s' - %v:'%s'", urlString, code, result)
-	}
-	_ = result
-
 	return nil
-}
-
-func (sl *Indexer) post(data any) ([]byte, int, error) {
-	if !(sl.indexerURL != nil && sl.indexerURL.String() != "") {
-		return nil, 0, errors.New("indexer url not set")
-	}
-	jsonBytes, err := json.Marshal(data)
-	if err != nil {
-		return nil, 0, errors.Wrapf(err, "cannot marshal %v", data)
-	}
-	resp, err := http.Post(sl.indexerURL.String(), "test/json", bytes.NewBuffer(jsonBytes))
-	if err != nil {
-		return nil, 0, errors.Wrapf(err, "cannot post %v to %s", data, sl.indexerURL)
-	}
-	defer resp.Body.Close()
-	result, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, 0, errors.Wrapf(err, "cannot read result of post %v to %s", data, sl.indexerURL)
-	}
-	return result, resp.StatusCode, nil
 }
 
 func (sl *Indexer) WriteConfig(fsys appendfs.FS) error {
