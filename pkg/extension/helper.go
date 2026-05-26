@@ -105,7 +105,7 @@ func ReadJsonL(extensionName string, fsys fs.FS, obj object.Object, version *inv
 	return data, nil
 }
 
-func WriteJsonL(extensionName string, obj object.VersionWriter, name string, brotliData []byte, compress, storageType, storageName string) error {
+func WriteJsonL(extensionName string, versionWriter object.VersionWriter, name string, brotliData []byte, compress, storageType, storageName string) error {
 	var bufReader = bytes.NewBuffer(brotliData)
 	var ext string
 	var reader io.Reader
@@ -132,27 +132,27 @@ func WriteJsonL(extensionName string, obj object.VersionWriter, name string, bro
 		return errors.Errorf("invalid compression '%s'", compress)
 	}
 
-	head := obj.GetObject().GetInventory().GetHead()
+	head := versionWriter.GetObject().GetInventory().GetHead()
 	switch strings.ToLower(storageType) {
 	case "area":
 		targetname := fmt.Sprintf("%s_%s.jsonl%s", name, head, ext)
-		if _, err := obj.AddReader(io.NopCloser(reader), []string{targetname}, storageName, true, false); err != nil {
+		if _, err := versionWriter.AddReader(io.NopCloser(reader), []string{targetname}, storageName, true, false); err != nil {
 			return errors.Wrapf(err, "cannot write '%s'", targetname)
 		}
 	case "path":
-		pathName, err := obj.GetObject().GetExtensionManager().GetAreaPath("content")
+		pathName, err := versionWriter.GetObject().GetExtensionManager().GetAreaPath("content")
 		if err != nil {
 			return errors.Wrapf(err, "cannot get area path for '%s'", "content")
 		}
 		targetname := fmt.Sprintf("%s/%s/%s_%s.jsonl%s", pathName, storageName, name, head, ext)
 
 		//targetname := fmt.Sprintf("%s/%s_%s.jsonl%s", name, storageName, head, ext)
-		if _, err := obj.AddReader(io.NopCloser(reader), []string{targetname}, "", true, false); err != nil {
+		if _, err := versionWriter.AddReader(io.NopCloser(reader), []string{targetname}, "", true, false); err != nil {
 			return errors.Wrapf(err, "cannot write '%s'", targetname)
 		}
 	case "extension":
 		targetname := strings.TrimLeft(fmt.Sprintf("extensions/%s/%s/%s_%s.jsonl%s", extensionName, storageName, name, head, ext), "/")
-		fsys := obj.GetFS()
+		fsys := versionWriter.GetObject().GetWriteFS()
 		fp, err := writefs.Create(fsys, targetname)
 		if err != nil {
 			return errors.Wrapf(err, "cannot create '%v/%s'", fsys, targetname)
