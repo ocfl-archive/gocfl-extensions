@@ -28,6 +28,7 @@ These extensions follow the official OCFL numbering and are documented at [https
 These extensions are not (yet) officially registered and use the placeholder `NNNN` in their designation.
 
 - [NNNN-content-subpath](ext_NNNN_content_subpath/README.md)
+- [NNNN-direct-path-layout](ext_NNNN_direct_path_layout/README.md)
 - [NNNN-filesystem](ext_NNNN_filesystem/README.md)
 - [NNNN-indexer](ext_NNNN_indexer/README.md)
 - [NNNN-metafile](ext_NNNN_metafile/README.md)
