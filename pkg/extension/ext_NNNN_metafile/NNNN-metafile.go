@@ -156,6 +156,8 @@ func (sl *MetaFile) IsRegistered() bool {
 	return false
 }
 
+var winDriveRegexp = regexp.MustCompile(`^[A-Za-z]:`)
+
 func (sl *MetaFile) SetParams(params map[string]string) error {
 	if params != nil {
 		name := fmt.Sprintf("ext-%s-%s", MetaFileName, "source")
@@ -164,6 +166,9 @@ func (sl *MetaFile) SetParams(params map[string]string) error {
 		if !ok || urlString == "" {
 			sl.metadataSource = nil
 			return nil //errors.Errorf("no source (--%s) configured", name)
+		}
+		if winDriveRegexp.MatchString(urlString) {
+			urlString = "file://" + filepath.ToSlash(urlString)
 		}
 		u, err := url.Parse(urlString)
 		if err != nil || u.Scheme == "" {
