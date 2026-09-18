@@ -2,7 +2,6 @@ package thumbnaildata
 
 import (
 	"embed"
-	_ "embed"
 )
 
 //go:embed thumbnail.toml
