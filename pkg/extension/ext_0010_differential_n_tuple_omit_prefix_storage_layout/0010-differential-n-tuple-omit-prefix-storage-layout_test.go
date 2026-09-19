@@ -1,7 +1,8 @@
 package ext_0010_differential_n_tuple_omit_prefix_storage_layout
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"path"
 	"testing"
 
@@ -23,7 +24,7 @@ func TestDifferentialNTupleOmitPrefixStorageLayout(t *testing.T) {
 
 	runTest := func(name string, config *DifferentialNTupleOmitPrefixStorageLayoutConfig, cases []testCase) {
 		t.Run(name, func(t *testing.T) {
-			data, _ := json.MarshalIndent(config, "", "  ")
+			data, _ := json.Marshal(config, jsontext.WithIndent("  "))
 			configPath := path.Join(DifferentialNTupleOmitPrefixStorageLayoutName, "config.json")
 			_, err := writefs.WriteFile(env.ConfigFS, configPath, data)
 			require.NoError(t, err)
@@ -73,7 +74,7 @@ func TestDifferentialNTupleOmitPrefixStorageLayout(t *testing.T) {
 			TupleSegmentSizes:          []int{2, 2},
 			FullIdentifierAsObjectRoot: false,
 		}
-		data, _ := json.MarshalIndent(config, "", "  ")
+		data, _ := json.Marshal(config, jsontext.WithIndent("  "))
 		configPath := path.Join(DifferentialNTupleOmitPrefixStorageLayoutName, "config.json")
 		_, err := writefs.WriteFile(env.ConfigFS, configPath, data)
 		require.NoError(t, err)

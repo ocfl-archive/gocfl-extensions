@@ -5,7 +5,8 @@ package ext_0012_hash_and_no_prefix_id_n_tuple_storage_layout
 
 import (
 	_ "embed"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"fmt"
 	"io/fs"
 	"strings"
@@ -46,7 +47,7 @@ func (sl *StorageLayoutHashAndNoPrefixIdNTuple) WithLogger(logger ocfllogger.OCF
 	return sl
 }
 
-func (sl *StorageLayoutHashAndNoPrefixIdNTuple) Load(data json.RawMessage, extFS fs.FS) error {
+func (sl *StorageLayoutHashAndNoPrefixIdNTuple) Load(data jsontext.Value, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.StorageLayoutHashAndNoPrefixIdNTupleConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal StorageLayoutHashAndNoPrefixIdNTupleConfig '%s'", string(data))
 	}
@@ -102,9 +103,7 @@ func (sl *StorageLayoutHashAndNoPrefixIdNTuple) WriteConfig(fsys appendfs.FS) er
 		return errors.Wrap(err, "cannot open config.json")
 	}
 	defer configWriter.Close()
-	jenc := json.NewEncoder(configWriter)
-	jenc.SetIndent("", "   ")
-	if err := jenc.Encode(sl.StorageLayoutHashAndNoPrefixIdNTupleConfig); err != nil {
+	if err := json.MarshalWrite(configWriter, sl.StorageLayoutHashAndNoPrefixIdNTupleConfig, jsontext.WithIndent("   ")); err != nil {
 		return errors.Wrapf(err, "cannot encode config to file")
 	}
 	return nil
@@ -193,15 +192,13 @@ func (sl *StorageLayoutHashAndNoPrefixIdNTuple) WriteLayout(fsys appendfs.FS) er
 			sl.logger.Error().Err(err).Msg("failed to close configWriter")
 		}
 	}(configWriter)
-	jenc := json.NewEncoder(configWriter)
-	jenc.SetIndent("", "   ")
-	if err := jenc.Encode(struct {
+	if err := json.MarshalWrite(configWriter, struct {
 		Extension   string `json:"extension"`
 		Description string `json:"description"`
 	}{
 		Extension:   StorageLayoutHashAndNoPrefixIdNTupleName,
 		Description: StorageLayoutHashAndNoPrefixIdNTupleDescription,
-	}); err != nil {
+	}, jsontext.WithIndent("   ")); err != nil {
 		return errors.Wrapf(err, "cannot encode config to file")
 	}
 	return nil

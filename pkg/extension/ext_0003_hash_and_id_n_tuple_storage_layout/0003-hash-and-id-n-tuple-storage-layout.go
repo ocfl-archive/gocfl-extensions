@@ -5,7 +5,8 @@ package ext_0003_hash_and_id_n_tuple_storage_layout
 
 import (
 	_ "embed"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"fmt"
 	"io/fs"
 
@@ -51,7 +52,7 @@ func (sl *StorageLayoutHashAndIdNTuple) WithLogger(logger ocfllogger.OCFLLogger)
 	return sl
 }
 
-func (sl *StorageLayoutHashAndIdNTuple) Load(data json.RawMessage, extFS fs.FS) error {
+func (sl *StorageLayoutHashAndIdNTuple) Load(data jsontext.Value, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.StorageLayoutHashAndIdNTupleConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal StorageLayoutHashAndIdNTupleConfig '%s'", string(data))
 	}
@@ -112,9 +113,7 @@ func (sl *StorageLayoutHashAndIdNTuple) WriteConfig(fsys appendfs.FS) error {
 		return errors.Wrap(err, "cannot open config.json")
 	}
 	defer configWriter.Close()
-	jenc := json.NewEncoder(configWriter)
-	jenc.SetIndent("", "   ")
-	if err := jenc.Encode(sl.ExtensionConfig); err != nil {
+	if err := json.MarshalWrite(configWriter, sl.ExtensionConfig, jsontext.WithIndent("   ")); err != nil {
 		return errors.Wrapf(err, "cannot encode config to file")
 	}
 	return nil
@@ -170,15 +169,13 @@ func (sl *StorageLayoutHashAndIdNTuple) WriteLayout(fsys appendfs.FS) error {
 		return errors.Wrap(err, "cannot open ocfl_layout.json")
 	}
 	defer configWriter.Close()
-	jenc := json.NewEncoder(configWriter)
-	jenc.SetIndent("", "   ")
-	if err := jenc.Encode(struct {
+	if err := json.MarshalWrite(configWriter, struct {
 		Extension   string `json:"extension"`
 		Description string `json:"description"`
 	}{
 		Extension:   StorageLayoutHashAndIdNTupleName,
 		Description: StorageLayoutHashAndIdNTupleDescription,
-	}); err != nil {
+	}, jsontext.WithIndent("   ")); err != nil {
 		return errors.Wrapf(err, "cannot encode config to file")
 	}
 	return nil

@@ -1,7 +1,8 @@
 package test
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"io"
 	"io/fs"
 	"os"
@@ -102,7 +103,7 @@ func SetupTestEnv(t *testing.T) *TestEnv {
 		Sort:            nil,
 		Exclusion:       nil,
 	}
-	data, _ := json.MarshalIndent(extensionManagerConfig, "", "  ")
+	data, _ := json.Marshal(extensionManagerConfig, jsontext.WithIndent("  "))
 	_, err = writefs.WriteFile(extensionConfigFS, path.Join(ext_NNNN_gocfl_extension_manager.GOCFLExtensionManagerName, "config.json"), data)
 	require.NoError(t, err)
 
@@ -110,7 +111,7 @@ func SetupTestEnv(t *testing.T) *TestEnv {
 		ExtensionConfig: &extension.ExtensionConfig{ExtensionName: ext_initial.InitialName},
 		Extension:       ext_NNNN_gocfl_extension_manager.GOCFLExtensionManagerName,
 	}
-	data, _ = json.MarshalIndent(initialConfig, "", "  ")
+	data, _ = json.Marshal(initialConfig, jsontext.WithIndent("  "))
 	_, err = writefs.WriteFile(extensionConfigFS, path.Join(ext_initial.InitialName, "config.json"), data)
 	require.NoError(t, err)
 

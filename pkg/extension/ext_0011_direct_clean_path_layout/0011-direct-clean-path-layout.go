@@ -6,7 +6,8 @@ package ext_0011_direct_clean_path_layout
 import (
 	_ "embed"
 	"encoding/hex"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"fmt"
 	"hash"
 	"io/fs"
@@ -29,7 +30,7 @@ import (
 const DirectCleanName = "0011-direct-clean-path-layout"
 
 func init() {
-	//extension.RegisterExtensionStorageRoot(DirectCleanName, NewDirectClean, nil, &DirectCleanDoc)
+	extension.RegisterExtensionStorageRoot(DirectCleanName, NewDirectClean, nil, &DirectCleanDoc)
 	extension.RegisterExtensionObject(DirectCleanName, NewDirectClean, nil, &DirectCleanDoc)
 }
 
@@ -101,7 +102,7 @@ func (sl *DirectClean) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.E
 	return sl
 }
 
-func (sl *DirectClean) Load(data json.RawMessage, extFS fs.FS) error {
+func (sl *DirectClean) Load(data jsontext.Value, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.DirectCleanConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal DirectCleanConfig '%s'", string(data))
 	}
@@ -161,9 +162,7 @@ func (sl *DirectClean) WriteConfig(fsys appendfs.FS) error {
 		return errors.Wrap(err, "cannot open config.json")
 	}
 	defer configWriter.Close()
-	jenc := json.NewEncoder(configWriter)
-	jenc.SetIndent("", "   ")
-	if err := jenc.Encode(sl.DirectCleanConfig); err != nil {
+	if err := json.MarshalWrite(configWriter, sl.DirectCleanConfig, jsontext.WithIndent("   ")); err != nil {
 		return errors.Wrapf(err, "cannot encode config to file")
 	}
 	return nil
@@ -175,15 +174,13 @@ func (sl *DirectClean) WriteLayout(fsys appendfs.FS) error {
 		return errors.Wrap(err, "cannot open ocfl_layout.json")
 	}
 	defer configWriter.Close()
-	jenc := json.NewEncoder(configWriter)
-	jenc.SetIndent("", "   ")
-	if err := jenc.Encode(struct {
+	if err := json.MarshalWrite(configWriter, struct {
 		Extension   string `json:"extension"`
 		Description string `json:"description"`
 	}{
 		Extension:   DirectCleanName,
 		Description: DirectCleanDescription,
-	}); err != nil {
+	}, jsontext.WithIndent("   ")); err != nil {
 		return errors.Wrapf(err, "cannot encode config to file")
 	}
 	return nil

@@ -7,7 +7,8 @@ import (
 	"bufio"
 	"bytes"
 	_ "embed"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"io"
 	"io/fs"
 	"os"
@@ -93,7 +94,7 @@ func (fi *Filesystem) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.Ex
 	return fi
 }
 
-func (fi *Filesystem) Load(data json.RawMessage, extFS fs.FS) error {
+func (fi *Filesystem) Load(data jsontext.Value, extFS fs.FS) error {
 	if err := json.Unmarshal(data, fi.FilesystemConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal FilesystemConfig '%s'", string(data))
 	}
@@ -351,13 +352,10 @@ func (fi *Filesystem) WriteConfig(fsys appendfs.FS) error {
 		return errors.Wrap(err, "cannot open config.json")
 	}
 	defer configWriter.Close()
-	jenc := json.NewEncoder(configWriter)
-	jenc.SetIndent("", "   ")
-	if err := jenc.Encode(fi.FilesystemConfig); err != nil {
+	if err := json.MarshalWrite(configWriter, fi.FilesystemConfig, jsontext.WithIndent("   ")); err != nil {
 		return errors.Wrapf(err, "cannot encode config to file")
 	}
 	return nil
-
 }
 
 func (fi *Filesystem) IsRegistered() bool {

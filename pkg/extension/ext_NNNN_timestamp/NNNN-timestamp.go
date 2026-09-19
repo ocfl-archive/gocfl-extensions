@@ -8,7 +8,8 @@ import (
 	"crypto"
 	_ "embed"
 	"encoding/hex"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"fmt"
 
 	"io"
@@ -66,7 +67,7 @@ func (sl *Timestamp) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.Ext
 	return sl
 }
 
-func (sl *Timestamp) Load(data json.RawMessage, extFS fs.FS) error {
+func (sl *Timestamp) Load(data jsontext.Value, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.TimestampConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal TimestampConfig '%s'", string(data))
 	}
@@ -207,9 +208,7 @@ func (sl *Timestamp) WriteConfig(fsys appendfs.FS) error {
 		return errors.Wrap(err, "cannot open config.json")
 	}
 	defer configWriter.Close()
-	jenc := json.NewEncoder(configWriter)
-	jenc.SetIndent("", "   ")
-	if err := jenc.Encode(sl.TimestampConfig); err != nil {
+	if err := json.MarshalWrite(configWriter, sl.TimestampConfig, jsontext.WithIndent("   ")); err != nil {
 		return errors.Wrapf(err, "cannot encode config to file")
 	}
 

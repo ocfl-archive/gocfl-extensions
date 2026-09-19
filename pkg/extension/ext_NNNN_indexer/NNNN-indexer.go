@@ -7,7 +7,8 @@ import (
 	"bufio"
 	"bytes"
 	_ "embed"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"io"
 	"io/fs"
 	"os"
@@ -48,8 +49,8 @@ func Init(conf *ironmaiden.IndexerConfig, localCache bool, logger ocfllogger.OCF
 }
 
 type indexerLine struct {
-	Path    string
-	Indexer *ironmaiden.ResultV2
+	Path    string               `json:"path"`
+	Indexer *ironmaiden.ResultV2 `json:"indexer"`
 }
 
 var actions = []string{"siegfried", "ffprobe", "identify", "tika", "fulltext", "xml", "json", "checksum"}
@@ -80,10 +81,10 @@ func NewIndexer(conf *ironmaiden.IndexerConfig, localCache bool) *Indexer {
 
 type IndexerConfig struct {
 	*extensiontypes.ExtensionConfig
-	StorageType string
-	StorageName string
-	Actions     []string
-	Compress    string
+	StorageType string   `json:"storageType"`
+	StorageName string   `json:"storageName"`
+	Actions     []string `json:"actions"`
+	Compress    string   `json:"compress"`
 }
 type Indexer struct {
 	*IndexerConfig
@@ -113,7 +114,7 @@ func (sl *Indexer) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.Exten
 	return sl
 }
 
-func (sl *Indexer) Load(data json.RawMessage, extFS fs.FS) error {
+func (sl *Indexer) Load(data jsontext.Value, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.IndexerConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal IndexerConfig '%s'", string(data))
 	}
@@ -174,9 +175,7 @@ func (sl *Indexer) WriteConfig(fsys appendfs.FS) error {
 		return errors.Wrap(err, "cannot open config.json")
 	}
 	defer configWriter.Close()
-	jenc := json.NewEncoder(configWriter)
-	jenc.SetIndent("", "   ")
-	if err := jenc.Encode(sl.IndexerConfig); err != nil {
+	if err := json.MarshalWrite(configWriter, sl.IndexerConfig, jsontext.WithIndent("   ")); err != nil {
 		return errors.Wrapf(err, "cannot encode config to file")
 	}
 	return nil

@@ -1,7 +1,8 @@
 package ext_0001_digest_algorithms
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"path"
 	"testing"
 
@@ -18,7 +19,7 @@ func TestNewDigestAlgorithms(t *testing.T) {
 	digestAlgorithmsConfig := &DigestAlgorithmsConfig{
 		ExtensionConfig: &extension.ExtensionConfig{ExtensionName: DigestAlgorithmsName},
 	}
-	data, err := json.MarshalIndent(digestAlgorithmsConfig, "", "  ")
+	data, err := json.Marshal(digestAlgorithmsConfig, jsontext.WithIndent("  "))
 	require.NoError(t, err)
 	_, err = writefs.WriteFile(env.ConfigFS, path.Join(DigestAlgorithmsName, "config.json"), data)
 	require.NoError(t, err)

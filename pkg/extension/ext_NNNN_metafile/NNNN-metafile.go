@@ -6,7 +6,8 @@ package ext_NNNN_metafile
 import (
 	"bytes"
 	_ "embed"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"fmt"
 	"io"
 	"io/fs"
@@ -109,7 +110,7 @@ func (sl *MetaFile) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.Exte
 	return sl
 }
 
-func (sl *MetaFile) Load(data json.RawMessage, extFS fs.FS) error {
+func (sl *MetaFile) Load(data jsontext.Value, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.MetaFileConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal MetaFileConfig '%s'", string(data))
 	}
@@ -208,12 +209,9 @@ func (sl *MetaFile) WriteConfig(fsys appendfs.FS) error {
 		return errors.Wrap(err, "cannot open config.json")
 	}
 	defer configWriter.Close()
-	jenc := json.NewEncoder(configWriter)
-	jenc.SetIndent("", "   ")
-	if err := jenc.Encode(sl.MetaFileConfig); err != nil {
+	if err := json.MarshalWrite(configWriter, sl.MetaFileConfig, jsontext.WithIndent("   ")); err != nil {
 		return errors.Wrapf(err, "cannot encode config to file")
 	}
-
 	return nil
 }
 
@@ -336,8 +334,7 @@ func (sl *MetaFile) UpdateObjectBefore(obj object.VersionWriter) error {
 
 	switch strings.ToLower(filepath.Ext(fname)) {
 	case ".json":
-		jr := json.NewDecoder(rc)
-		if err := jr.Decode(&info); err != nil {
+		if err := json.UnmarshalRead(rc, &info); err != nil {
 			return errors.Wrap(err, "cannot decode info file")
 		}
 		if err := sl.compiledSchema.Validate(info); err != nil {
@@ -371,7 +368,7 @@ func (sl *MetaFile) UpdateObjectBefore(obj object.VersionWriter) error {
 		return errors.Errorf("unknown file extension in '%s' only .json, .toml and .yaml supported", fname)
 	}
 
-	infoData, err = json.MarshalIndent(info, "", "  ")
+	infoData, err = json.Marshal(info, jsontext.WithIndent("  "))
 	if err != nil {
 		return errors.Wrap(err, "cannot marshal info json")
 	}

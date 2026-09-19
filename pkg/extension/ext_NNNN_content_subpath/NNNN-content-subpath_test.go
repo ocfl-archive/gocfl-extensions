@@ -1,7 +1,8 @@
 package ext_NNNN_content_subpath
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"os"
 	"path"
 	"testing"
@@ -48,7 +49,7 @@ func TestContentSubPath(t *testing.T) {
 		},
 	}
 
-	data, err := json.MarshalIndent(config, "", "  ")
+	data, err := json.Marshal(config, jsontext.WithIndent("  "))
 	require.NoError(t, err)
 	err = writefs.MkDir(configFS, ContentSubPathName)
 	require.NoError(t, err)

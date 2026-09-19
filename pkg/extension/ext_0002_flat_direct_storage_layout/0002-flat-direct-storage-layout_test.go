@@ -1,7 +1,8 @@
 package ext_0002_flat_direct_storage_layout
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"path"
 	"testing"
 
@@ -18,7 +19,7 @@ func TestNewStorageLayoutFlatDirect(t *testing.T) {
 	storageLayoutConfig := &StorageLayoutFlatDirectConfig{
 		ExtensionConfig: &extension.ExtensionConfig{ExtensionName: StorageLayoutFlatDirectName},
 	}
-	data, _ := json.MarshalIndent(storageLayoutConfig, "", "  ")
+	data, _ := json.Marshal(storageLayoutConfig, jsontext.WithIndent("  "))
 	_, err := writefs.WriteFile(env.ConfigFS, path.Join(StorageLayoutFlatDirectName, "config.json"), data)
 	require.NoError(t, err)
 

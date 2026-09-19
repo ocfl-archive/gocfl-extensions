@@ -7,7 +7,8 @@ import (
 	"bufio"
 	"bytes"
 	_ "embed"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"io"
 	"io/fs"
 	"path/filepath"
@@ -72,9 +73,9 @@ func NewMigration(mig *migration) *Migration {
 
 type MigrationConfig struct {
 	*extensiontypes.ExtensionConfig
-	StorageType string
-	StorageName string
-	Compress    string
+	StorageType string `json:"storageType"`
+	StorageName string `json:"storageName"`
+	Compress    string `json:"compress"`
 }
 
 type MigrationTarget struct {
@@ -123,7 +124,7 @@ func (mi *Migration) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.Ext
 	return mi
 }
 
-func (mi *Migration) Load(data json.RawMessage, extFS fs.FS) error {
+func (mi *Migration) Load(data jsontext.Value, extFS fs.FS) error {
 	if err := json.Unmarshal(data, mi.MigrationConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal MigrationConfig '%s'", string(data))
 	}
@@ -160,7 +161,7 @@ func (mi *Migration) SetParams(map[string]string) error {
 }
 
 func (mi *Migration) WriteConfig(fsys appendfs.FS) error {
-	jsonData, _ := json.MarshalIndent(mi.MigrationConfig, "", "  ")
+	jsonData, _ := json.Marshal(mi.MigrationConfig, jsontext.WithIndent("  "))
 	if _, err := writefs.WriteFile(fsys, "config.json", jsonData); err != nil {
 		return errors.Wrap(err, "cannot write config.json")
 	}

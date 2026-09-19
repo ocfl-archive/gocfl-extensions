@@ -1,7 +1,8 @@
 package ext_0007_n_tuple_omit_prefix_storage_layout
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"path"
 	"testing"
 
@@ -23,7 +24,7 @@ func TestNTupleOmitPrefixStorageLayout(t *testing.T) {
 
 	runTest := func(name string, config *NTupleOmitPrefixStorageLayoutConfig, cases []testCase) {
 		t.Run(name, func(t *testing.T) {
-			data, _ := json.MarshalIndent(config, "", "  ")
+			data, _ := json.Marshal(config, jsontext.WithIndent("  "))
 			configPath := path.Join(NTupleOmitPrefixStorageLayoutName, "config.json")
 			_, err := writefs.WriteFile(env.ConfigFS, configPath, data)
 			require.NoError(t, err)

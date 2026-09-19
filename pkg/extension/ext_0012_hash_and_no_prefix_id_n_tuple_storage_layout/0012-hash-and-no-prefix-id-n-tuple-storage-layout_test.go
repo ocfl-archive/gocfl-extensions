@@ -1,7 +1,8 @@
 package ext_0012_hash_and_no_prefix_id_n_tuple_storage_layout_test
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"path"
 	"testing"
 
@@ -148,7 +149,7 @@ func TestStorageLayoutHashAndNoPrefixIdNTuple(t *testing.T) {
 				Delimiters:      tc.delimiters,
 			}
 
-			data, err := json.MarshalIndent(conf, "", "  ")
+			data, err := json.Marshal(conf, jsontext.WithIndent("  "))
 			require.NoError(t, err)
 			configPath := path.Join(ext_0012_hash_and_no_prefix_id_n_tuple_storage_layout.StorageLayoutHashAndNoPrefixIdNTupleName, "config.json")
 			_, err = writefs.WriteFile(env.ConfigFS, configPath, data)

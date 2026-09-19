@@ -1,7 +1,8 @@
 package ext_NNNN_mets
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"os"
 	"path"
 	"strings"
@@ -41,13 +42,12 @@ func TestMETSIntegration_OnRealObject(t *testing.T) {
 			"metadata": {Path: "metadata/files", Description: "Metadata area"},
 		},
 	}
-	data, err := json.MarshalIndent(cspCfg, "", "  ")
+	data, err := json.Marshal(cspCfg, jsontext.WithIndent("  "))
 	require.NoError(t, err)
 	require.NoError(t, writefs.MkDir(configFS, extcontent.ContentSubPathName))
 	_, err = writefs.WriteFile(configFS, path.Join(extcontent.ContentSubPathName, "config.json"), data)
 	require.NoError(t, err)
 
-	// METS-Konfiguration: Ablage in Area "metadata"
 	metsCfg := &MetsConfig{
 		ExtensionConfig:            &extension.ExtensionConfig{ExtensionName: METSName},
 		StorageType:                "area",
@@ -56,7 +56,7 @@ func TestMETSIntegration_OnRealObject(t *testing.T) {
 		MetsFile:                   "mets.xml",
 		PremisFile:                 "premis.xml",
 	}
-	data, err = json.MarshalIndent(metsCfg, "", "  ")
+	data, err = json.Marshal(metsCfg, jsontext.WithIndent("  "))
 	require.NoError(t, err)
 	require.NoError(t, writefs.MkDir(configFS, METSName))
 	_, err = writefs.WriteFile(configFS, path.Join(METSName, "config.json"), data)

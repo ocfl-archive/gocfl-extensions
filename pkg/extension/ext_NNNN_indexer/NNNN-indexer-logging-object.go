@@ -1,7 +1,7 @@
 package ext_NNNN_indexer
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
 	"io"
 	"io/fs"
 	"net/url"
@@ -28,7 +28,7 @@ func (li *LoggingIndexer) WithLogger(logger ocfllogger.OCFLLogger) extensiontype
 	return li
 }
 
-func (sl *LoggingIndexer) Load(json.RawMessage, fs.FS) error {
+func (sl *LoggingIndexer) Load(jsontext.Value, fs.FS) error {
 	// no config file currently defined; placeholder to satisfy interface
 	return nil
 }

@@ -1,7 +1,8 @@
 package ext_0011_direct_clean_path_layout
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"path"
 	"testing"
 
@@ -24,7 +25,7 @@ func doTestDirectClean(t *testing.T, extensionName string) {
 
 	runTest := func(name string, config *DirectCleanConfig, cases []testCase) {
 		t.Run(name, func(t *testing.T) {
-			data, err := json.MarshalIndent(config, "", "  ")
+			data, err := json.Marshal(config, jsontext.WithIndent("  "))
 			require.NoError(t, err)
 			configPath := path.Join(extensionName, "config.json")
 			_, err = writefs.WriteFile(env.ConfigFS, configPath, data)

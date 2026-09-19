@@ -1,7 +1,8 @@
 package ext_NNNN_indexer
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"io/fs"
 	"path"
 	"testing"
@@ -37,7 +38,7 @@ func TestIndexer_AddObject(t *testing.T) {
 		Compress:      "none", // "none" für einfachere Verifikation im ersten Schritt
 	}
 
-	configData, err := json.MarshalIndent(cfgData, "", "  ")
+	configData, err := json.Marshal(cfgData, jsontext.WithIndent("  "))
 	require.NoError(t, err)
 	_, err = writefs.WriteFile(configFS, path.Join("object", IndexerName, "config.json"), configData)
 	require.NoError(t, err)

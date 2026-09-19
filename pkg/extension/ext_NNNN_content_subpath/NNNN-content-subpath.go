@@ -5,7 +5,8 @@ package ext_NNNN_content_subpath
 
 import (
 	_ "embed"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"fmt"
 
 	"io/fs"
@@ -75,7 +76,7 @@ func (sl *ContentSubPath) WithLogger(logger ocfllogger.OCFLLogger) extensiontype
 	return sl
 }
 
-func (sl *ContentSubPath) Load(data json.RawMessage, extFS fs.FS) error {
+func (sl *ContentSubPath) Load(data jsontext.Value, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.ContentSubPathConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal ContentSubPathConfig '%s'", string(data))
 	}
@@ -118,9 +119,7 @@ func (sl *ContentSubPath) WriteConfig(fsys appendfs.FS) error {
 		return errors.Wrap(err, "cannot open config.json")
 	}
 	defer configWriter.Close()
-	jenc := json.NewEncoder(configWriter)
-	jenc.SetIndent("", "   ")
-	if err := jenc.Encode(sl.ContentSubPathConfig); err != nil {
+	if err := json.MarshalWrite(configWriter, sl.ContentSubPathConfig, jsontext.WithIndent("   ")); err != nil {
 		return errors.Wrapf(err, "cannot encode config to file")
 	}
 

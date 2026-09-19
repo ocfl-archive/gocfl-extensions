@@ -6,7 +6,8 @@ package ext_0001_digest_algorithms
 
 import (
 	_ "embed"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"io/fs"
 
 	"emperror.dev/errors"
@@ -65,7 +66,7 @@ func (sl *DigestAlgorithms) WithLogger(logger ocfllogger.OCFLLogger) extension.E
 	return sl
 }
 
-func (sl *DigestAlgorithms) Load(data json.RawMessage, extFS fs.FS) error {
+func (sl *DigestAlgorithms) Load(data jsontext.Value, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.DigestAlgorithmsConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal DigestAlgorithmsConfig0001 '%s'", string(data))
 	}
@@ -100,9 +101,7 @@ func (sl *DigestAlgorithms) WriteConfig(fsys appendfs.FS) error {
 		return errors.Wrap(err, "cannot open config.json")
 	}
 	defer configWriter.Close()
-	jenc := json.NewEncoder(configWriter)
-	jenc.SetIndent("", "   ")
-	if err := jenc.Encode(sl.ExtensionConfig); err != nil {
+	if err := json.MarshalWrite(configWriter, sl.ExtensionConfig, jsontext.WithIndent("   ")); err != nil {
 		return errors.Wrapf(err, "cannot encode config to file")
 	}
 	return nil

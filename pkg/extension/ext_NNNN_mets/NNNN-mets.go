@@ -7,7 +7,8 @@ import (
 	"bytes"
 	"crypto/sha512"
 	_ "embed"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -132,7 +133,7 @@ func (me *Mets) Terminate() error {
 	return nil
 }
 
-func (me *Mets) Load(data json.RawMessage, extFS fs.FS) error {
+func (me *Mets) Load(data jsontext.Value, extFS fs.FS) error {
 	if err := json.Unmarshal(data, me.MetsConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal MetsConfig '%s'", string(data))
 	}
@@ -175,12 +176,9 @@ func (me *Mets) WriteConfig(fsys appendfs.FS) error {
 		return errors.Wrap(err, "cannot create config.json")
 	}
 	defer configWriter.Close()
-	jenc := json.NewEncoder(configWriter)
-	jenc.SetIndent("", "   ")
-	if err := jenc.Encode(me.MetsConfig); err != nil {
+	if err := json.MarshalWrite(configWriter, me.MetsConfig, jsontext.WithIndent("   ")); err != nil {
 		return errors.Wrapf(err, "cannot encode config to file")
 	}
-
 	return nil
 }
 

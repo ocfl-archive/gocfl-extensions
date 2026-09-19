@@ -7,7 +7,8 @@ import (
 	"bufio"
 	"bytes"
 	_ "embed"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"fmt"
 	"image"
 	_ "image/gif"
@@ -145,7 +146,7 @@ func (thumb *Thumbnail) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.
 	return thumb
 }
 
-func (thumb *Thumbnail) Load(data json.RawMessage, extFS fs.FS) error {
+func (thumb *Thumbnail) Load(data jsontext.Value, extFS fs.FS) error {
 	if err := json.Unmarshal(data, thumb.ThumbnailConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal ThumbnailConfig '%s'", string(data))
 	}
@@ -185,9 +186,7 @@ func (thumb *Thumbnail) WriteConfig(fsys appendfs.FS) error {
 		return errors.Wrap(err, "cannot open config.json")
 	}
 	defer configWriter.Close()
-	jenc := json.NewEncoder(configWriter)
-	jenc.SetIndent("", "   ")
-	if err := jenc.Encode(thumb.ThumbnailConfig); err != nil {
+	if err := json.MarshalWrite(configWriter, thumb.ThumbnailConfig, jsontext.WithIndent("   ")); err != nil {
 		return errors.Wrapf(err, "cannot encode config to file")
 	}
 	return nil

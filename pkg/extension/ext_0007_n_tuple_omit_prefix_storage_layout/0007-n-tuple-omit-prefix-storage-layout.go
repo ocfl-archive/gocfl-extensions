@@ -5,7 +5,8 @@ package ext_0007_n_tuple_omit_prefix_storage_layout
 
 import (
 	_ "embed"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 
 	"io"
 	"io/fs"
@@ -64,7 +65,7 @@ func (sl *NTupleOmitPrefixStorageLayout) WithLogger(logger ocfllogger.OCFLLogger
 	return sl
 }
 
-func (sl *NTupleOmitPrefixStorageLayout) Load(data json.RawMessage, extFS fs.FS) error {
+func (sl *NTupleOmitPrefixStorageLayout) Load(data jsontext.Value, extFS fs.FS) error {
 	if err := json.Unmarshal(data, sl.NTupleOmitPrefixStorageLayoutConfig); err != nil {
 		return errors.Wrapf(err, "cannot unmarshal NTupleOmitPrefixStorageLayoutConfig '%s'", string(data))
 	}
@@ -126,9 +127,7 @@ func (sl *NTupleOmitPrefixStorageLayout) WriteConfig(fsys appendfs.FS) error {
 		return errors.Wrap(err, "cannot open config.json")
 	}
 	defer configWriter.Close()
-	jenc := json.NewEncoder(configWriter)
-	jenc.SetIndent("", "   ")
-	if err := jenc.Encode(sl.ExtensionConfig); err != nil {
+	if err := json.MarshalWrite(configWriter, sl.ExtensionConfig, jsontext.WithIndent("   ")); err != nil {
 		return errors.Wrapf(err, "cannot encode config to file")
 	}
 	return nil
@@ -140,15 +139,13 @@ func (sl *NTupleOmitPrefixStorageLayout) WriteLayout(fsys appendfs.FS) error {
 		return errors.Wrap(err, "cannot open ocfl_layout.json")
 	}
 	defer configWriter.Close()
-	jenc := json.NewEncoder(configWriter)
-	jenc.SetIndent("", "   ")
-	if err := jenc.Encode(struct {
+	if err := json.MarshalWrite(configWriter, struct {
 		Extension   string `json:"extension"`
 		Description string `json:"description"`
 	}{
 		Extension:   NTupleOmitPrefixStorageLayoutName,
 		Description: NTupleOmitPrefixStorageLayoutDescription,
-	}); err != nil {
+	}, jsontext.WithIndent("   ")); err != nil {
 		return errors.Wrapf(err, "cannot encode config to file")
 	}
 	return nil

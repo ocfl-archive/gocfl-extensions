@@ -1,7 +1,8 @@
 package ext_NNNN_direct_path_layout
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"path"
 	"testing"
 
@@ -18,7 +19,7 @@ func TestNewDirectPathLayout(t *testing.T) {
 	storageLayoutConfig := &DirectPathLayoutConfig{
 		ExtensionConfig: &extension.ExtensionConfig{ExtensionName: DirectPathLayoutName},
 	}
-	data, err := json.MarshalIndent(storageLayoutConfig, "", "  ")
+	data, err := json.Marshal(storageLayoutConfig, jsontext.WithIndent("  "))
 	require.NoError(t, err)
 	_, err = writefs.WriteFile(env.ConfigFS, path.Join(DirectPathLayoutName, "config.json"), data)
 	require.NoError(t, err)

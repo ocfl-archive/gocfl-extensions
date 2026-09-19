@@ -2,7 +2,8 @@ package ext_NNNN_metafile
 
 import (
 	_ "embed"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"fmt"
 	"io/fs"
 	"net/http"
@@ -57,7 +58,7 @@ func TestMetaFile_AddObject(t *testing.T) {
 		MetaSchema:      "gocfl-info-1.0.json",
 		MetaSchemaUrl:   "https://raw.githubusercontent.com/ocfl-archive/gocfl/main/gocfl-info-1.0.json",
 	}
-	metafileConfigData, _ := json.MarshalIndent(metafileConfig, "", "  ")
+	metafileConfigData, _ := json.Marshal(metafileConfig, jsontext.WithIndent("  "))
 	_, err = writefs.WriteFile(configFS, path.Join("extensions", MetaFileName, "config.json"), metafileConfigData)
 	require.NoError(t, err)
 	_, err = writefs.WriteFile(configFS, path.Join("extensions", MetaFileName, "gocfl-info-1.0.json"), metafileSchema)
