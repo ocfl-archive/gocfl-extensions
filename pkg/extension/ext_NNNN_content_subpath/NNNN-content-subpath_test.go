@@ -12,6 +12,7 @@ import (
 	"github.com/ocfl-archive/filesystem/pkg/writefs"
 	"github.com/ocfl-archive/gocfl-extensions/test"
 	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/extension"
+	"github.com/ocfl-archive/gocfl/v3/pkg/ocfl/object"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
 )
@@ -39,11 +40,11 @@ func TestContentSubPath(t *testing.T) {
 		},
 		Paths: map[string]ContentSubPathEntry{
 			"content": {
-				Path:        "content/data",
+				Path:        "data",
 				Description: "Primary content area",
 			},
 			"metadata": {
-				Path:        "metadata/files",
+				Path:        "meta",
 				Description: "Metadata area",
 			},
 		},
@@ -59,8 +60,7 @@ func TestContentSubPath(t *testing.T) {
 
 	env := test.SetupFullTestEnv(t, nil, nil, nil, configFS)
 
-	t.Run("IntegrationWithObject", func(t *testing.T) {
-		objID := "test-object"
+	createTestObjectWithFiles := func(t *testing.T, objID string) object.Object {
 		obj, _ := test.CreateTestObject(t, env, objID)
 
 		vw, err := obj.StartUpdate("initial version", "Junie", "junie@jetbrains.com", false)
@@ -81,8 +81,13 @@ func TestContentSubPath(t *testing.T) {
 		err = vw.Close()
 		require.NoError(t, err)
 
-		// Reload and verify inventory paths
 		loadedObj, _ := test.ReloadObject(t, env, objID)
+		return loadedObj
+	}
+
+	t.Run("IntegrationWithObject", func(t *testing.T) {
+		objID := "test-object"
+		loadedObj := createTestObjectWithFiles(t, objID)
 		inv := loadedObj.GetInventory()
 
 		foundContent := false
@@ -92,15 +97,15 @@ func TestContentSubPath(t *testing.T) {
 		err = inv.IterateFiles(inv.GetHead(), func(internal []string, external []string, digest string) error {
 			for i, ext := range external {
 				switch ext {
-				case "file1.txt", "content/data/file1.txt":
-					require.Contains(t, internal[i], "content/data/file1.txt")
+				case "file1.txt", "data/file1.txt":
+					require.Contains(t, internal[i], "data/file1.txt")
 					foundContent = true
-				case "meta1.json", "metadata/files/meta1.json":
-					require.Contains(t, internal[i], "metadata/files/meta1.json")
+				case "meta1.json", "meta/meta1.json":
+					require.Contains(t, internal[i], "meta/meta1.json")
 					foundMetadata = true
 				case "root.txt":
 					require.Contains(t, internal[i], "root.txt")
-					require.NotContains(t, internal[i], "content/data/")
+					require.NotContains(t, internal[i], "data/")
 					foundFull = true
 				}
 			}
@@ -118,14 +123,57 @@ func TestContentSubPath(t *testing.T) {
 				if ext == "README.md" {
 					foundREADME = true
 					// Check if it's in the root (no subpath)
-					require.NotContains(t, internal[i], "content/data/")
-					require.NotContains(t, internal[i], "metadata/files/")
+					require.NotContains(t, internal[i], "data/")
+					require.NotContains(t, internal[i], "meta/")
 				}
 			}
 			return nil
 		})
 		require.NoError(t, err)
 		require.True(t, foundREADME, "README.md not found in inventory")
+	})
+
+	t.Run("GetMetadata", func(t *testing.T) {
+		objID := "test-object-metadata"
+		loadedObj := createTestObjectWithFiles(t, objID)
+
+		csp := &ContentSubPath{
+			ContentSubPathConfig: config,
+		}
+		meta, err := csp.GetMetadata(nil, loadedObj)
+		require.NoError(t, err)
+		require.NotNil(t, meta)
+
+		// Base configuration returned under ""
+		require.Equal(t, config.Paths, meta[""])
+
+		inv := loadedObj.GetInventory()
+		var file1Digest, meta1Digest, rootDigest, readmeDigest string
+		err = inv.IterateFiles(inv.GetHead(), func(internal []string, external []string, digest string) error {
+			for _, ext := range external {
+				switch ext {
+				case "file1.txt", "data/file1.txt":
+					file1Digest = digest
+				case "meta1.json", "meta/meta1.json":
+					meta1Digest = digest
+				case "root.txt":
+					rootDigest = digest
+				case "README.md":
+					readmeDigest = digest
+				}
+			}
+			return nil
+		})
+		require.NoError(t, err)
+		require.NotEmpty(t, file1Digest)
+		require.NotEmpty(t, meta1Digest)
+		require.NotEmpty(t, rootDigest)
+		require.NotEmpty(t, readmeDigest)
+
+		require.Equal(t, []string{"content"}, meta[file1Digest])
+		require.Equal(t, []string{"metadata"}, meta[meta1Digest])
+		require.Nil(t, meta[rootDigest])
+		require.Nil(t, meta[readmeDigest])
 	})
 
 	// Keep existing unit tests logic using the extension manager from env
@@ -139,9 +187,9 @@ func TestContentSubPath(t *testing.T) {
 			expected     string
 			expectError  bool
 		}{
-			{"Default area (content)", "file.txt", "", "content/data/file.txt", false},
-			{"Explicit content area", "file.txt", "content", "content/data/file.txt", false},
-			{"Explicit metadata area", "doc.pdf", "metadata", "metadata/files/doc.pdf", false},
+			{"Default area (content)", "file.txt", "", "data/file.txt", false},
+			{"Explicit content area", "file.txt", "content", "data/file.txt", false},
+			{"Explicit metadata area", "doc.pdf", "metadata", "meta/doc.pdf", false},
 			{"Full area (no prefix)", "anything.txt", "full", "anything.txt", false},
 			{"Invalid area", "file.txt", "invalid", "", true},
 		}
@@ -162,7 +210,7 @@ func TestContentSubPath(t *testing.T) {
 	t.Run("BuildObjectStatePath", func(t *testing.T) {
 		p, err := extManager.BuildObjectStatePath("file.txt", "metadata")
 		require.NoError(t, err)
-		require.Equal(t, "metadata/files/file.txt", p)
+		require.Equal(t, "meta/file.txt", p)
 	})
 
 	t.Run("BuildObjectExtractPath", func(t *testing.T) {
@@ -173,10 +221,10 @@ func TestContentSubPath(t *testing.T) {
 			expected     string
 			expectError  bool
 		}{
-			{"Extract from content", "content/data/file.txt", "content", "file.txt", false},
-			{"Extract from metadata", "metadata/files/doc.pdf", "metadata", "doc.pdf", false},
+			{"Extract from content", "data/file.txt", "content", "file.txt", false},
+			{"Extract from metadata", "meta/doc.pdf", "metadata", "doc.pdf", false},
 			{"Extract full", "any/path/file.txt", "full", "any/path/file.txt", false},
-			{"Wrong area prefix", "content/data/file.txt", "metadata", "", true},
+			{"Wrong area prefix", "data/file.txt", "metadata", "", true},
 		}
 
 		for _, tc := range testCases {
@@ -195,7 +243,7 @@ func TestContentSubPath(t *testing.T) {
 	t.Run("GetAreaPath", func(t *testing.T) {
 		path, err := extManager.GetAreaPath("content")
 		require.NoError(t, err)
-		require.Equal(t, "content/data", path)
+		require.Equal(t, "data", path)
 
 		_, err = extManager.GetAreaPath("invalid")
 		require.Error(t, err)

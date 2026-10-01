@@ -8,6 +8,7 @@ import (
 	"encoding/json/jsontext"
 	"encoding/json/v2"
 	"fmt"
+	"slices"
 
 	"io/fs"
 	"path/filepath"
@@ -90,8 +91,35 @@ func (sl *ContentSubPath) Terminate() error {
 	return nil
 }
 
-func (sl *ContentSubPath) GetMetadata(fs.FS, object.Object) (map[string]any, error) {
-	return map[string]any{"": sl.Paths}, nil
+func (sl *ContentSubPath) GetMetadata(fsys fs.FS, obj object.Object) (map[string]any, error) {
+	result := map[string]any{"": sl.Paths}
+	paths := map[string]string{}
+	for name, val := range sl.Paths {
+		valPath := strings.Trim(val.Path, "/")
+		if valPath != "" {
+			paths[valPath] = name
+		}
+	}
+
+	inventory := obj.GetInventory()
+	manifest := inventory.GetManifest()
+	for digest, internal := range manifest.Iterate() {
+		var subs []string
+		for _, intString := range internal {
+			parts := strings.Split(intString, "/")
+			if len(parts) >= 4 {
+				if name, ok := paths[parts[2]]; ok {
+					if !slices.Contains(subs, name) {
+						subs = append(subs, name)
+					}
+				}
+			}
+		}
+		if len(subs) > 0 {
+			result[digest] = subs
+		}
+	}
+	return result, nil
 }
 
 func (sl *ContentSubPath) GetConfig() any {
@@ -215,5 +243,6 @@ var (
 	_ object.ExtensionObjectStatePath   = &ContentSubPath{}
 	_ object.ExtensionObjectExtractPath = &ContentSubPath{}
 	_ object.ExtensionArea              = &ContentSubPath{}
+	_ object.ExtensionMetadata          = &ContentSubPath{}
 	_ object.ExtensionMetadata          = &ContentSubPath{}
 )

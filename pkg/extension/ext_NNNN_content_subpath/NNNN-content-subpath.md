@@ -28,7 +28,7 @@ This extra path layer lets you create subfolders for meta, data and log, for exa
 #### `PathDescription`
 
 * **Name:** `path`
-    * **Description:** subpath in object content 
+    * **Description:** subpath in object content (only one level) 
     * **Type:** string
     * **Default:**
 
