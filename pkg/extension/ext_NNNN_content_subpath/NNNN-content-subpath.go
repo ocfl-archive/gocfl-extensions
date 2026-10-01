@@ -106,14 +106,16 @@ func (sl *ContentSubPath) GetMetadata(fsys fs.FS, obj object.Object) (map[string
 	for digest, internal := range manifest.Iterate() {
 		var subs []string
 		for _, intString := range internal {
-			parts := strings.Split(intString, "/")
-			if len(parts) >= 4 {
-				if name, ok := paths[parts[2]]; ok {
-					if !slices.Contains(subs, name) {
-						subs = append(subs, name)
-					}
+			parts := strings.SplitN(intString, "/", 4)
+			if len(parts) != 4 {
+				continue
+			}
+			if name, ok := paths[parts[2]]; ok {
+				if !slices.Contains(subs, name) {
+					subs = append(subs, name)
 				}
 			}
+
 		}
 		if len(subs) > 0 {
 			result[digest] = subs
