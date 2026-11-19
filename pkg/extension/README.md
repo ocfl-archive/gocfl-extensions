@@ -35,6 +35,7 @@ These extensions are not (yet) officially registered and use the placeholder `NN
 - [NNNN-mets](ext_NNNN_mets/README.md)
 - [NNNN-migration](ext_NNNN_migration/README.md)
 - [NNNN-pairtree-storage-layout](ext_NNNN_pairtree_storage_layout/README.md)
+- [NNNN-ro-crate](ext_NNNN_ro_crate/README.md)
 - [NNNN-thumbnail](ext_NNNN_thumbnail/README.md)
 - [NNNN-timestamp](ext_NNNN_timestamp/README.md)
 
