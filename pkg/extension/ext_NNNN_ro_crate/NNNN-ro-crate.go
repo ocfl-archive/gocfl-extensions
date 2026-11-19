@@ -366,16 +366,16 @@ func (rc *ROCrateFile) StreamObject(
 		return errors.Wrapf(err, "cannot generate GOCFL summary from RO-CRATE metadata")
 	}
 	rc.writeConfigValues(&rcMeta)
-	metaString := rcMeta.String()
-	if metaString == rocrate.StringerError {
-		return errors.New("problem creating GOCFL metadata JSON")
+	metaBytes, err := rcMeta.ToJSON()
+	if err != nil {
+		return errors.Wrap(err, "problem creating GOCFL metadata JSON")
 	}
-	if err := rc.writeMetafile(obj, metaString); err != nil {
+	if err := rc.writeMetafile(obj, string(metaBytes)); err != nil {
 		return errors.Wrapf(err, "cannot write metafile")
 	}
 	head := inventory.GetHead()
 	if head.IsValid() {
-		rc.info[head.String()] = []byte(metaString)
+		rc.info[head.String()] = metaBytes
 	}
 	return nil
 }

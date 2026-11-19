@@ -498,3 +498,73 @@ func TestGOCFLMetadata(t *testing.T) {
 		assert.Equal(t, test.gocflSummary, res, "%s gocfl metadata", test.label)
 	}
 }
+
+func TestCrate_IndexingAndResolution(t *testing.T) {
+	crate, err := ProcessMetadataStream(bytes.NewBuffer(afternoonDrinks))
+	require.NoError(t, err)
+
+	// O(1) Index lookup
+	descriptor, ok := crate.Descriptor()
+	require.True(t, ok)
+	assert.Equal(t, "ro-crate-metadata.json", descriptor.ID)
+
+	root, err := crate.RootEntity()
+	require.NoError(t, err)
+	assert.Equal(t, "./RC0E772B3021E7E40C2BBDE657", root.ID)
+
+	// Resolving referenced author entity
+	authorEntity, ok := crate.Resolve("#Ross_Spencer-1")
+	require.True(t, ok)
+	require.NotNil(t, authorEntity.Name)
+	assert.Equal(t, []string{"Ross Spencer"}, authorEntity.Name.Value())
+
+	// Resolving author names via helper
+	authorNames := crate.GetAuthorNames(root)
+	assert.Equal(t, []string{"Ross Spencer"}, authorNames)
+
+	// Non-existent entity
+	_, ok = crate.Resolve("#does-not-exist")
+	assert.False(t, ok)
+}
+
+func TestFlexSlice_Variants(t *testing.T) {
+	// Null JSON
+	var fsNull FlexSlice[string]
+	require.NoError(t, fsNull.UnmarshalJSON([]byte("null")))
+	assert.True(t, fsNull.IsBlank())
+
+	// Single value
+	var fsSingle FlexSlice[string]
+	require.NoError(t, fsSingle.UnmarshalJSON([]byte(`"hello"`)))
+	assert.Equal(t, []string{"hello"}, fsSingle.Value())
+
+	// Array
+	var fsArray FlexSlice[string]
+	require.NoError(t, fsArray.UnmarshalJSON([]byte(`["a", "b", "c"]`)))
+	assert.Equal(t, []string{"a", "b", "c"}, fsArray.Value())
+}
+
+func TestCrate_Serialization(t *testing.T) {
+	crate, err := ProcessMetadataStream(bytes.NewBuffer(simpleCrate))
+	require.NoError(t, err)
+
+	crateJSON, err := crate.ToJSON()
+	require.NoError(t, err)
+	assert.NotEmpty(t, crateJSON)
+	assert.NotEmpty(t, crate.String())
+
+	summary, err := crate.Summary()
+	require.NoError(t, err)
+	summaryJSON, err := summary.ToJSON()
+	require.NoError(t, err)
+	assert.NotEmpty(t, summaryJSON)
+	assert.NotEmpty(t, summary.String())
+
+	gocflSummary, err := crate.GOCFLSummaryWithTime("2026-11-19T12:00:00Z")
+	require.NoError(t, err)
+	assert.Equal(t, "2026-11-19T12:00:00Z", gocflSummary.LastChanged)
+	gocflJSON, err := gocflSummary.ToJSON()
+	require.NoError(t, err)
+	assert.NotEmpty(t, gocflJSON)
+	assert.NotEmpty(t, gocflSummary.String())
+}

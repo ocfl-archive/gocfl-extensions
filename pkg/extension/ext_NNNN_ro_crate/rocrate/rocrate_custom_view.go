@@ -49,9 +49,8 @@ type GocflSummary struct {
 	Address        string `json:"address"`
 }
 
-// newGocflSummary returns an initialized gocflSummary object for
-// maximum safety.
-func newGocflSummary() GocflSummary {
+// NewGocflSummary returns an initialized GocflSummary object for maximum safety.
+func NewGocflSummary() GocflSummary {
 	return GocflSummary{
 		Signature:      "",
 		Title:          "",
@@ -68,13 +67,22 @@ func newGocflSummary() GocflSummary {
 	}
 }
 
+func newGocflSummary() GocflSummary {
+	return NewGocflSummary()
+}
+
+// ToJSON serializes GocflSummary to formatted JSON.
+func (gocflSummary GocflSummary) ToJSON() ([]byte, error) {
+	return json.MarshalIndent(gocflSummary, "", " ")
+}
+
 // String provides stringer functions for the gocfl summary object.
 func (gocflSummary GocflSummary) String() string {
-	ret, err := json.MarshalIndent(gocflSummary, " ", " ")
+	b, err := gocflSummary.ToJSON()
 	if err != nil {
-		return fmt.Sprintf("%s: %s", StringerError, err)
+		return fmt.Sprintf("GocflSummary{Signature: %q, Title: %q}", gocflSummary.Signature, gocflSummary.Title)
 	}
-	return string(ret)
+	return string(b)
 }
 
 // joinStrings simplifies string join functions for us so that we can
@@ -100,18 +108,20 @@ func getTime(utc bool) string {
 
 // GOCFLSummary maps RO-CRATE metadata safely into a GOCFL compatible
 // summary object before returning it to the caller.
-func (rcMeta rocrateMeta) GOCFLSummary() (GocflSummary, error) {
-	if len(rcMeta.Graph) == 0 {
+func (c *Crate) GOCFLSummary() (GocflSummary, error) {
+	return c.GOCFLSummaryWithTime(currentTime(true))
+}
+
+// GOCFLSummaryWithTime maps RO-CRATE metadata with a specified timestamp.
+func (c *Crate) GOCFLSummaryWithTime(timestamp string) (GocflSummary, error) {
+	if len(c.Graph) == 0 {
 		return GocflSummary{}, fmt.Errorf("ro-crate-metadata.json is empty")
 	}
-	rootEntity, err := rcMeta.findRootEntity()
+	rootEntity, err := c.RootEntity()
 	if err != nil {
-		if len(rcMeta.Graph) == 1 {
-			return GocflSummary{}, fmt.Errorf("ro-crate-metadata.json is non-conformant")
-		}
-		rootEntity = rcMeta.Graph[1]
+		return GocflSummary{}, err
 	}
-	summary := newGocflSummary()
+	summary := NewGocflSummary()
 	summary.Signature = rootEntity.ID
 	if rootEntity.Name != nil {
 		name := rootEntity.Name.Value()
@@ -132,6 +142,6 @@ func (rcMeta rocrateMeta) GOCFLSummary() (GocflSummary, error) {
 	if rootEntity.Keywords != nil {
 		summary.Keywords = joinStrings(rootEntity.Keywords.Value())
 	}
-	summary.LastChanged = currentTime(true)
+	summary.LastChanged = timestamp
 	return summary, nil
 }
