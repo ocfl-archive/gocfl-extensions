@@ -199,7 +199,7 @@ func (sl *MetaFile) GetName() string { return MetaFileName }
 func (sl *MetaFile) WriteConfig(fsys appendfs.FS) error {
 	if sl.metadataSource == nil {
 		sl.logger.Warn().Msg("metadata source is empty - no config file written")
-		return errors.New("no metadata source configured")
+		return nil
 	}
 	if _, err := writefs.WriteFile(fsys, sl.MetaSchema, sl.schema); err != nil {
 		return errors.Wrapf(err, "cannot write schema to %v/%s", fsys, sl.MetaSchema)
