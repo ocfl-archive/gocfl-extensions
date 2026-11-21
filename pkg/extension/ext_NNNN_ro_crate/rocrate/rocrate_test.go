@@ -286,77 +286,49 @@ var metadataTests []metadataTest = []metadataTest{
 		"empty",
 		emptyCrate,
 		RocrateSummary{
-			// ID
-			"",
-			// Name
-			[]string{},
-			// Type
-			[]string{},
-			// Description
-			[]string{},
-			// DatePublished
-			"",
-			// Author
-			[]string{},
-			// License
-			"",
-			// HasPart
-			[]string{},
-			// ContentURL
-			[]string{},
-			// Keywords
-			[]string{},
-			// Publisher
-			[]string{},
-			// About
-			"./",
+			ID:            "",
+			Name:          []string{},
+			Type:          []string{},
+			Description:   []string{},
+			DatePublished: "",
+			Author:        []string{},
+			License:       "",
+			HasPart:       []string{},
+			ContentURL:    []string{},
+			Keywords:      []string{},
+			Publisher:     []string{},
+			About:         "./",
 		},
 		GocflSummary{
-			// signature
-			"",
-			// title
-			"",
-			// description
-			"",
-			// created
-			"",
-			// sets
-			"",
-			// keywords
-			"",
-			// licenses
-			"",
-			// provided by caller.
-			"",
-			"",
-			"",
-			"",
-			"",
+			Signature:      "",
+			Title:          "",
+			Description:    "",
+			Created:        "",
+			Sets:           "",
+			Keywords:       "",
+			Licenses:       "",
+			LastChanged:    "",
+			OrganisationID: "",
+			Organisation:   "",
+			User:           "",
+			Address:        "",
 		},
 	},
 	metadataTest{
 		"afternoon drinks",
 		afternoonDrinks,
 		RocrateSummary{
-			// ID
-			"./RC0E772B3021E7E40C2BBDE657",
-			// Name
-			[]string{"A study of my afternoon drinks"},
-			// Type
-			[]string{"Dataset"},
-			// Description
-			[]string{
+			ID:   "./RC0E772B3021E7E40C2BBDE657",
+			Name: []string{"A study of my afternoon drinks"},
+			Type: []string{"Dataset"},
+			Description: []string{
 				"A study of my afternoon consumption one week in 2018",
 				"Exported from Dataverse",
 			},
-			// DatePublished
-			"2018",
-			// Author
-			[]string{"#Ross_Spencer-1"},
-			// License
-			"https://spdx.org/licenses/CC0-1.0.html",
-			// HasPart
-			[]string{
+			DatePublished: "2018",
+			Author:        []string{"#Ross_Spencer-1"},
+			License:       "https://spdx.org/licenses/CC0-1.0.html",
+			HasPart: []string{
 				"metadata/agents.json",
 				"metadata/dataset.json",
 				"Drinkscitation-endnote.xml",
@@ -367,235 +339,163 @@ var metadataTests []metadataTest = []metadataTest{
 				"Drinks.RData",
 				"Drinks-ddi.xml",
 			},
-			// ContentURL
-			nil,
-			// Keywords
-			[]string{
+			ContentURL: nil,
+			Keywords: []string{
 				"dataverse",
 				"study",
 				"observational-study",
 			},
-			// Publisher
-			[]string{
+			Publisher: []string{
 				"https://ror.org/02s6k3f65",
 			},
-			// About
-			"./RC0E772B3021E7E40C2BBDE657",
+			About: "./RC0E772B3021E7E40C2BBDE657",
 		},
 		GocflSummary{
-			// signature
-			"./RC0E772B3021E7E40C2BBDE657",
-			// title
-			"A study of my afternoon drinks",
-			// description
-			"A study of my afternoon consumption one week in 2018; Exported from Dataverse",
-			// created
-			"2018",
-			// sets
-			"Dataset",
-			// keywords
-			"dataverse; study; observational-study",
-			// licenses
-			"https://spdx.org/licenses/CC0-1.0.html",
-			// provided by caller.
-			"",
-			"",
-			"",
-			"",
-			"",
+			Signature:      "./RC0E772B3021E7E40C2BBDE657",
+			Title:          "A study of my afternoon drinks",
+			Description:    "A study of my afternoon consumption one week in 2018; Exported from Dataverse",
+			Created:        "2018",
+			Sets:           "Dataset",
+			Keywords:       "dataverse; study; observational-study",
+			Licenses:       "https://spdx.org/licenses/CC0-1.0.html",
+			LastChanged:    "",
+			OrganisationID: "",
+			Organisation:   "",
+			User:           "",
+			Address:        "",
 		},
 	},
 	metadataTest{
 		"carpentries",
 		carpentriesCrate,
 		RocrateSummary{
-			// ID
-			"./",
-			// Name
-			[]string{
+			ID: "./",
+			Name: []string{
 				"Example dataset for RO-Crate specification",
 			},
-			// Type
-			[]string{
+			Type: []string{
 				"Dataset",
 				"LearningResource",
 			},
-			// Description
-			[]string{
+			Description: []string{
 				"Official rainfall readings for Katoomba, NSW 2022, Australia",
 			},
-			// DatePublished
-			"2023-05-22T12:03:00+0100",
-			// Author
-			[]string{
+			DatePublished: "2023-05-22T12:03:00+0100",
+			Author: []string{
 				"https://orcid.org/0000-0002-1825-0097",
 			},
-			// License
-			"http://spdx.org/licenses/CC0-1.0",
-			// HasPart
-			[]string{
+			License: "http://spdx.org/licenses/CC0-1.0",
+			HasPart: []string{
 				"data.csv",
 			},
-			// ContentURL
-			[]string{},
-			// Keywords
-			[]string{},
-			// Publisher
-			[]string{
+			ContentURL: []string{},
+			Keywords:   []string{},
+			Publisher: []string{
 				"https://ror.org/05gq02987",
 			},
-			// About
-			"./",
+			About: "./",
 		},
 		GocflSummary{
-			// signature
-			"./",
-			// title
-			"Example dataset for RO-Crate specification",
-			// description
-			"Official rainfall readings for Katoomba, NSW 2022, Australia",
-			// created
-			"2023-05-22T12:03:00+0100",
-			// sets
-			"Dataset; LearningResource",
-			// keywords
-			"",
-			// licenses
-			"http://spdx.org/licenses/CC0-1.0",
-			// provided by caller.
-			"",
-			"",
-			"",
-			"",
-			"",
+			Signature:      "./",
+			Title:          "Example dataset for RO-Crate specification",
+			Description:    "Official rainfall readings for Katoomba, NSW 2022, Australia",
+			Created:        "2023-05-22T12:03:00+0100",
+			Sets:           "Dataset; LearningResource",
+			Keywords:       "",
+			Licenses:       "http://spdx.org/licenses/CC0-1.0",
+			LastChanged:    "",
+			OrganisationID: "",
+			Organisation:   "",
+			User:           "",
+			Address:        "",
 		},
 	},
 	metadataTest{
 		"spec",
 		specCrate,
 		RocrateSummary{
-			// ID
-			"./",
-			// Name
-			[]string{
+			ID: "./",
+			Name: []string{
 				"Example RO-Crate",
 			},
-			// Type
-			[]string{
+			Type: []string{
 				"Dataset",
 			},
-			// Description
-			[]string{
+			Description: []string{
 				"The RO-Crate Root Data Entity",
 			},
-			// DatePublished
-			"",
-			// Author
-			[]string{},
-			// License
-			"",
-			// HasPart
-			[]string{
+			DatePublished: "",
+			Author:        []string{},
+			License:       "",
+			HasPart: []string{
 				"data1.txt",
 				"data2.txt",
 			},
-			// ContentURL
-			[]string{},
-			// Keywords
-			[]string{},
-			// Publisher
-			[]string{},
-			// About
-			"./",
+			ContentURL: []string{},
+			Keywords:   []string{},
+			Publisher:  []string{},
+			About:      "./",
 		},
 		GocflSummary{
-			// signature
-			"./",
-			// title
-			"Example RO-Crate",
-			// description
-			"The RO-Crate Root Data Entity",
-			// created
-			"",
-			// sets
-			"Dataset",
-			// keywords
-			"",
-			// licenses
-			"",
-			// provided by caller.
-			"",
-			"",
-			"",
-			"",
-			"",
+			Signature:      "./",
+			Title:          "Example RO-Crate",
+			Description:    "The RO-Crate Root Data Entity",
+			Created:        "",
+			Sets:           "Dataset",
+			Keywords:       "",
+			Licenses:       "",
+			LastChanged:    "",
+			OrganisationID: "",
+			Organisation:   "",
+			User:           "",
+			Address:        "",
 		},
 	},
 	metadataTest{
 		"galaxy",
 		galaxyCrate,
 		RocrateSummary{
-			// ID
-			"./",
-			// Name
-			[]string{
+			ID: "./",
+			Name: []string{
 				"Demo Crate",
 			},
-			// Type
-			[]string{
+			Type: []string{
 				"Dataset",
 				"LearningResource",
 			},
-			// Description
-			[]string{
+			Description: []string{
 				"a demo crate for Galaxy training",
 			},
-			// DatePublished
-			"2024-03-08",
-			// Author
-			[]string{
+			DatePublished: "2024-03-08",
+			Author: []string{
 				"https://orcid.org/0000-0000-0000-0000",
 			},
-			// License
-			"https://spdx.org/licenses/CC-BY-NC-SA-4.0.html",
-			// HasPart
-			[]string{
+			License: "https://spdx.org/licenses/CC-BY-NC-SA-4.0.html",
+			HasPart: []string{
 				"data.csv",
 			},
-			// ContentURL
-			[]string{
+			ContentURL: []string{
 				"http://example.com/resource/data",
 			},
-			// Keywords
-			[]string{},
-			// Publisher
-			[]string{
+			Keywords: []string{},
+			Publisher: []string{
 				"https://ror.org/0abcdef00",
 			},
-			// About
-			"./",
+			About: "./",
 		},
 		GocflSummary{
-			// signature
-			"./",
-			// title
-			"Demo Crate",
-			// description
-			"a demo crate for Galaxy training",
-			// created
-			"2024-03-08",
-			// sets
-			"Dataset; LearningResource",
-			// keywords
-			"",
-			// licenses
-			"https://spdx.org/licenses/CC-BY-NC-SA-4.0.html",
-			// provided by caller.
-			"",
-			"",
-			"",
-			"",
-			"",
+			Signature:      "./",
+			Title:          "Demo Crate",
+			Description:    "a demo crate for Galaxy training",
+			Created:        "2024-03-08",
+			Sets:           "Dataset; LearningResource",
+			Keywords:       "",
+			Licenses:       "https://spdx.org/licenses/CC-BY-NC-SA-4.0.html",
+			LastChanged:    "",
+			OrganisationID: "",
+			Organisation:   "",
+			User:           "",
+			Address:        "",
 		},
 	},
 }

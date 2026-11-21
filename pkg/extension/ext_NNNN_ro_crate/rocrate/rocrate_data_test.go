@@ -351,7 +351,7 @@ var afternoonDrinks []byte = []byte(`
 }
 `)
 
-// carprentriesCrate conforms to the example crate created as part of
+// carpentriesCrate conforms to the example crate created as part of
 // the RO-CRATE carpentries tutorial.
 var carpentriesCrate []byte = []byte(`
 {
@@ -539,8 +539,8 @@ var galaxyCrate []byte = []byte(`
 }
 `)
 
-// emptyCrate provides a way to test the lacn of information, e.g.
-// when providign summary information.
+// emptyCrate provides a way to test the lack of information, e.g.
+// when providing summary information.
 var emptyCrate []byte = []byte(`
 {
     "@context": "https://w3id.org/ro/crate/1.1/context",

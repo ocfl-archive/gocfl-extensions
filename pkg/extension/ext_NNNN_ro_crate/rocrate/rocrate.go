@@ -38,7 +38,7 @@ type graph struct {
 	ContentURL       *NodeIdentifierOrSlice `json:"contentUrl,omitempty"`
 	DatePublished    string                 `json:"datePublished,omitempty"`
 	Description      *StringOrSlice         `json:"description,omitempty"`
-	EncodingFormat   string                 `json:"enncodingFormat,omitempty"`
+	EncodingFormat   string                 `json:"encodingFormat,omitempty"`
 	FamilyName       string                 `json:"familyName,omitempty"`
 	Funder           *NodeIdentifierOrSlice `json:"funder,omitempty"`
 	GivenName        string                 `json:"givenName,omitempty"`
@@ -58,7 +58,7 @@ type rocrateContext struct {
 	vocab map[string]string
 }
 
-// Context provides a helpter to return the RO-CRATE context from the
+// Context provides a helper to return the RO-CRATE context from the
 // RO-CRATE data structure.
 //
 // NB: we must be able to cast to rocrateContext some way, but it is
@@ -91,10 +91,10 @@ func (rcMeta *rocrateMeta) Context() string {
 	return context
 }
 
-// RocrateSummary provides a summary structure we can access safefly
+// RocrateSummary provides a summary structure we can access safely
 // so as to reason about the data in a RO-CRATE.
 // The data in this structure mirrors the basic information in the
-// ro-create-preview.htm file.
+// ro-crate-preview.htm file.
 type RocrateSummary struct {
 	// ID via graph[1].
 	ID string
@@ -106,7 +106,7 @@ type RocrateSummary struct {
 	Description []string
 	// DatePublished via graph[1].
 	DatePublished string
-	// Autho via graph[1].
+	// Author via graph[1].
 	Author []string
 	// License via graph[1].
 	License string
@@ -143,18 +143,18 @@ func (rcSummary RocrateSummary) String() string {
 // from the caller.
 func newSummary() RocrateSummary {
 	return RocrateSummary{
-		"",
-		[]string{},
-		[]string{},
-		[]string{},
-		"",
-		[]string{},
-		"",
-		[]string{},
-		[]string{},
-		[]string{},
-		[]string{},
-		"",
+		ID:            "",
+		Name:          []string{},
+		Type:          []string{},
+		Description:   []string{},
+		DatePublished: "",
+		Author:        []string{},
+		License:       "",
+		HasPart:       []string{},
+		ContentURL:    []string{},
+		Keywords:      []string{},
+		Publisher:     []string{},
+		About:         "",
 	}
 }
 

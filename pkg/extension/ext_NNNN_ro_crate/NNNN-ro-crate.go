@@ -138,7 +138,7 @@ func NewROCrate(fSys fs.FS, logger ocfllogger.OCFLLogger) (*ROCrateFile, error) 
 			ExtensionName: ROCrateFileName,
 		},
 		StorageType: "extension",
-		StorageName: "",
+		StorageName: "metadata",
 		MetaName:    "info.json",
 	}
 	rc := &ROCrateFile{
@@ -248,6 +248,11 @@ func (rc *ROCrateFile) WriteConfig(fsys appendfs.FS) error {
 }
 
 func (rc *ROCrateFile) UpdateObjectBefore(object.VersionWriter) error {
+	// NB. the RO-CRATE metadata output is an info.json conformant
+	// to the schema used by metafile.go. It would serve us well
+	// to extract those components to be reusable across both
+	// modules here. Reusable components might also be used for other
+	// standards like Bagit.
 	return nil
 }
 
@@ -366,17 +371,15 @@ func (rc *ROCrateFile) StreamObject(
 		return errors.Wrapf(err, "cannot generate GOCFL summary from RO-CRATE metadata")
 	}
 	rc.writeConfigValues(&rcMeta)
-	metaBytes, err := rcMeta.ToJSON()
-	if err != nil {
-		return errors.Wrap(err, "problem creating GOCFL metadata JSON")
+	metaString := rcMeta.String()
+	if metaString == rocrate.StringerError {
+		return errors.New("problem creating GOCFL metadata JSON")
 	}
-	if err := rc.writeMetafile(obj, string(metaBytes)); err != nil {
-		return errors.Wrapf(err, "cannot write metafile")
+	if err := rc.writeMetafile(obj, metaString); err != nil {
+		return errors.Wrap(err, "cannot write RO-Crate metafile")
 	}
 	head := inventory.GetHead()
-	if head.IsValid() {
-		rc.info[head.String()] = metaBytes
-	}
+	rc.info[head.String()] = []byte(rcMeta.String())
 	return nil
 }
 

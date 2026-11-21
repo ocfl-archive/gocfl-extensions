@@ -55,19 +55,18 @@ type GocflSummary struct {
 // maximum safety.
 func newGocflSummary() GocflSummary {
 	return GocflSummary{
-		"",
-		"",
-		"",
-		"",
-		"",
-		"",
-		"",
-		// provided by caller (orgID, org, user, address)
-		"",
-		"",
-		"",
-		"",
-		"",
+		Signature:      "",
+		Title:          "",
+		Description:    "",
+		Created:        "",
+		Sets:           "",
+		Keywords:       "",
+		Licenses:       "",
+		LastChanged:    "",
+		OrganisationID: "",
+		Organisation:   "",
+		User:           "",
+		Address:        "",
 	}
 }
 
@@ -90,7 +89,7 @@ func joinStrings(inputString []string) string {
 // functions, e.g. for testing.
 var currentTime = getTime
 
-// getTime provides a helpter to return the current time formatted as
+// getTime provides a helper to return the current time formatted as
 // a string.
 func getTime(utc bool) string {
 	if utc {
@@ -101,7 +100,7 @@ func getTime(utc bool) string {
 	return t.Format("2006-01-02T15:04:05")
 }
 
-// GOCFLSummary maps RO-CRATE mettadata safely into a GOCFL compatible
+// GOCFLSummary maps RO-CRATE metadata safely into a GOCFL compatible
 // summary object before returning it to the caller.
 func (rcMeta rocrateMeta) GOCFLSummary() (GocflSummary, error) {
 	if len(rcMeta.Graph) == 0 {
