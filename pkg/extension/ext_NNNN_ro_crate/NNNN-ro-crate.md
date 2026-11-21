@@ -9,18 +9,31 @@
 
 ## Overview
 
-This object extension processes RO-Crate metadata (`ro-crate-metadata.json`) present in an OCFL object's content during ingest or streaming, extracts semantic metadata from the root entity, and generates a GOCFL-compatible metadata summary file (by default `info.json`).
+This object extension processes RO-Crate metadata (`ro-crate-metadata.json`)
+present in an OCFL object's content during ingest or streaming, extracts
+semantic metadata from the root entity, and generates a GOCFL-compatible
+metadata summary file (by default `info.json`).
 
 ### Usage Scenario
 
-When storing research data packages that follow the [RO-Crate specification](https://www.researchobject.org/ro-crate/), this extension extracts key descriptive metadata (such as title, description, keywords, license, authors, and publication date) from `ro-crate-metadata.json` and writes a summary metadata file (`info.json`) that can be consumed by external repository viewers or archive management tools.
+When storing research data packages that follow the
+[RO-Crate specification][ro-crate-1], this extension extracts key
+descriptive metadata (such as title, description, keywords, license,
+authors, and publication date) from `ro-crate-metadata.json` and
+writes a summary metadata file (`info.json`) that can be consumed
+by external repository viewers or archive management tools. The metadata
+output by this file can be optionally validated by the metafile
+info.json schema.
+
+[ro-crate-1]: https://www.researchobject.org/ro-crate/
 
 ## Parameters
 
 ### Summary
 
 * **Name:** `storageType`
-    * **Description:** Location type where the generated metadata file is stored. Possible values are `area`, `path`, or `extension`.
+    * **Description:** Location type where the generated metadata file is
+    stored. Possible values are `area`, `path`, or `extension`.
         * **area:** within an `area` defined by [NNNN-content-subpath](NNNN-content-subpath.md)
         * **path:** directly within content folder
         * **extension:** within the extension subfolder
@@ -44,7 +57,8 @@ When storing research data packages that follow the [RO-Crate specification](htt
 
 The following parameters can be supplied via configuration or CLI flags:
 
-* `ext-NNNN-ro-crate-enabled`: enable or disable the RO-Crate metadata processing (default: `false`).
+* `ext-NNNN-ro-crate-enabled`: enable or disable the RO-Crate metadata
+processing (default: `false`).
 * `ext-NNNN-ro-crate-organisation`: institutional organisation name.
 * `ext-NNNN-ro-crate-organisationID`: institutional organisation identifier.
 * `ext-NNNN-ro-crate-user`: user name.
@@ -58,7 +72,8 @@ The following parameters can be supplied via configuration or CLI flags:
 {
   "extensionName": "NNNN-ro-crate",
   "storageType": "extension",
-  "storageName": "",
+  "storageName": "metadata",
   "metaFileName": "info.json"
+  "schemaUrl": "https://raw.githubusercontent.com/ocfl-archive/gocfl/main/gocfl-info-1.0.json"
 }
 ```

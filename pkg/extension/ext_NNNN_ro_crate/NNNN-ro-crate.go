@@ -31,7 +31,12 @@ import (
 
 const ROCrateFileName = "NNNN-ro-crate"
 const ROCrateAliasName = "NNNN-rocrate"
+
+// Registered.
 const ROCrateEnabled = "enabled"
+
+// Config file.
+const configFile = "config.json"
 
 // ext prefix.
 const extPrefix = "ext"
@@ -65,6 +70,8 @@ func Init(fSys fs.FS, logger ocfllogger.OCFLLogger) {
 	}, GetROCrateParams, &ROCrateDoc)
 }
 
+// GetROCrateFileParams enables the retrieval of configured values from
+// the GOCFL configuration.
 func GetROCrateParams() ([]*extension.ExternalParam, error) {
 	return []*extension.ExternalParam{
 		{
@@ -138,7 +145,7 @@ func NewROCrate(fSys fs.FS, logger ocfllogger.OCFLLogger) (*ROCrateFile, error) 
 			ExtensionName: ROCrateFileName,
 		},
 		StorageType: "extension",
-		StorageName: "",
+		StorageName: "metadata",
 		MetaName:    "info.json",
 	}
 	rc := &ROCrateFile{
@@ -156,6 +163,7 @@ func (rc *ROCrateFile) WithLogger(logger ocfllogger.OCFLLogger) extensiontypes.E
 	return rc
 }
 
+// GetName returns the name of this extension to the caller.
 func (rc *ROCrateFile) GetName() string {
 	return ROCrateFileName
 }
@@ -177,35 +185,50 @@ func (rc *ROCrateFile) Terminate() error {
 	return nil
 }
 
+// GetConfig provides a helper to retrieve the RO-CRATE configuration
+// object.
 func (rc *ROCrateFile) GetConfig() any {
 	return rc.ROCrateFileConfig
 }
 
+// IsRegistered describes whether this is an official GOCFL extension.
 func (rc *ROCrateFile) IsRegistered() bool {
 	return false
 }
 
-// ParamROCrateEnabled returns the full parameter key for enabled flag.
+// ParamROCrateEnabled provides a mechanism for retrieving the enabled
+// parameter from the user's configuration, e.g. given a param map,
+// call `param[ParamRoCrateEnabled()]“.
 func ParamROCrateEnabled() string {
 	return fmt.Sprintf("%s-%s-%s", extPrefix, ROCrateFileName, ROCrateEnabled)
 }
 
+// paramROCrateOrg enables the consistent retrieval of the
+// configured "organisation" parameter.
 func paramROCrateOrg() string {
 	return fmt.Sprintf("%s-%s-%s", extPrefix, ROCrateFileName, rOCrateParamOrg)
 }
 
+// paramROCrateOrgID enables the consistent retrieval of the
+// configured "organisation id" parameter.
 func paramROCrateOrgID() string {
 	return fmt.Sprintf("%s-%s-%s", extPrefix, ROCrateFileName, rOCrateParamOrgID)
 }
 
+// paramROCrateUser enables the consistent retrieval of the
+// configured "user" parameter.
 func paramROCrateUser() string {
 	return fmt.Sprintf("%s-%s-%s", extPrefix, ROCrateFileName, rOCrateParamUser)
 }
 
+// paramROCrateAddress enables the consistent retrieval of the
+// configured "address" parameter.
 func paramROCrateAddress() string {
 	return fmt.Sprintf("%s-%s-%s", extPrefix, ROCrateFileName, rOCrateParamAddress)
 }
 
+// SetParams allows us to set parameters provided to the extension via
+// the config, e.g. CLI (or TOML?)
 func (rc *ROCrateFile) SetParams(params map[string]string) error {
 	if params == nil {
 		return nil
@@ -235,10 +258,12 @@ func (rc *ROCrateFile) SetParams(params map[string]string) error {
 	return nil
 }
 
+// WriteConfig ensures the configuration file is written to the
+// object's extension directory when an extension is used.
 func (rc *ROCrateFile) WriteConfig(fsys appendfs.FS) error {
-	configWriter, err := writefs.Create(fsys, "config.json")
+	configWriter, err := writefs.Create(fsys, configFile)
 	if err != nil {
-		return errors.Wrap(err, "cannot open config.json")
+		return errors.Wrapf(err, "cannot open %s", configFile)
 	}
 	defer configWriter.Close()
 	if err := json.MarshalWrite(configWriter, rc.ROCrateFileConfig, jsontext.WithIndent("   ")); err != nil {
@@ -247,14 +272,24 @@ func (rc *ROCrateFile) WriteConfig(fsys appendfs.FS) error {
 	return nil
 }
 
+// UpdateObjectBefore (before a new version of an OCFL object is
+// created...)
 func (rc *ROCrateFile) UpdateObjectBefore(object.VersionWriter) error {
+	// NB. the RO-CRATE metadata output is an info.json conformant
+	// to the schema used by metafile.go. It would serve us well
+	// to extract those components to be reusable across both
+	// modules here. Reusable components might also be used for other
+	// standards like Bagit.
 	return nil
 }
 
+// UpdateObjectAfter (after all content to the new version is written)
 func (rc *ROCrateFile) UpdateObjectAfter(object.VersionWriter) error {
 	return nil
 }
 
+// findROCrateMeta looks for the RO-CRATE metadata file within the
+// objects supplied to the function.
 func (rc *ROCrateFile) findROCrateMeta(stateFiles []string) bool {
 	for _, f := range stateFiles {
 		fClean := strings.TrimPrefix(filepath.ToSlash(f), "/")
@@ -265,6 +300,9 @@ func (rc *ROCrateFile) findROCrateMeta(stateFiles []string) bool {
 	return false
 }
 
+// copyStream allows StreamObject to make a copy of a reader so that it
+// can be given back safely to the caller and other stream functions
+// can be performed on the object.
 func copyStream(reader io.Reader) (io.Reader, error) {
 	buf := &bytes.Buffer{}
 	_, err := io.Copy(buf, reader)
@@ -274,6 +312,9 @@ func copyStream(reader io.Reader) (io.Reader, error) {
 	return buf, nil
 }
 
+// infoJSONExists provides a guard that ensures we know what we're
+// doing with info.json and its replacement when driven by the
+// RO-CRATE extension.
 func infoJSONExists(obj object.Object, metaFileName string) bool {
 	inv := obj.GetInventory()
 	if inv == nil {
@@ -294,6 +335,8 @@ func infoJSONExists(obj object.Object, metaFileName string) bool {
 	return false
 }
 
+// writeMetafile outputs the configured metadata file and content to
+// the metadata storage location.
 func (rc *ROCrateFile) writeMetafile(obj object.VersionWriter, rcMeta string) error {
 	if !rc.enabled {
 		return nil
@@ -328,6 +371,8 @@ func (rc *ROCrateFile) writeMetafile(obj object.VersionWriter, rcMeta string) er
 	return nil
 }
 
+// writeConfigValues completes a ro-crate info.json output by adding
+// user or institution supplied values to the structure.
 func (rc *ROCrateFile) writeConfigValues(rcMeta *rocrate.GocflSummary) {
 	if rc.userConfig != nil {
 		rcMeta.Organisation = rc.userConfig.organisation
@@ -337,6 +382,10 @@ func (rc *ROCrateFile) writeConfigValues(rcMeta *rocrate.GocflSummary) {
 	}
 }
 
+// StreamObject implements an interface object enabling the access of
+// RO-CRATE content as a stream so it can be utilised by this
+// extension as required, i.e. in the case of RO-CRATE its metadata
+// is accessed and mapped into a GOCFL compatible metadata object.
 func (rc *ROCrateFile) StreamObject(
 	obj object.VersionWriter,
 	reader io.Reader,
@@ -366,20 +415,21 @@ func (rc *ROCrateFile) StreamObject(
 		return errors.Wrapf(err, "cannot generate GOCFL summary from RO-CRATE metadata")
 	}
 	rc.writeConfigValues(&rcMeta)
-	metaBytes, err := rcMeta.ToJSON()
-	if err != nil {
-		return errors.Wrap(err, "problem creating GOCFL metadata JSON")
+	metaString := rcMeta.String()
+	if metaString == rocrate.StringerError {
+		return errors.New("problem creating GOCFL metadata JSON")
 	}
-	if err := rc.writeMetafile(obj, string(metaBytes)); err != nil {
-		return errors.Wrapf(err, "cannot write metafile")
+	if err := rc.writeMetafile(obj, metaString); err != nil {
+		return errors.Wrap(err, "cannot write RO-Crate metafile")
 	}
 	head := inventory.GetHead()
-	if head.IsValid() {
-		rc.info[head.String()] = metaBytes
-	}
+	rc.info[head.String()] = []byte(rcMeta.String())
 	return nil
 }
 
+// GetMetadata (is called by any tool, which wants to report about
+// content, e.g. data will be retrieved from here for use in METS.xml
+// or PREMIS.xml.
 func (rc *ROCrateFile) GetMetadata(sourceFS fs.FS, obj object.Object) (map[string]any, error) {
 	if !rc.enabled {
 		return nil, nil
@@ -432,7 +482,7 @@ func (rc *ROCrateFile) GetMetadata(sourceFS fs.FS, obj object.Object) (map[strin
 	return result, nil
 }
 
-// Interface assertions
+// Check interface satisfaction.
 var (
 	_ extensiontypes.Extension     = &ROCrateFile{}
 	_ object.ExtensionObjectChange = &ROCrateFile{}

@@ -1,4 +1,3 @@
-// Custom view/summary objects for consumers of RO-CRATE metadata.
 package rocrate
 
 import (
@@ -10,8 +9,9 @@ import (
 
 const stringSeparator = "; "
 
-// GocflSummary provides a summary compatible with gocfl user's
+// GocflSummary provides a summary compatible with GOCFL user's
 // expectations for the info.json object.
+//
 /*
 	-- via RO-CRATE.
 	signature       = id
@@ -30,7 +30,9 @@ const stringSeparator = "; "
 	organisation    = user.config
 	user            = user.config
 	address         = user.config
+
 */
+//
 type GocflSummary struct {
 	// provided by ro-crate.
 	Signature   string `json:"signature"`
@@ -49,8 +51,9 @@ type GocflSummary struct {
 	Address        string `json:"address"`
 }
 
-// NewGocflSummary returns an initialized GocflSummary object for maximum safety.
-func NewGocflSummary() GocflSummary {
+// newGocflSummary returns an initialized gocflSummary object for
+// maximum safety.
+func newGocflSummary() GocflSummary {
 	return GocflSummary{
 		Signature:      "",
 		Title:          "",
@@ -67,22 +70,13 @@ func NewGocflSummary() GocflSummary {
 	}
 }
 
-func newGocflSummary() GocflSummary {
-	return NewGocflSummary()
-}
-
-// ToJSON serializes GocflSummary to formatted JSON.
-func (gocflSummary GocflSummary) ToJSON() ([]byte, error) {
-	return json.MarshalIndent(gocflSummary, "", " ")
-}
-
 // String provides stringer functions for the gocfl summary object.
 func (gocflSummary GocflSummary) String() string {
-	b, err := gocflSummary.ToJSON()
+	ret, err := json.MarshalIndent(gocflSummary, " ", " ")
 	if err != nil {
-		return fmt.Sprintf("GocflSummary{Signature: %q, Title: %q}", gocflSummary.Signature, gocflSummary.Title)
+		return fmt.Sprintf("%s: %s", StringerError, err)
 	}
-	return string(b)
+	return string(ret)
 }
 
 // joinStrings simplifies string join functions for us so that we can
@@ -108,40 +102,34 @@ func getTime(utc bool) string {
 
 // GOCFLSummary maps RO-CRATE metadata safely into a GOCFL compatible
 // summary object before returning it to the caller.
-func (c *Crate) GOCFLSummary() (GocflSummary, error) {
-	return c.GOCFLSummaryWithTime(currentTime(true))
-}
-
-// GOCFLSummaryWithTime maps RO-CRATE metadata with a specified timestamp.
-func (c *Crate) GOCFLSummaryWithTime(timestamp string) (GocflSummary, error) {
-	if len(c.Graph) == 0 {
+func (rcMeta rocrateMeta) GOCFLSummary() (GocflSummary, error) {
+	if len(rcMeta.Graph) == 0 {
 		return GocflSummary{}, fmt.Errorf("ro-crate-metadata.json is empty")
 	}
-	rootEntity, err := c.RootEntity()
-	if err != nil {
-		return GocflSummary{}, err
+	if len(rcMeta.Graph) == 1 {
+		return GocflSummary{}, fmt.Errorf("ro-crate-metadata.json is non-conformant")
 	}
-	summary := NewGocflSummary()
-	summary.Signature = rootEntity.ID
-	if rootEntity.Name != nil {
-		name := rootEntity.Name.Value()
+	summary := newGocflSummary()
+	summary.Signature = rcMeta.Graph[1].ID
+	if rcMeta.Graph[1].Name != nil {
+		name := rcMeta.Graph[1].Name.Value()
 		if len(name) > 0 {
-			summary.Title = rootEntity.Name.Value()[0]
+			summary.Title = rcMeta.Graph[1].Name.Value()[0]
 		}
 	}
-	if rootEntity.Type != nil {
-		summary.Sets = joinStrings(rootEntity.Type.Value())
+	if rcMeta.Graph[1].Type != nil {
+		summary.Sets = joinStrings(rcMeta.Graph[1].Type.Value())
 	}
-	if rootEntity.Description != nil {
-		summary.Description = joinStrings(rootEntity.Description.Value())
+	if rcMeta.Graph[1].Description != nil {
+		summary.Description = joinStrings(rcMeta.Graph[1].Description.Value())
 	}
-	summary.Created = rootEntity.DatePublished
-	if rootEntity.License != nil {
-		summary.Licenses = joinStrings(rootEntity.License.StringSlice())
+	summary.Created = rcMeta.Graph[1].DatePublished
+	if rcMeta.Graph[1].License != nil {
+		summary.Licenses = joinStrings(rcMeta.Graph[1].License.StringSlice())
 	}
-	if rootEntity.Keywords != nil {
-		summary.Keywords = joinStrings(rootEntity.Keywords.Value())
+	if rcMeta.Graph[1].Keywords != nil {
+		summary.Keywords = joinStrings(rcMeta.Graph[1].Keywords.Value())
 	}
-	summary.LastChanged = timestamp
+	summary.LastChanged = currentTime(true)
 	return summary, nil
 }

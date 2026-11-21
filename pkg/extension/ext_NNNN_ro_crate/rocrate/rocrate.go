@@ -1,3 +1,10 @@
+// Package rocrate enables simple processing of RO-CRATE data so that
+// it can be remapped in custom metadata.
+//
+// For additional reference for some of the structural information in
+// this module, including cardinality, please look at Crate-O:
+//
+//   - https://language-research-technology.github.io/crate-o
 package rocrate
 
 import (
@@ -5,306 +12,136 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"slices"
+	"strings"
 )
 
-// FlexSlice represents a slice of elements that can be unmarshalled from either
-// a single JSON element or a JSON array of elements.
-type FlexSlice[T any] []T
-
-// Value returns the underlying slice of T.
-func (f FlexSlice[T]) Value() []T {
-	return []T(f)
+var versions []string = []string{
+	"https://w3id.org/ro/crate/1.1/context",
+	"https://w3id.org/ro/crate/1.2/context",
 }
 
-// IsBlank indicates if a FlexSlice is empty.
-func (f FlexSlice[T]) IsBlank() bool {
-	return len(f) == 0
+type rocrateMeta struct {
+	LDContext any     `json:"@context"`
+	Graph     []graph `json:"@graph"`
 }
 
-// UnmarshalJSON unmarshals either a single T or a slice []T from JSON.
-func (f *FlexSlice[T]) UnmarshalJSON(data []byte) error {
-	trimmed := bytes.TrimSpace(data)
-	if len(trimmed) == 0 || bytes.Equal(trimmed, []byte("null")) {
-		*f = nil
-		return nil
-	}
-	if trimmed[0] == '[' {
-		var list []T
-		if err := json.Unmarshal(trimmed, &list); err != nil {
-			return err
-		}
-		*f = list
-		return nil
-	}
-	var single T
-	if err := json.Unmarshal(trimmed, &single); err != nil {
-		return err
-	}
-	*f = []T{single}
-	return nil
+type graph struct {
+	ID               string                 `json:"@id"`
+	Name             *StringOrSlice         `json:"name,omitempty"`
+	Type             *StringOrSlice         `json:"@type,omitempty"`
+	About            *NodeIdentifierOrSlice `json:"about,omitempty"`
+	Author           *NodeIdentifierOrSlice `json:"author,omitempty"`
+	Affiliation      *NodeIdentifierOrSlice `json:"affiliation,omitempty"`
+	Conforms         *NodeIdentifierOrSlice `json:"conformsTo,omitempty"`
+	ContentLocation  *NodeIdentifierOrSlice `json:"contentLocation,omitempty"`
+	ContentURL       *NodeIdentifierOrSlice `json:"contentUrl,omitempty"`
+	DatePublished    string                 `json:"datePublished,omitempty"`
+	Description      *StringOrSlice         `json:"description,omitempty"`
+	EncodingFormat   string                 `json:"encodingFormat,omitempty"`
+	FamilyName       string                 `json:"familyName,omitempty"`
+	Funder           *NodeIdentifierOrSlice `json:"funder,omitempty"`
+	GivenName        string                 `json:"givenName,omitempty"`
+	HasPart          *NodeIdentifierOrSlice `json:"hasPart,omitempty"`
+	Identifier       string                 `json:"identifier,omitempty"`
+	Keywords         *StringOrSlice         `json:"keywords,omitempty"`
+	License          *NodeIdentifierOrSlice `json:"license,omitempty"`
+	Latitude         string                 `json:"latitude,omitempty"`
+	Longitude        string                 `json:"longitude,omitempty"`
+	Publisher        *NodeIdentifierOrSlice `json:"publisher,omitempty"`
+	TemporalCoverage string                 `json:"temporalCoverage,omitempty"`
+	URL              string                 `json:"url,omitempty"`
 }
 
-// StringSlice represents a slice of strings with backward-compatible helper methods.
-type StringSlice FlexSlice[string]
-
-// Value allows accessing StringSlice data.
-func (sSlice StringSlice) Value() []string {
-	return []string(sSlice)
+type rocrateContext struct {
+	string
+	vocab map[string]string
 }
 
-func (sSlice StringSlice) isBlank() bool {
-	return len(sSlice) == 0
-}
+// Context provides a helper to return the RO-CRATE context from the
+// RO-CRATE data structure.
+//
+// NB: we must be able to cast to rocrateContext some way, but it is
+// currently eluding me. We should circle back to this.
+func (rcMeta *rocrateMeta) Context() string {
 
-func (sSlice *StringSlice) UnmarshalJSON(data []byte) error {
-	var fs FlexSlice[string]
-	if err := json.Unmarshal(data, &fs); err != nil {
-		return fmt.Errorf("cannot unmarshal into []string: %w", err)
-	}
-	*sSlice = StringSlice(fs)
-	return nil
-}
-
-// stringSlice alias for internal/legacy compatibility.
-type stringSlice = StringSlice
-
-// NodeRef represents a reference to another entity node in RO-Crate.
-type NodeRef struct {
-	ID string `json:"@id"`
-}
-
-// isBlank returns true if a node identifier has no ID value.
-func (nr NodeRef) isBlank() bool {
-	return nr.ID == ""
-}
-
-// nodeIdentifier alias for backward compatibility.
-type nodeIdentifier = NodeRef
-
-// NodeRefSlice represents a slice of node references.
-type NodeRefSlice FlexSlice[NodeRef]
-
-// Value allows accessing NodeRefSlice data.
-func (nSlice NodeRefSlice) Value() []NodeRef {
-	return []NodeRef(nSlice)
-}
-
-// StringSlice returns a string slice of the IDs in the NodeRefSlice.
-func (nSlice NodeRefSlice) StringSlice() []string {
-	ret := make([]string, len(nSlice))
-	for i, node := range nSlice {
-		ret[i] = node.ID
-	}
-	return ret
-}
-
-func (nSlice *NodeRefSlice) UnmarshalJSON(data []byte) error {
-	var fs FlexSlice[NodeRef]
-	if err := json.Unmarshal(data, &fs); err != nil {
-		return fmt.Errorf("cannot unmarshal into []node: %w", err)
-	}
-	*nSlice = NodeRefSlice(fs)
-	return nil
-}
-
-// nodeSlice alias for internal/legacy compatibility.
-type nodeSlice = NodeRefSlice
-
-// Entity represents a node in the RO-CRATE JSON-LD graph.
-type Entity struct {
-	ID            string        `json:"@id"`
-	Type          *StringSlice  `json:"@type,omitempty"`
-	About         *NodeRefSlice `json:"about,omitempty"`
-	Author        *NodeRefSlice `json:"author,omitempty"`
-	ContentURL    *NodeRefSlice `json:"contentUrl,omitempty"`
-	DatePublished string        `json:"datePublished,omitempty"`
-	Description   *StringSlice  `json:"description,omitempty"`
-	HasPart       *NodeRefSlice `json:"hasPart,omitempty"`
-	Keywords      *StringSlice  `json:"keywords,omitempty"`
-	License       *NodeRefSlice `json:"license,omitempty"`
-	Name          *StringSlice  `json:"name,omitempty"`
-	Publisher     *NodeRefSlice `json:"publisher,omitempty"`
-	ConformsTo    NodeRef       `json:"conformsTo,omitempty"`
-}
-
-// graph alias for backward compatibility.
-type graph = Entity
-
-// Crate represents an RO-CRATE object read from a JSON-LD file.
-type Crate struct {
-	RocrateContext any      `json:"@context"`
-	Graph          []Entity `json:"@graph"`
-	index          map[string]*Entity
-}
-
-// rocrateMeta alias for backward compatibility.
-type rocrateMeta = Crate
-
-// Context gets the context from the RO-CRATE JSON-LD file as a string.
-func (c *Crate) Context() string {
-	switch context := c.RocrateContext.(type) {
+	// E.g.
+	//
+	// "context":
+	// [
+	//		https://w3id.org/ro/crate/1.1/context,
+	//		map[@vocab:http://schema.org/],
+	// ]
+	//
+	// or
+	//
+	// "@context": "https://example.com/vocab/context"
+	//
+	switch rcMeta.LDContext.(type) {
 	case string:
-		return context
-	case []any:
-		if len(context) > 0 {
-			return fmt.Sprintf("%v", context[0])
-		}
+		return rcMeta.LDContext.(string)
+	default:
+		// expect string/map variant
 	}
-	return ""
+	rcContext, ok := rcMeta.LDContext.([]interface{})
+	if !ok {
+		return fmt.Sprintf("cannot determine @context from json-ld input: %v", rcMeta.LDContext)
+	}
+	context := (rcContext[0].(string))
+	return context
 }
 
-// BuildIndex populates the internal O(1) entity lookup map.
-func (c *Crate) BuildIndex() {
-	c.index = make(map[string]*Entity, len(c.Graph))
-	for i := range c.Graph {
-		c.index[c.Graph[i].ID] = &c.Graph[i]
-	}
-}
-
-// Entity returns the graph entity with the given @id in O(1) time.
-func (c *Crate) Entity(id string) (*Entity, bool) {
-	if c.index == nil {
-		c.BuildIndex()
-	}
-	e, ok := c.index[id]
-	return e, ok
-}
-
-// Resolve returns the graph entity with the given @id, if present in the graph.
-func (c *Crate) Resolve(id string) (*Entity, bool) {
-	return c.Entity(id)
-}
-
-// Descriptor finds and returns the root metadata descriptor node.
-func (c *Crate) Descriptor() (*Entity, bool) {
-	if e, ok := c.Entity("ro-crate-metadata.json"); ok {
-		return e, true
-	}
-	if e, ok := c.Entity("ro-crate-metadata.jsonld"); ok {
-		return e, true
-	}
-	for i := range c.Graph {
-		g := &c.Graph[i]
-		if !g.ConformsTo.isBlank() {
-			return g, true
-		}
-	}
-	return nil, false
-}
-
-// RootEntity finds and returns the root dataset entity conforming to RO-Crate specification.
-func (c *Crate) RootEntity() (*Entity, error) {
-	if len(c.Graph) == 0 {
-		return nil, fmt.Errorf("ro-crate-metadata.json is empty")
-	}
-
-	// 1. Resolve via descriptor "about" property
-	if descriptor, ok := c.Descriptor(); ok {
-		if descriptor.About != nil && len(descriptor.About.Value()) > 0 {
-			aboutID := descriptor.About.Value()[0].ID
-			if root, ok := c.Entity(aboutID); ok {
-				return root, nil
-			}
-		}
-	}
-
-	// 2. Fallback: Lookup standard root dataset IDs
-	if root, ok := c.Entity("./"); ok {
-		return root, nil
-	}
-	if root, ok := c.Entity("."); ok {
-		return root, nil
-	}
-
-	// 3. Fallback: Search for an entity with @type "Dataset"
-	for i := range c.Graph {
-		g := &c.Graph[i]
-		if g.Type != nil {
-			for _, t := range g.Type.Value() {
-				if t == "Dataset" {
-					return g, nil
-				}
-			}
-		}
-	}
-
-	// 4. Fallback: If only one non-descriptor entity exists
-	if len(c.Graph) == 1 {
-		return &c.Graph[0], nil
-	}
-
-	return nil, fmt.Errorf("ro-crate root entity not found")
-}
-
-func (c *Crate) findRootEntity() (Entity, error) {
-	root, err := c.RootEntity()
-	if err != nil {
-		return Entity{}, err
-	}
-	return *root, nil
-}
-
-// GetEntityNames resolves the IDs in nodeRefs and returns their names if found, or the ID as fallback.
-func (c *Crate) GetEntityNames(refs []NodeRef) []string {
-	names := make([]string, 0, len(refs))
-	for _, ref := range refs {
-		if entity, ok := c.Resolve(ref.ID); ok && entity.Name != nil && len(entity.Name.Value()) > 0 {
-			names = append(names, entity.Name.Value()[0])
-		} else if ref.ID != "" {
-			names = append(names, ref.ID)
-		}
-	}
-	return names
-}
-
-// GetAuthorNames returns the author names of an entity, resolving referenced author nodes when available.
-func (c *Crate) GetAuthorNames(entity *Entity) []string {
-	if entity == nil || entity.Author == nil {
-		return nil
-	}
-	return c.GetEntityNames(entity.Author.Value())
-}
-
-// GetPublisherNames returns the publisher names of an entity, resolving referenced publisher nodes when available.
-func (c *Crate) GetPublisherNames(entity *Entity) []string {
-	if entity == nil || entity.Publisher == nil {
-		return nil
-	}
-	return c.GetEntityNames(entity.Publisher.Value())
-}
-
-// ToJSON serializes the Crate to JSON.
-func (c *Crate) ToJSON() ([]byte, error) {
-	return json.MarshalIndent(c, "", " ")
-}
-
-// String provides a string representation of Crate.
-func (c *Crate) String() string {
-	b, err := c.ToJSON()
-	if err != nil {
-		return fmt.Sprintf("Crate{Graph: %d entities}", len(c.Graph))
-	}
-	return string(b)
-}
-
-// RocrateSummary is a summary of the RO-CRATE metadata.
+// RocrateSummary provides a summary structure we can access safely
+// so as to reason about the data in a RO-CRATE.
+// The data in this structure mirrors the basic information in the
+// ro-crate-preview.htm file.
 type RocrateSummary struct {
-	ID            string   `json:"id"`
-	Name          []string `json:"name"`
-	Type          []string `json:"type"`
-	Description   []string `json:"description"`
-	DatePublished string   `json:"datePublished"`
-	Author        []string `json:"author"`
-	License       string   `json:"license"`
-	HasPart       []string `json:"hasPart"`
-	ContentURL    []string `json:"contentUrl"`
-	Keywords      []string `json:"keywords"`
-	Publisher     []string `json:"publisher"`
-	About         string   `json:"about"`
+	// ID via graph[1].
+	ID string
+	// Name via graph[1].
+	Name []string
+	// Type via graph[1].
+	Type []string
+	// Description via graph[1].
+	Description []string
+	// DatePublished via graph[1].
+	DatePublished string
+	// Author via graph[1].
+	Author []string
+	// License via graph[1].
+	License string
+	// HasPart via graph[1].
+	HasPart []string
+	// ContentURL via graph[1].
+	ContentURL []string
+	// Keywords via graph[1].
+	Keywords []string
+	// Published via graph[1].
+	Publisher []string
+	// About provides an alias for 'Referenced by' which refers to
+	// sections of the RO-CRATE that reference this summary. It takes
+	// this information from the about field.
+	//
+	// via graph[0].
+	About string
 }
 
-// NewSummary returns an initialized RocrateSummary.
-func NewSummary() RocrateSummary {
+// StringerError provides a meaningful way to test for any issues
+// in the stringer function in this module.
+const StringerError = "error in ro-crate stringer"
+
+// String provides stringer functions for the RO-CRATE summary object.
+func (rcSummary RocrateSummary) String() string {
+	ret, err := json.MarshalIndent(rcSummary, " ", " ")
+	if err != nil {
+		return fmt.Sprintf("%s: %s", StringerError, err)
+	}
+	return string(ret)
+}
+
+// newSummary creates a new ro-crate summary to provide safe access
+// from the caller.
+func newSummary() RocrateSummary {
 	return RocrateSummary{
 		ID:            "",
 		Name:          []string{},
@@ -321,77 +158,178 @@ func NewSummary() RocrateSummary {
 	}
 }
 
-func newSummary() RocrateSummary {
-	return NewSummary()
-}
+// Summary returns a summary ro-crate structure from the data we
+// have in-memory.
+func (rcMeta rocrateMeta) Summary() (RocrateSummary, error) {
 
-// ToJSON serializes RocrateSummary to formatted JSON.
-func (rSummary RocrateSummary) ToJSON() ([]byte, error) {
-	return json.MarshalIndent(rSummary, "", " ")
-}
-
-// String provides a string representation of RocrateSummary.
-func (rSummary RocrateSummary) String() string {
-	b, err := rSummary.ToJSON()
-	if err != nil {
-		return fmt.Sprintf("RocrateSummary{ID: %q}", rSummary.ID)
+	if len(rcMeta.Graph) == 0 {
+		return RocrateSummary{}, fmt.Errorf("ro-crate-metadata.json is empty")
 	}
-	return string(b)
-}
-
-// Summary maps RO-CRATE metadata to a summary object.
-func (c *Crate) Summary() (RocrateSummary, error) {
-	summary := NewSummary()
-	if len(c.Graph) == 0 {
-		return summary, nil
+	if len(rcMeta.Graph) == 1 {
+		return RocrateSummary{}, fmt.Errorf("ro-crate-metadata.json is non-conformant")
 	}
-	g, err := c.RootEntity()
-	if err != nil {
-		return summary, err
+	summary := newSummary()
+	summary.ID = rcMeta.Graph[1].ID
+	if rcMeta.Graph[1].Name != nil {
+		summary.Name = rcMeta.Graph[1].Name.Value()
 	}
-	summary.ID = g.ID
-	if g.Name != nil {
-		summary.Name = g.Name.Value()
+	if rcMeta.Graph[1].Type != nil {
+		summary.Type = rcMeta.Graph[1].Type.Value()
 	}
-	if g.Type != nil {
-		summary.Type = g.Type.Value()
+	if rcMeta.Graph[1].Description != nil {
+		summary.Description = rcMeta.Graph[1].Description.Value()
 	}
-	if g.Description != nil {
-		summary.Description = g.Description.Value()
+	summary.DatePublished = rcMeta.Graph[1].DatePublished
+	if rcMeta.Graph[1].Author != nil {
+		summary.Author = rcMeta.Graph[1].Author.StringSlice()
 	}
-	summary.DatePublished = g.DatePublished
-	if g.Author != nil {
-		summary.Author = g.Author.StringSlice()
+	if rcMeta.Graph[1].License != nil {
+		license := rcMeta.Graph[1].License.StringSlice()
+		if len(license) != 0 {
+			summary.License = license[0]
+		}
 	}
-	if g.License != nil && len(g.License.Value()) > 0 {
-		summary.License = g.License.Value()[0].ID
+	if rcMeta.Graph[1].HasPart != nil {
+		summary.HasPart = rcMeta.Graph[1].HasPart.StringSlice()
 	}
-	if g.HasPart != nil {
-		summary.HasPart = g.HasPart.StringSlice()
+	if rcMeta.Graph[1].Keywords != nil {
+		summary.Keywords = rcMeta.Graph[1].Keywords.Value()
 	}
-	if g.ContentURL != nil {
-		summary.ContentURL = g.ContentURL.StringSlice()
+	if rcMeta.Graph[1].Publisher != nil {
+		summary.Publisher = rcMeta.Graph[1].Publisher.StringSlice()
 	}
-	if g.Keywords != nil {
-		summary.Keywords = g.Keywords.Value()
+	if rcMeta.Graph[1].ContentURL != nil {
+		summary.ContentURL = rcMeta.Graph[1].ContentURL.StringSlice()
 	}
-	if g.Publisher != nil {
-		summary.Publisher = g.Publisher.StringSlice()
+	if rcMeta.Graph[0].About != nil {
+		about := rcMeta.Graph[0].About.StringSlice()
+		if len(about) != 0 {
+			summary.About = about[0]
+		}
 	}
-	summary.About = g.ID
 	return summary, nil
 }
 
-// ProcessMetadataStream processes an RO-CRATE metadata stream from an io.Reader.
-func ProcessMetadataStream(reader io.Reader) (*Crate, error) {
-	data, err := io.ReadAll(reader)
+// String provides stringer functions for the rocrate meta object.
+func (rcMeta rocrateMeta) String() string {
+	ret, err := json.MarshalIndent(rcMeta, " ", " ")
 	if err != nil {
-		return nil, fmt.Errorf("error reading metadata stream: %w", err)
+		return fmt.Sprintf("%s: %s", StringerError, err)
 	}
-	var crate Crate
-	if err := json.Unmarshal(data, &crate); err != nil {
-		return nil, fmt.Errorf("error unmarshalling rocrate metadata: %w", err)
+	return string(ret)
+}
+
+/* StringOrSlice type and handler:
+
+For more info on the type handling below:
+
+StringOrSlice:
+   https://gitlab.com/flimzy/talks/-/blob/master/2020/go-json/string-or-array.go
+
+*/
+
+// StringOrSlice represents a type that can interpret both single-value
+// strings or slices of strings.
+type StringOrSlice []string
+
+// UnmarshalJSON implements Unmarshal for the StringOrSlice type.
+func (s *StringOrSlice) UnmarshalJSON(d []byte) error {
+	if d[0] == '"' {
+		var v string
+		err := json.Unmarshal(d, &v)
+		*s = StringOrSlice{v}
+		return err
 	}
-	crate.BuildIndex()
-	return &crate, nil
+	var v []string
+	err := json.Unmarshal(d, &v)
+	*s = StringOrSlice(v)
+	return err
+}
+
+// Value provides access to the StringOrSlice value as something
+// sensible.
+func (s StringOrSlice) Value() []string {
+	return s
+}
+
+// String provides a stringer method for this type. It might not
+// be needed eventually.
+func (s StringOrSlice) String() string {
+	var out string = "["
+	for _, v := range s {
+		out = fmt.Sprintf("%s%s; ", out, v)
+	}
+	out = fmt.Sprintf("%s]", strings.TrimSpace(out))
+	return out
+}
+
+// Node-identifier handlers. These seem to only contain relative
+// links in the RO-CRATE specification.
+
+// nodePrimitive look like they only contain links. relative, or
+// absolute, in RO-CRATE metadata. They can be single-value objects
+// or slices of objects.
+type nodeIdentifier struct {
+	ID string `json:"@id"`
+}
+
+// NodeIdentifierOrSlice represents a type that can interpret the
+// RO-CRATE map like objects acting as identifiers correctly.
+type NodeIdentifierOrSlice []nodeIdentifier
+
+// UnmarshalJSON implements unmarshal for the NodeIdentifierOrSlice
+// object.
+func (s *NodeIdentifierOrSlice) UnmarshalJSON(d []byte) error {
+	if d[0] == '{' {
+		var v nodeIdentifier
+		err := json.Unmarshal(d, &v)
+		*s = NodeIdentifierOrSlice{v}
+		return err
+	}
+	if d[0] == '"' {
+		// we might have a string that needs converting. This technique
+		// might also work for all RO-CRATE objects, so we should
+		// circle back to this.
+		var v nodeIdentifier
+		converted := fmt.Sprintf("{\"@id\": %v}", string(d))
+		err := json.Unmarshal([]byte(converted), &v)
+		*s = NodeIdentifierOrSlice{v}
+		return err
+	}
+	var v []nodeIdentifier
+	err := json.Unmarshal(d, &v)
+	*s = NodeIdentifierOrSlice(v)
+	return err
+}
+
+// Value provides access to the NodeIdentifierOrSlice in a sensible
+// way.
+func (s NodeIdentifierOrSlice) Value() []nodeIdentifier {
+	return s
+}
+
+// StringSlice provides a way of accessing the NodeIdentifierOrSlice
+// contents as a slice of strings.
+func (s NodeIdentifierOrSlice) StringSlice() []string {
+	var res []string
+	for _, v := range s {
+		res = append(res, v.ID)
+	}
+	return res
+}
+
+// ProcessMetadataStream enables processing of ro-crate-metadata.json
+// and return in the simple structs made available in this package.
+func ProcessMetadataStream(metaObject io.Reader) (rocrateMeta, error) {
+	buf := new(bytes.Buffer)
+	_, err := io.Copy(buf, metaObject)
+	if err != nil {
+		return rocrateMeta{}, err
+	}
+	meta := rocrateMeta{}
+	json.Unmarshal(buf.Bytes(), &meta)
+	if !slices.Contains(versions, meta.Context()) {
+		return rocrateMeta{}, fmt.Errorf("cannot process this version: %s", meta.Context())
+	}
+	return meta, nil
 }

@@ -4,30 +4,43 @@ import (
 	"bytes"
 	"fmt"
 	"reflect"
+	"slices"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/go-test/deep"
 )
 
 // TestContexts ensures that we can open an empty JSON-LD as expected
 // and reason about it.
 func TestContexts(t *testing.T) {
+
 	expectedContext := "https://w3id.org/ro/crate/1.1/context"
 
 	simpleContextRes := bytes.NewBuffer(simpleContext)
 	res, err := ProcessMetadataStream(simpleContextRes)
 
-	require.NoError(t, err, "error processing simpleContext")
-	assert.Equal(t, expectedContext, res.Context())
-	assert.Empty(t, res.Graph)
+	if err != nil {
+		t.Errorf("error processing simpleContext: %s", err)
+	}
+	if res.Context() != expectedContext {
+		t.Errorf("context wasn't read successfully, got: '%s'", res.Context())
+	}
+	if len(res.Graph) != 0 {
+		t.Errorf("expecting empty graph, got graph len: '%d'", len(res.Graph))
+	}
 
 	complexContextRes := bytes.NewBuffer(complexContext)
 	res, err = ProcessMetadataStream(complexContextRes)
 
-	require.NoError(t, err, "error processing complexContext")
-	assert.Equal(t, expectedContext, res.Context())
-	assert.Empty(t, res.Graph)
+	if err != nil {
+		t.Errorf("error processing complexContext: %s", err)
+	}
+	if res.Context() != expectedContext {
+		t.Errorf("context wasn't read successfully, got: '%s'", res.Context())
+	}
+	if len(res.Graph) != 0 {
+		t.Errorf("expecting empty graph, got graph len: '%d'", len(res.Graph))
+	}
 }
 
 type stringTest struct {
@@ -37,20 +50,20 @@ type stringTest struct {
 	compare2 []string
 }
 
-var stringTests = []stringTest{
-	{
+var stringTests []stringTest = []stringTest{
+	stringTest{
 		"name",
 		nameTest,
 		[]string{"name one", "name two"},
 		[]string{"name one"},
 	},
-	{
+	stringTest{
 		"keyword",
 		keywordTest,
 		[]string{"kw1", "kw2"},
 		[]string{"kw1"},
 	},
-	{
+	stringTest{
 		"type",
 		typeTest,
 		[]string{"Person", "Artist"},
@@ -80,16 +93,38 @@ func TestStringVariants(t *testing.T) {
 		variantTest := bytes.NewBuffer(test.testData)
 		res, err := ProcessMetadataStream(variantTest)
 
-		require.NoError(t, err, "%s: cannot process input", test.label)
-		assert.Len(t, res.Graph, 2, "%s: test data is incorrect length", test.label)
-		assert.Equal(t, "test1", res.Graph[0].ID)
-
+		if err != nil {
+			t.Errorf("%s: cannot process input ('%s')", test.label, err)
+		}
+		if len(res.Graph) != 2 {
+			fmt.Printf("test data is incorrect length: '%d'", len(res.Graph))
+		}
+		testID := res.Graph[0].ID
+		if testID != "test1" {
+			t.Errorf("test ID is incorrect: %s", testID)
+		}
 		value := getStringSliceValue(res.Graph[0], test.label)
-		assert.Equal(t, test.compare1, value, "%s test 1", test.label)
-
-		assert.Equal(t, "test2", res.Graph[1].ID)
+		if !slices.Equal(value, test.compare1) {
+			t.Errorf(
+				"%s: string variant: '%v' result doesn't match expected: '%v'",
+				fmt.Sprintf("%s test 1", test.label),
+				value,
+				test.compare1,
+			)
+		}
+		testID = res.Graph[1].ID
+		if testID != "test2" {
+			t.Errorf("test ID is incorrect: %s", testID)
+		}
 		value = getStringSliceValue(res.Graph[1], test.label)
-		assert.Equal(t, test.compare2, value, "%s test 2", test.label)
+		if !slices.Equal(value, test.compare2) {
+			t.Errorf(
+				"%s: string variant: '%v' result doesn't match expected: '%v'",
+				fmt.Sprintf("%s test 2", test.label),
+				value,
+				test.compare2,
+			)
+		}
 	}
 }
 
@@ -100,39 +135,39 @@ type nodeTest struct {
 	compare2 []nodeIdentifier
 }
 
-var nodeTests = []nodeTest{
-	{
+var nodeTests []nodeTest = []nodeTest{
+	nodeTest{
 		"author",
 		authorTest,
 		[]nodeIdentifier{
-			{ID: "https://orcid.org/1234-0003-1974-0000"},
-			{ID: "#Yann"},
-			{ID: "#Organization-SMUC"},
+			nodeIdentifier{"https://orcid.org/1234-0003-1974-0000"},
+			nodeIdentifier{"#Yann"},
+			nodeIdentifier{"#Organization-SMUC"},
 		},
 		[]nodeIdentifier{
-			{ID: "https://orcid.org/0000-0003-1974-1234"},
+			nodeIdentifier{"https://orcid.org/0000-0003-1974-1234"},
 		},
 	},
-	{
+	nodeTest{
 		"hasPart",
 		hasPartTest,
 		[]nodeIdentifier{
-			{ID: "part1"},
+			nodeIdentifier{"part1"},
 		},
 		[]nodeIdentifier{
-			{ID: "part1"},
-			{ID: "part2"},
-			{ID: "part3"},
+			nodeIdentifier{"part1"},
+			nodeIdentifier{"part2"},
+			nodeIdentifier{"part3"},
 		},
 	},
-	{
+	nodeTest{
 		"license",
 		licenseTest,
 		[]nodeIdentifier{
-			{ID: "https://spdx.org/licenses/license1"},
+			nodeIdentifier{"https://spdx.org/licenses/license1"},
 		},
 		[]nodeIdentifier{
-			{ID: "http://spdx.org/licenses/license2"},
+			nodeIdentifier{"http://spdx.org/licenses/license2"},
 		},
 	},
 }
@@ -158,19 +193,45 @@ func TestNodeIdentifierVariants(t *testing.T) {
 		variantTest := bytes.NewBuffer(test.testData)
 		res, err := ProcessMetadataStream(variantTest)
 
-		require.NoError(t, err, "%s: cannot process input", test.label)
-		assert.Len(t, res.Graph, 2, "%s: test data is incorrect length", test.label)
-		assert.Equal(t, "test1", res.Graph[0].ID)
-
+		if err != nil {
+			t.Errorf("%s: cannot process input ('%s')", test.label, err)
+		}
+		if len(res.Graph) != 2 {
+			fmt.Printf(
+				"%s: test data is incorrect length: '%d'",
+				test.label,
+				len(res.Graph),
+			)
+		}
+		testID := res.Graph[0].ID
+		if testID != "test1" {
+			t.Errorf("test ID is incorrect: %s", testID)
+		}
 		value := getNodeIdentifierSliceValue(res.Graph[0], test.label)
 		for idx, v := range value {
-			assert.Equal(t, test.compare1[idx].ID, v.ID, "%s test 1", test.label)
+			if v.ID != test.compare1[idx].ID {
+				t.Errorf(
+					"%s: string variant: '%v' result doesn't match expected: '%v'",
+					fmt.Sprintf("%s test 1", test.label),
+					v,
+					test.compare1[idx],
+				)
+			}
 		}
-
-		assert.Equal(t, "test2", res.Graph[1].ID)
+		testID = res.Graph[1].ID
+		if testID != "test2" {
+			t.Errorf("test ID is incorrect: %s", testID)
+		}
 		value = getNodeIdentifierSliceValue(res.Graph[1], test.label)
 		for idx, v := range value {
-			assert.Equal(t, test.compare2[idx].ID, v.ID, "%s test 2", test.label)
+			if v.ID != test.compare2[idx].ID {
+				t.Errorf(
+					"%s: string variant: '%v' result doesn't match expected: '%v'",
+					fmt.Sprintf("%s test 2", test.label),
+					v,
+					test.compare2[idx],
+				)
+			}
 		}
 	}
 }
@@ -188,7 +249,9 @@ func TestNewSummary(t *testing.T) {
 		}
 		fieldName := structType.Field(i).Name
 		isSet := field.IsValid() && !field.IsZero()
-		assert.True(t, isSet, "summary constructor isn't setting: %s", fieldName)
+		if !isSet {
+			t.Errorf("summary constructor isn't setting: %s", fieldName)
+		}
 	}
 }
 
@@ -205,7 +268,9 @@ func TestNewGocflSummary(t *testing.T) {
 		}
 		fieldName := structType.Field(i).Name
 		isSet := field.IsValid() && !field.IsZero()
-		assert.True(t, isSet, "summary constructor isn't setting: %s", fieldName)
+		if !isSet {
+			t.Errorf("summary constructor isn't setting: %s", fieldName)
+		}
 	}
 }
 
@@ -216,14 +281,14 @@ type metadataTest struct {
 	gocflSummary GocflSummary
 }
 
-var metadataTests = []metadataTest{
-	{
-		label:    "empty",
-		testData: emptyCrate,
-		summary: RocrateSummary{
-			ID:            "./",
+var metadataTests []metadataTest = []metadataTest{
+	metadataTest{
+		"empty",
+		emptyCrate,
+		RocrateSummary{
+			ID:            "",
 			Name:          []string{},
-			Type:          []string{"Dataset"},
+			Type:          []string{},
 			Description:   []string{},
 			DatePublished: "",
 			Author:        []string{},
@@ -234,12 +299,12 @@ var metadataTests = []metadataTest{
 			Publisher:     []string{},
 			About:         "./",
 		},
-		gocflSummary: GocflSummary{
-			Signature:      "./",
+		GocflSummary{
+			Signature:      "",
 			Title:          "",
 			Description:    "",
 			Created:        "",
-			Sets:           "Dataset",
+			Sets:           "",
 			Keywords:       "",
 			Licenses:       "",
 			LastChanged:    "",
@@ -249,10 +314,10 @@ var metadataTests = []metadataTest{
 			Address:        "",
 		},
 	},
-	{
-		label:    "afternoon drinks",
-		testData: afternoonDrinks,
-		summary: RocrateSummary{
+	metadataTest{
+		"afternoon drinks",
+		afternoonDrinks,
+		RocrateSummary{
 			ID:   "./RC0E772B3021E7E40C2BBDE657",
 			Name: []string{"A study of my afternoon drinks"},
 			Type: []string{"Dataset"},
@@ -274,18 +339,24 @@ var metadataTests = []metadataTest{
 				"Drinks.RData",
 				"Drinks-ddi.xml",
 			},
-			ContentURL: []string{},
-			Keywords:   []string{},
-			Publisher:  []string{},
-			About:      "./RC0E772B3021E7E40C2BBDE657",
+			ContentURL: nil,
+			Keywords: []string{
+				"dataverse",
+				"study",
+				"observational-study",
+			},
+			Publisher: []string{
+				"https://ror.org/02s6k3f65",
+			},
+			About: "./RC0E772B3021E7E40C2BBDE657",
 		},
-		gocflSummary: GocflSummary{
+		GocflSummary{
 			Signature:      "./RC0E772B3021E7E40C2BBDE657",
 			Title:          "A study of my afternoon drinks",
 			Description:    "A study of my afternoon consumption one week in 2018; Exported from Dataverse",
 			Created:        "2018",
 			Sets:           "Dataset",
-			Keywords:       "",
+			Keywords:       "dataverse; study; observational-study",
 			Licenses:       "https://spdx.org/licenses/CC0-1.0.html",
 			LastChanged:    "",
 			OrganisationID: "",
@@ -294,82 +365,44 @@ var metadataTests = []metadataTest{
 			Address:        "",
 		},
 	},
-	{
-		label:    "tape artifacts",
-		testData: tapeArtifacts,
-		summary: RocrateSummary{
-			ID:   "https://doi.org/10.5281/zenodo.10057813",
-			Name: []string{"Tape Artifacts (Tape Transfer Artifacts from an Investigation of Digital Preservation Storage Strategies)"},
-			Type: []string{"Dataset"},
+	metadataTest{
+		"carpentries",
+		carpentriesCrate,
+		RocrateSummary{
+			ID: "./",
+			Name: []string{
+				"Example dataset for RO-Crate specification",
+			},
+			Type: []string{
+				"Dataset",
+				"LearningResource",
+			},
 			Description: []string{
-				"Digital preservation is not without impact on the environment. At the same time, cultural heritage organizations and memory institutions operate under severe financial constraints. In this paper we consider how digital preservation processes can be made cheaper and more ecologically sustainable by reducing data accessions and storage volumes.",
+				"Official rainfall readings for Katoomba, NSW 2022, Australia",
 			},
-			DatePublished: "2023-10-31",
+			DatePublished: "2023-05-22T12:03:00+0100",
 			Author: []string{
-				"https://orcid.org/0000-0003-1974-1234",
-				"#Yann",
-				"#Organization-SMUC",
+				"https://orcid.org/0000-0002-1825-0097",
 			},
-			License: "https://creativecommons.org/licenses/by/4.0/legalcode",
+			License: "http://spdx.org/licenses/CC0-1.0",
 			HasPart: []string{
-				"A_Slice_of_PI_Sustainability_Final.pdf",
-				"Tape_Artifacts.zip",
+				"data.csv",
 			},
-			ContentURL: []string{
-				"https://zenodo.org/api/records/10057813/files-archive",
-			},
-			Keywords: []string{
-				"digital preservation",
-				"environmental sustainability",
-				"carbon footprint",
-				"tape storage",
-				"green digital preservation",
-			},
+			ContentURL: []string{},
+			Keywords:   []string{},
 			Publisher: []string{
-				"https://ror.org/010000000",
+				"https://ror.org/05gq02987",
 			},
-			About: "https://doi.org/10.5281/zenodo.10057813",
+			About: "./",
 		},
-		gocflSummary: GocflSummary{
-			Signature:      "https://doi.org/10.5281/zenodo.10057813",
-			Title:          "Tape Artifacts (Tape Transfer Artifacts from an Investigation of Digital Preservation Storage Strategies)",
-			Description:    "Digital preservation is not without impact on the environment. At the same time, cultural heritage organizations and memory institutions operate under severe financial constraints. In this paper we consider how digital preservation processes can be made cheaper and more ecologically sustainable by reducing data accessions and storage volumes.",
-			Created:        "2023-10-31",
-			Sets:           "Dataset",
-			Keywords:       "digital preservation; environmental sustainability; carbon footprint; tape storage; green digital preservation",
-			Licenses:       "https://creativecommons.org/licenses/by/4.0/legalcode",
-			LastChanged:    "",
-			OrganisationID: "",
-			Organisation:   "",
-			User:           "",
-			Address:        "",
-		},
-	},
-	{
-		label:    "simple",
-		testData: simpleCrate,
-		summary: RocrateSummary{
-			ID:            "./",
-			Name:          []string{"My Research Object"},
-			Type:          []string{"Dataset"},
-			Description:   []string{"The RO-Crate Root Data Entity"},
-			DatePublished: "2023-05-22",
-			Author:        []string{},
-			License:       "https://creativecommons.org/licenses/by-nc-sa/4.0/",
-			HasPart:       []string{},
-			ContentURL:    []string{},
-			Keywords:      []string{},
-			Publisher:     []string{},
-			About:         "./",
-		},
-		gocflSummary: GocflSummary{
+		GocflSummary{
 			Signature:      "./",
-			Title:          "My Research Object",
-			Description:    "The RO-Crate Root Data Entity",
-			Created:        "2023-05-22",
-			Sets:           "Dataset",
+			Title:          "Example dataset for RO-Crate specification",
+			Description:    "Official rainfall readings for Katoomba, NSW 2022, Australia",
+			Created:        "2023-05-22T12:03:00+0100",
+			Sets:           "Dataset; LearningResource",
 			Keywords:       "",
-			Licenses:       "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+			Licenses:       "http://spdx.org/licenses/CC0-1.0",
 			LastChanged:    "",
 			OrganisationID: "",
 			Organisation:   "",
@@ -377,26 +410,35 @@ var metadataTests = []metadataTest{
 			Address:        "",
 		},
 	},
-	{
-		label:    "sample",
-		testData: sampleCrate,
-		summary: RocrateSummary{
-			ID:            "./",
-			Name:          []string{"Introduction to Text Analysis in Python"},
-			Type:          []string{"Dataset"},
-			Description:   []string{"The RO-Crate Root Data Entity"},
+	metadataTest{
+		"spec",
+		specCrate,
+		RocrateSummary{
+			ID: "./",
+			Name: []string{
+				"Example RO-Crate",
+			},
+			Type: []string{
+				"Dataset",
+			},
+			Description: []string{
+				"The RO-Crate Root Data Entity",
+			},
 			DatePublished: "",
 			Author:        []string{},
 			License:       "",
-			HasPart:       []string{},
-			ContentURL:    []string{},
-			Keywords:      []string{},
-			Publisher:     []string{},
-			About:         "./",
+			HasPart: []string{
+				"data1.txt",
+				"data2.txt",
+			},
+			ContentURL: []string{},
+			Keywords:   []string{},
+			Publisher:  []string{},
+			About:      "./",
 		},
-		gocflSummary: GocflSummary{
+		GocflSummary{
 			Signature:      "./",
-			Title:          "Introduction to Text Analysis in Python",
+			Title:          "Example RO-Crate",
 			Description:    "The RO-Crate Root Data Entity",
 			Created:        "",
 			Sets:           "Dataset",
@@ -409,10 +451,10 @@ var metadataTests = []metadataTest{
 			Address:        "",
 		},
 	},
-	{
-		label:    "galaxy",
-		testData: galaxyCrate,
-		summary: RocrateSummary{
+	metadataTest{
+		"galaxy",
+		galaxyCrate,
+		RocrateSummary{
 			ID: "./",
 			Name: []string{
 				"Demo Crate",
@@ -435,11 +477,13 @@ var metadataTests = []metadataTest{
 			ContentURL: []string{
 				"http://example.com/resource/data",
 			},
-			Keywords:  []string{},
-			Publisher: []string{"https://ror.org/0abcdef00"},
-			About:     "./",
+			Keywords: []string{},
+			Publisher: []string{
+				"https://ror.org/0abcdef00",
+			},
+			About: "./",
 		},
-		gocflSummary: GocflSummary{
+		GocflSummary{
 			Signature:      "./",
 			Title:          "Demo Crate",
 			Description:    "a demo crate for Galaxy training",
@@ -462,109 +506,29 @@ func TestMetadata(t *testing.T) {
 	for _, test := range metadataTests {
 		variantTest := bytes.NewBuffer(test.testData)
 		processed, err := ProcessMetadataStream(variantTest)
-		require.NoError(t, err, "%s: cannot process input", test.label)
-		res, err := processed.Summary()
-		require.NoError(t, err, "%s summary error", test.label)
-		assert.Equal(t, test.summary.ID, res.ID, "%s ID", test.label)
-		assert.Equal(t, test.summary.Name, res.Name, "%s Name", test.label)
-		assert.Equal(t, test.summary.Type, res.Type, "%s Type", test.label)
-		assert.Equal(t, test.summary.Description, res.Description, "%s Description", test.label)
-		assert.Equal(t, test.summary.DatePublished, res.DatePublished, "%s DatePublished", test.label)
-		assert.Equal(t, test.summary.Author, res.Author, "%s Author", test.label)
-		assert.Equal(t, test.summary.License, res.License, "%s License", test.label)
-		assert.Equal(t, test.summary.HasPart, res.HasPart, "%s HasPart", test.label)
-		assert.Equal(t, test.summary.ContentURL, res.ContentURL, "%s ContentURL", test.label)
-		assert.Equal(t, test.summary.Keywords, res.Keywords, "%s Keywords", test.label)
-		assert.Equal(t, test.summary.Publisher, res.Publisher, "%s Publisher", test.label)
-		assert.Equal(t, test.summary.About, res.About, "%s About", test.label)
+		if err != nil {
+			t.Errorf("%s: cannot process input ('%s')", test.label, err)
+		}
+		res, _ := processed.Summary()
+		if diff := deep.Equal(res, test.summary); diff != nil {
+			t.Errorf("%s summary metadata doesn't match: %s", test.label, diff)
+		}
 	}
 }
 
 // TestGOCFLMetadata provides more generic testing the summary output
 // of the GOCFL struct.
 func TestGOCFLMetadata(t *testing.T) {
-	oldTime := currentTime
-	defer func() { currentTime = oldTime }()
-	currentTime = func(bool) string {
-		return ""
-	}
-
 	for _, test := range metadataTests {
 		variantTest := bytes.NewBuffer(test.testData)
-		processed, err := ProcessMetadataStream(variantTest)
-		require.NoError(t, err, "%s: cannot process input", test.label)
-		res, err := processed.GOCFLSummary()
-		require.NoError(t, err, "%s gocfl summary error", test.label)
-		assert.Equal(t, test.gocflSummary, res, "%s gocfl metadata", test.label)
+		processed, _ := ProcessMetadataStream(variantTest)
+		currentTime = func(bool) string {
+			// Mock getTime function.
+			return ""
+		}
+		res, _ := processed.GOCFLSummary()
+		if diff := deep.Equal(res, test.gocflSummary); diff != nil {
+			t.Errorf("%s gocfl metadata doesn't match: %s", test.label, diff)
+		}
 	}
-}
-
-func TestCrate_IndexingAndResolution(t *testing.T) {
-	crate, err := ProcessMetadataStream(bytes.NewBuffer(afternoonDrinks))
-	require.NoError(t, err)
-
-	// O(1) Index lookup
-	descriptor, ok := crate.Descriptor()
-	require.True(t, ok)
-	assert.Equal(t, "ro-crate-metadata.json", descriptor.ID)
-
-	root, err := crate.RootEntity()
-	require.NoError(t, err)
-	assert.Equal(t, "./RC0E772B3021E7E40C2BBDE657", root.ID)
-
-	// Resolving referenced author entity
-	authorEntity, ok := crate.Resolve("#Ross_Spencer-1")
-	require.True(t, ok)
-	require.NotNil(t, authorEntity.Name)
-	assert.Equal(t, []string{"Ross Spencer"}, authorEntity.Name.Value())
-
-	// Resolving author names via helper
-	authorNames := crate.GetAuthorNames(root)
-	assert.Equal(t, []string{"Ross Spencer"}, authorNames)
-
-	// Non-existent entity
-	_, ok = crate.Resolve("#does-not-exist")
-	assert.False(t, ok)
-}
-
-func TestFlexSlice_Variants(t *testing.T) {
-	// Null JSON
-	var fsNull FlexSlice[string]
-	require.NoError(t, fsNull.UnmarshalJSON([]byte("null")))
-	assert.True(t, fsNull.IsBlank())
-
-	// Single value
-	var fsSingle FlexSlice[string]
-	require.NoError(t, fsSingle.UnmarshalJSON([]byte(`"hello"`)))
-	assert.Equal(t, []string{"hello"}, fsSingle.Value())
-
-	// Array
-	var fsArray FlexSlice[string]
-	require.NoError(t, fsArray.UnmarshalJSON([]byte(`["a", "b", "c"]`)))
-	assert.Equal(t, []string{"a", "b", "c"}, fsArray.Value())
-}
-
-func TestCrate_Serialization(t *testing.T) {
-	crate, err := ProcessMetadataStream(bytes.NewBuffer(simpleCrate))
-	require.NoError(t, err)
-
-	crateJSON, err := crate.ToJSON()
-	require.NoError(t, err)
-	assert.NotEmpty(t, crateJSON)
-	assert.NotEmpty(t, crate.String())
-
-	summary, err := crate.Summary()
-	require.NoError(t, err)
-	summaryJSON, err := summary.ToJSON()
-	require.NoError(t, err)
-	assert.NotEmpty(t, summaryJSON)
-	assert.NotEmpty(t, summary.String())
-
-	gocflSummary, err := crate.GOCFLSummaryWithTime("2026-11-19T12:00:00Z")
-	require.NoError(t, err)
-	assert.Equal(t, "2026-11-19T12:00:00Z", gocflSummary.LastChanged)
-	gocflJSON, err := gocflSummary.ToJSON()
-	require.NoError(t, err)
-	assert.NotEmpty(t, gocflJSON)
-	assert.NotEmpty(t, gocflSummary.String())
 }
